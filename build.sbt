@@ -8,6 +8,10 @@ organization := "org"
 
 scalaVersion := "2.10.4"
 
+// code coverage plugins
+ScoverageSbtPlugin.instrumentSettings
+CoverallsPlugin.coverallsSettings
+
 resolvers ++= Seq(
   "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
   "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
