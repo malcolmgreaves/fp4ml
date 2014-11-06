@@ -9,7 +9,9 @@ organization := "org"
 scalaVersion := "2.10.4"
 
 // code coverage plugins
+
 ScoverageSbtPlugin.instrumentSettings
+
 CoverallsPlugin.coverallsSettings
 
 resolvers ++= Seq(
