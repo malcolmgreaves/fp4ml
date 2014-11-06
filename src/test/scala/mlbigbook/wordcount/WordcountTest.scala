@@ -60,7 +60,7 @@ object WordcountTest {
 			val e:Map[String,Long] = Map()
 			actualCounts.foldLeft(e)({
 				case (m, (_, actual)) => actual.foldLeft(m)({
-					case (a, (k,v)) => AddMapL(a, k,v)
+					case (a, (k,v)) => AddMap.Whole.mark(a, k,v)
 				}) 
 			})
 		}
@@ -122,7 +122,7 @@ class TFIDFTest extends FunSuite {
 	val expectedFoxTF = {
 			val nWords = sentFox.words.size.toDouble 
 			sentFox.words.foldLeft(emptyD)({
-				case (a, word) => AddMapD(a, word, 1.0/nWords)
+				case (a, word) => AddMap.Real.mark(a, word, 1.0/nWords)
 			})
 		}
 
