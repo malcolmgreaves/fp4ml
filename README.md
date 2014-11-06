@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/malcolmgreaves/bigmlbook.svg?branch=master)](https://travis-ci.org/malcolmgreaves/bigmlbook)
-![Coverage Status](https://img.shields.io/coveralls/malcolmgreaves/bigmlbook.svg)](https://coveralls.io/r/malcolmgreaves/bigmlbook)
+[![Coverage Status](https://img.shields.io/coveralls/malcolmgreaves/bigmlbook.svg)](https://coveralls.io/r/malcolmgreaves/bigmlbook)
 ==========================================================================================
 Using sbt for building, tests, running programs, and interative shell.
 ==========================================================================================
