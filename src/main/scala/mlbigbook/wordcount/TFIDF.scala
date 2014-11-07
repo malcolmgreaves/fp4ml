@@ -1,32 +1,26 @@
 package mlbigbook.wordcount
 
-import scala.io.Source
-import scala.reflect.ClassTag
-import scala.collection.Map
-
-import org.apache.spark.rdd.RDD
-
 object TFIDF {
 
   def docfreqCorpus(documents: Data.Corpus): Data.WordCount = {
     documents
       .map(docfreqDocument)
-      .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine _, AddMap.Whole.combine _)
+      .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine, AddMap.Whole.combine)
   }
 
   def docfreqDocument(doc: Data.Document): Data.WordCount = {
     doc.sentences
       .map(_.words
-        .foldLeft(IndicatorMap.empty)(IndicatorMap.mark _)
+        .foldLeft(IndicatorMap.empty)(IndicatorMap.mark)
       )
-      .aggregate(IndicatorMap.empty)(IndicatorMap.combine _, IndicatorMap.combine _)
+      .aggregate(IndicatorMap.empty)(IndicatorMap.combine, IndicatorMap.combine)
   }
 
   def invDocFreq(documents: Data.Corpus): Data.NormalizedWordCount = {
     docfreqCorpus(documents)
       .aggregate(AddMap.Real.empty)(
         { case (accum, (word, df)) => accum + (word -> 1.0 / df) },
-        AddMap.Real.combine _
+        AddMap.Real.combine
       )
   }
 
@@ -47,9 +41,9 @@ object TFIDF {
         .map(Count.wordcountSentence)
         .map(termFreq)
         .map(multByIDF)
-        .aggregate(AddMap.Real.empty)(AddMap.Real.combine _, AddMap.Real.combine _)
+        .aggregate(AddMap.Real.empty)(AddMap.Real.combine, AddMap.Real.combine)
       )
-      .aggregate(AddMap.Real.empty)(AddMap.Real.combine _, AddMap.Real.combine _)
+      .aggregate(AddMap.Real.empty)(AddMap.Real.combine, AddMap.Real.combine)
   }
 
 }

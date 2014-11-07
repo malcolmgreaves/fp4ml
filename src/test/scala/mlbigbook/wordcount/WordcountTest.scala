@@ -1,12 +1,10 @@
 package mlbigbook.wordcount
 
-import scala.collection.Map
-
-import org.scalatest.{ BeforeAndAfterAll, Suite, FunSuite }
-
-import org.apache.spark.SparkContext
-
 import org.apache.log4j.{ Level, Logger }
+import org.apache.spark.SparkContext
+import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
+
+import scala.collection.Map
 
 object WordcountTest {
 
@@ -15,8 +13,6 @@ object WordcountTest {
   }
 
   case class DocID(id: Int, doc: Data.Document) extends ID
-
-  import WordcountTest._
 
   val sentFox = Data.Sentence(IndexedSeq("the", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog"))
   val docFox = Data.Document(IndexedSeq(sentFox))
@@ -94,7 +90,7 @@ object WordcountTest {
 
 class WordcountTest extends FunSuite {
 
-  import WordcountTest._
+  import mlbigbook.wordcount.WordcountTest._
 
   test("[seq] wordcount sentence") {
     assertCountsL(actualCounts(idFox), Count.wordcountSentence(sentFox))
@@ -115,7 +111,7 @@ class WordcountTest extends FunSuite {
 
 class TFIDFTest extends FunSuite {
 
-  import WordcountTest._
+  import mlbigbook.wordcount.WordcountTest._
 
   private val emptyL: Map[String, Long] = Map()
   private val emptyD: Map[String, Double] = Map()
@@ -178,7 +174,7 @@ class TFIDFTest extends FunSuite {
 
 class SparkWordcountTest extends FunSuite with LocalSparkContext {
 
-  import WordcountTest._
+  import mlbigbook.wordcount.WordcountTest._
 
   lazy val corpusRDD = sc.parallelize(corpus)
 
@@ -188,7 +184,8 @@ class SparkWordcountTest extends FunSuite with LocalSparkContext {
 
 }
 
-trait LocalSparkContext extends BeforeAndAfterAll { self: Suite =>
+trait LocalSparkContext extends BeforeAndAfterAll {
+  self: Suite =>
   @transient var sc: SparkContext = _
 
   override def beforeAll() {
@@ -215,7 +212,7 @@ object SparkUtil {
     loggers.map {
       loggerName =>
         val logger = Logger.getLogger(loggerName)
-        val prevLevel = logger.getLevel()
+        val prevLevel = logger.getLevel
         logger.setLevel(level)
         loggerName -> prevLevel
     }.toMap

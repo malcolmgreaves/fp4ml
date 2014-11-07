@@ -11,12 +11,11 @@ class LSHTest extends FunSuite {
   import WordcountTest._
   import LSHTest._
 
-  ignore("[seq] ranking using locally sensitive hashing"){
-    
+  ignore("[seq] ranking using locally sensitive hashing") {
+
   }
 }
 
 object LSHTest {
-
 
 }

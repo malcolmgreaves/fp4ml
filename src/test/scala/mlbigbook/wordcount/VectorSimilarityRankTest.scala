@@ -1,16 +1,11 @@
 package mlbigbook.wordcount
 
-import scala.collection.Map
-
-import org.scalatest.{ BeforeAndAfterAll, Suite, FunSuite }
-
-import org.apache.spark.SparkContext
-import org.apache.log4j.{ Level, Logger }
+import org.scalatest.FunSuite
 
 class VectorTest extends FunSuite {
 
-  import WordcountTest._
-  import VectorTest._
+  import mlbigbook.wordcount.VectorTest._
+  import mlbigbook.wordcount.WordcountTest._
 
   test("[seq] vectorize documents from corpus, check zero/non-zero correctness") {
     val doc2vec = wordcountVectorizer(corpus)

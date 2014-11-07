@@ -1,22 +1,21 @@
 package mlbigbook.wordcount
 
-
 trait LSH[T] {
-  val partitionFuncs:IndexedSeq[T => Int]
+  val partitionFuncs: IndexedSeq[T => Int]
 }
 
 object LSH {
 
   import DistData._
 
-  def apply(config:LSH[Data.Document])(
+  def apply(config: LSH[Data.Document])(
     dist: Vector.DistanceFn,
     docLimit: Int,
     mkVec: Vectorizer.Maker,
     documents: Data.Corpus): Rank.Type = {
 
     val vectorizer = mkVec(documents)
-  
+
     /* 
 
     -- need to make hash tables for each partition function:
