@@ -2,6 +2,11 @@
 target
 project
 
+####    IDE
+.idea/*
+.idea_modules/*
+
+
 #### 	compiled source
 *.com
 *.class

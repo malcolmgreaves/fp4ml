@@ -1,9 +1,9 @@
 package mlbigbook.wordcount
 
-import scala.reflect.ClassTag
-import scala.collection.{ Map, SeqLike }
-
 import org.apache.spark.rdd.RDD
+
+import scala.collection.Map
+import scala.reflect.ClassTag
 
 object Data {
   type Word = String
@@ -40,9 +40,13 @@ object DistData {
 
   case class TravDistData[A](ls: Seq[A]) extends DistData[A] {
     override def map[B: ClassTag](f: A => B) = new TravDistData(ls.map(f))
+
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = ls.aggregate(zero)(seqOp, combOp)
+
     override def foldLeft[B: ClassTag](zero: B)(seqOp: (B, A) => B): B = ls.foldLeft(zero)(seqOp)
+
     override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = ls.sortBy(f)
+
     override def take(k: Int): Traversable[A] = ls.take(k)
   }
 
@@ -50,11 +54,16 @@ object DistData {
 
   case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
     override def map[B: ClassTag](f: A => B) = new RDDDistData(d.map(f))
+
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = d.aggregate(zero)(seqOp, combOp)
+
     override def foldLeft[B: ClassTag](zero: B)(seqOp: (B, A) => B): B = d.foldLeft(zero)(seqOp)
+
     override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = d.sortBy(f)
+
     override def take(k: Int): Traversable[A] = d.take(k)
   }
+
 }
 
 object AddMap {
@@ -64,7 +73,7 @@ object AddMap {
 
 class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
-  import Numeric.Implicits._
+  import scala.Numeric.Implicits._
 
   val empty: Map[String, N] = Map()
 
@@ -117,7 +126,7 @@ object MultiplyMap {
 
 class MultiplyMap[@specialized(Long, Double) N: Numeric] {
 
-  import Numeric.Implicits._
+  import scala.Numeric.Implicits._
 
   private val addmap = new AddMap[N]()
 
@@ -129,7 +138,7 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
           case None           => aggmap // 0 * _ => 0
         }
       },
-      addmap.combine _
+      addmap.combine
     )
   }
 }

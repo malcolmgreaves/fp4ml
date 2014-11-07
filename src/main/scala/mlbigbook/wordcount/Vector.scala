@@ -48,8 +48,21 @@ object Counters {
     def apply(d: Data.Corpus): Data.WordCount = Count.wordcountCorpus(d)
   }
 
-  val WordDocumentCounter = new DocCounter[Long] {
-    def apply(d: Data.Document): Data.WordCount = Count.wordcountDocument(d)
+  val WordDocumentCounter = (ignored: Data.Corpus) => {
+    new DocCounter[Long] {
+      def apply(d: Data.Document): Data.WordCount = Count.wordcountDocument(d)
+    }
+  }
+
+  val NormCorpusCounter = new CorpusCounter[Double] {
+    def apply(d: Data.Corpus): Data.NormalizedWordCount = TFIDF(d)
+  }
+
+  val NormDocumentCounter = (c: Data.Corpus) => {
+    new DocCounter[Double] {
+      val docLevelTFIDF = TFIDF.docTFIDF(c)
+      override def apply(d: Data.Document): Data.NormalizedWordCount = docLevelTFIDF(d)
+    }
   }
 }
 
@@ -61,21 +74,21 @@ object Vectorizer {
 
   type Maker = Data.Corpus => Type
 
-  def apply[N: Numeric](corpCount: CorpusCounter[N], docCount: DocCounter[N])(documents: Data.Corpus): Type = {
+  def apply[N: Numeric](corpCount: CorpusCounter[N], mkDocCount: (Data.Corpus) => DocCounter[N])(documents: Data.Corpus): Type = {
 
     val index2word: IndexedSeq[Data.Word] = {
 
       val word2index = corpCount(documents).foldLeft((Data.EmptyWordCount, 0))({
-        case ((word2count, nextIndex), (word, _)) => {
-          word2count.get(word) match {
-            case Some(existingIndex) => (word2count, nextIndex)
-            case None                => (word2count + (word -> nextIndex), nextIndex + 1)
-          }
+        case ((word2count, nextIndex), (word, _)) => word2count.get(word) match {
+          case Some(existingIndex) => (word2count, nextIndex)
+          case None                => (word2count + (word -> nextIndex), nextIndex + 1)
         }
       })._1
 
       word2index.toSeq.sortBy(_._2).map(_._1).toIndexedSeq
     }
+
+    val docCount = mkDocCount(documents)
 
     (d: Data.Document) => {
       val countedD = docCount(d)
