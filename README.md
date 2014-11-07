@@ -20,3 +20,13 @@ To compile all dependencies into bytecode and pacakge into a single jar
 ==========================================================================================
 
 $ sbt assembly
+
+==========================================================================================
+To create an IntelliJ IDEA or Eclipse project
+==========================================================================================
+
+$ sbt gen-idea
+
+# or
+
+$ sbt eclipse
