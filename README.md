@@ -27,6 +27,6 @@ To create an IntelliJ IDEA or Eclipse project
 
 $ sbt gen-idea
 
-# or
+or
 
 $ sbt eclipse
