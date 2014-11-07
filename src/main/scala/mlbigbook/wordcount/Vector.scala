@@ -1,7 +1,5 @@
 package mlbigbook.wordcount
 
-import mlbigbook.wordcount.Data
-
 import scala.collection.Map
 
 trait Vector {
@@ -50,15 +48,17 @@ object Counters {
     def apply(d: Data.Corpus): Data.WordCount = Count.wordcountCorpus(d)
   }
 
-  val WordDocumentCounter = new DocCounter[Long] {
-    def apply(d: Data.Document): Data.WordCount = Count.wordcountDocument(d)
+  val WordDocumentCounter = (ignored: Data.Corpus) => {
+    new DocCounter[Long] {
+      def apply(d: Data.Document): Data.WordCount = Count.wordcountDocument(d)
+    }
   }
 
   val NormCorpusCounter = new CorpusCounter[Double] {
     def apply(d: Data.Corpus): Data.NormalizedWordCount = TFIDF(d)
   }
 
-  def mkNormDocCounter(c: Data.Corpus): DocCounter[Double] = {
+  val NormDocumentCounter = (c: Data.Corpus) => {
     new DocCounter[Double] {
       val docLevelTFIDF = TFIDF.docTFIDF(c)
       override def apply(d: Data.Document): Data.NormalizedWordCount = docLevelTFIDF(d)
@@ -74,7 +74,7 @@ object Vectorizer {
 
   type Maker = Data.Corpus => Type
 
-  def apply[N: Numeric](corpCount: CorpusCounter[N], docCount: DocCounter[N])(documents: Data.Corpus): Type = {
+  def apply[N: Numeric](corpCount: CorpusCounter[N], mkDocCount: (Data.Corpus) => DocCounter[N])(documents: Data.Corpus): Type = {
 
     val index2word: IndexedSeq[Data.Word] = {
 
@@ -87,6 +87,8 @@ object Vectorizer {
 
       word2index.toSeq.sortBy(_._2).map(_._1).toIndexedSeq
     }
+
+    val docCount = mkDocCount(documents)
 
     (d: Data.Document) => {
       val countedD = docCount(d)
