@@ -31,18 +31,24 @@ object TFIDF {
     })
   }
 
-  /**
-   * TF-IDF function
-   */
-  def apply(documents: Data.Corpus): Data.NormalizedWordCount = {
+  def docTFIDF(documents: Data.Corpus): Data.Document => Data.NormalizedWordCount = {
     val multByIDF = MultiplyMap.Real.multiplyWith(invDocFreq(documents)) _
-    documents
-      .map(_.sentences
+    (d: Data.Document) => {
+      d.sentences
         .map(Count.wordcountSentence)
         .map(termFreq)
         .map(multByIDF)
         .aggregate(AddMap.Real.empty)(AddMap.Real.combine, AddMap.Real.combine)
-      )
+    }
+  }
+
+  /**
+   * TF-IDF function
+   */
+  def apply(documents: Data.Corpus): Data.NormalizedWordCount = {
+    val docLevelTFIDF = docTFIDF(documents)
+    documents
+      .map(docLevelTFIDF)
       .aggregate(AddMap.Real.empty)(AddMap.Real.combine, AddMap.Real.combine)
   }
 

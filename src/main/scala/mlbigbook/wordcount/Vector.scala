@@ -1,5 +1,7 @@
 package mlbigbook.wordcount
 
+import mlbigbook.wordcount.Data
+
 import scala.collection.Map
 
 trait Vector {
@@ -51,6 +53,17 @@ object Counters {
   val WordDocumentCounter = new DocCounter[Long] {
     def apply(d: Data.Document): Data.WordCount = Count.wordcountDocument(d)
   }
+
+  val NormCorpusCounter = new CorpusCounter[Double] {
+    def apply(d: Data.Corpus): Data.NormalizedWordCount = TFIDF(d)
+  }
+
+  def mkNormDocCounter(c: Data.Corpus): DocCounter[Double] = {
+    new DocCounter[Double] {
+      val docLevelTFIDF = TFIDF.docTFIDF(c)
+      override def apply(d: Data.Document): Data.NormalizedWordCount = docLevelTFIDF(d)
+    }
+  }
 }
 
 object Vectorizer {
@@ -66,11 +79,9 @@ object Vectorizer {
     val index2word: IndexedSeq[Data.Word] = {
 
       val word2index = corpCount(documents).foldLeft((Data.EmptyWordCount, 0))({
-        case ((word2count, nextIndex), (word, _)) => {
-          word2count.get(word) match {
-            case Some(existingIndex) => (word2count, nextIndex)
-            case None                => (word2count + (word -> nextIndex), nextIndex + 1)
-          }
+        case ((word2count, nextIndex), (word, _)) => word2count.get(word) match {
+          case Some(existingIndex) => (word2count, nextIndex)
+          case None                => (word2count + (word -> nextIndex), nextIndex + 1)
         }
       })._1
 
