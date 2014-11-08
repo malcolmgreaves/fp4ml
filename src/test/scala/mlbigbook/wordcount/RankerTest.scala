@@ -35,7 +35,7 @@ object RankerTest {
 
   def checkInOutSame(ranker: Rank.Type)(doc: Data.Document) = {
     val ranked = ranker(doc).toSeq(0)._2
-    assert(ranked == doc, s"expecting ranked: ${ranked} to be ${doc}")
+    assert(ranked == doc, s"expecting ranked: $ranked to be $doc")
   }
 
 }

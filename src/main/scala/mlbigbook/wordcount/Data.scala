@@ -2,15 +2,24 @@ package mlbigbook.wordcount
 
 import org.apache.spark.rdd.RDD
 
-import scala.collection.Map
+import scala.collection.{mutable, Map}
 import scala.reflect.ClassTag
 
 object Data {
   type Word = String
 
-  case class Sentence(words: IndexedSeq[Word])
+  case class Sentence(words: Traversable[Word]){
+    override def toString = "(${words.size})"+words.take(15).mkString(",") + (if(words.size > 15) "..." else "")
+  }
 
-  case class Document(sentences: IndexedSeq[Sentence])
+  case class Document(sentences: Traversable[Sentence]){
+    override def toString = {
+      val x = sentences.foldLeft((1,List.empty[String]))({
+        case ((i,a),s) => (i+1, a :+ s"S$i:$s")
+      })._2
+      "(${x.size} documents)"+x.take(5).mkString(";") + (if(x.size > 5) "..." else "")
+    }
+  }
 
   type Corpus = DistData[Data.Document]
 
@@ -27,44 +36,43 @@ trait DistData[A] {
 
   def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B
 
-  def foldLeft[B: ClassTag](zero: B)(seqOp: (B, A) => B): B
-
   def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A]
 
   def take(k: Int): Traversable[A]
+
+  def collect():Array[A]
 }
 
 object DistData {
-
-  implicit def traversable2DistData[A](l: Seq[A]): DistData[A] = TravDistData(l)
-
-  case class TravDistData[A](ls: Seq[A]) extends DistData[A] {
-    override def map[B: ClassTag](f: A => B) = new TravDistData(ls.map(f))
-
-    override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = ls.aggregate(zero)(seqOp, combOp)
-
-    override def foldLeft[B: ClassTag](zero: B)(seqOp: (B, A) => B): B = ls.foldLeft(zero)(seqOp)
-
-    override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = ls.sortBy(f)
-
-    override def take(k: Int): Traversable[A] = ls.take(k)
-  }
-
+  implicit def traversable2DistData[A:ClassTag](l: Traversable[A]): DistData[A] = TravDistData(l)
   implicit def rdd2DistData[A](d: RDD[A]): DistData[A] = RDDDistData(d)
-
-  case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
-    override def map[B: ClassTag](f: A => B) = new RDDDistData(d.map(f))
-
-    override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = d.aggregate(zero)(seqOp, combOp)
-
-    override def foldLeft[B: ClassTag](zero: B)(seqOp: (B, A) => B): B = d.foldLeft(zero)(seqOp)
-
-    override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = d.sortBy(f)
-
-    override def take(k: Int): Traversable[A] = d.take(k)
-  }
-
 }
+
+case class TravDistData[A:ClassTag](ls: Traversable[A]) extends DistData[A] {
+  override def map[B: ClassTag](f: A => B):DistData[B] = new TravDistData(ls.map(f))
+
+  override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = ls.aggregate(zero)(seqOp, combOp)
+
+  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = new TravDistData(ls.toSeq.sortBy(f))
+
+  override def take(k: Int): Traversable[A] = ls.take(k)
+
+  override def collect():Array[A] = ls.toArray
+}
+
+case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
+  override def map[B: ClassTag](f: A => B) = new RDDDistData(d.map(f))
+
+  override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = d.aggregate(zero)(seqOp, combOp)
+
+  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] = new RDDDistData(d.sortBy(f))
+
+  override def take(k: Int): Traversable[A] = d.take(k)
+
+  override def collect():Array[A] = d.collect()
+}
+
+
 
 object AddMap {
   val Real = new AddMap[Double]
