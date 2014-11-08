@@ -32,7 +32,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
     )
   }
 
-  test("[experiment] 20 newsgroups document ranking, wordcount vs. TFIDF based vectorization") {
+  ignore("[experiment] 20 newsgroups document ranking, wordcount vs. TFIDF based vectorization") {
     println(s"Training corpus:  $dirTrainNG")
     println(s"Query corpus:     $dirTestNG")
 
