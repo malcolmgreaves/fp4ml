@@ -13,7 +13,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
   import mlbigbook.wordcount.DistData._
   import mlbigbook.wordcount.TwentyNewsgroupsExperimentTestIgnore._
 
-  lazy val sc:SparkContext = {
+  lazy val sc: SparkContext = {
     class X extends FunSuite with LocalSparkContext
     new X().sc
   }
@@ -78,9 +78,9 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
 object TwentyNewsgroupsExperimentTestIgnore {
 
-  def lines(scOpt:Option[SparkContext])(fi: File): DistData[String] = scOpt match {
+  def lines(scOpt: Option[SparkContext])(fi: File): DistData[String] = scOpt match {
     case Some(sc) => sc.textFile(fi.toString).filter(_.size > 0)
-    case None => Source.fromFile(fi).getLines().filter(_.size > 0).foldLeft(List.empty[String])((a, line) => a :+ line)
+    case None     => Source.fromFile(fi).getLines().filter(_.size > 0).foldLeft(List.empty[String])((a, line) => a :+ line)
   }
 
   val docLimit = 10

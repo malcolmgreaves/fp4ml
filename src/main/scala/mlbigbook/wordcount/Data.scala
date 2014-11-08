@@ -2,22 +2,22 @@ package mlbigbook.wordcount
 
 import org.apache.spark.rdd.RDD
 
-import scala.collection.{mutable, Map}
+import scala.collection.{ mutable, Map }
 import scala.reflect.ClassTag
 
 object Data {
   type Word = String
 
-  case class Sentence(words: Traversable[Word]){
-    override def toString = "(${words.size})"+words.take(15).mkString(",") + (if(words.size > 15) "..." else "")
+  case class Sentence(words: Traversable[Word]) {
+    override def toString = "(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
   }
 
-  case class Document(sentences: Traversable[Sentence]){
+  case class Document(sentences: Traversable[Sentence]) {
     override def toString = {
-      val x = sentences.foldLeft((1,List.empty[String]))({
-        case ((i,a),s) => (i+1, a :+ s"S$i:$s")
+      val x = sentences.foldLeft((1, List.empty[String]))({
+        case ((i, a), s) => (i + 1, a :+ s"S$i:$s")
       })._2
-      "(${x.size} documents)"+x.take(5).mkString(";") + (if(x.size > 5) "..." else "")
+      "(${x.size} documents)" + x.take(5).mkString(";") + (if (x.size > 5) "..." else "")
     }
   }
 
@@ -40,16 +40,16 @@ trait DistData[A] {
 
   def take(k: Int): Traversable[A]
 
-  def collect():Array[A]
+  def collect(): Array[A]
 }
 
 object DistData {
-  implicit def traversable2DistData[A:ClassTag](l: Traversable[A]): DistData[A] = TravDistData(l)
+  implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] = TravDistData(l)
   implicit def rdd2DistData[A](d: RDD[A]): DistData[A] = RDDDistData(d)
 }
 
-case class TravDistData[A:ClassTag](ls: Traversable[A]) extends DistData[A] {
-  override def map[B: ClassTag](f: A => B):DistData[B] = new TravDistData(ls.map(f))
+case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
+  override def map[B: ClassTag](f: A => B): DistData[B] = new TravDistData(ls.map(f))
 
   override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B = ls.aggregate(zero)(seqOp, combOp)
 
@@ -57,7 +57,7 @@ case class TravDistData[A:ClassTag](ls: Traversable[A]) extends DistData[A] {
 
   override def take(k: Int): Traversable[A] = ls.take(k)
 
-  override def collect():Array[A] = ls.toArray
+  override def collect(): Array[A] = ls.toArray
 }
 
 case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
@@ -69,10 +69,8 @@ case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
 
   override def take(k: Int): Traversable[A] = d.take(k)
 
-  override def collect():Array[A] = d.collect()
+  override def collect(): Array[A] = d.collect()
 }
-
-
 
 object AddMap {
   val Real = new AddMap[Double]
