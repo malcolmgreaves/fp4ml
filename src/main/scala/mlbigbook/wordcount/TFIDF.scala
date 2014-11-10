@@ -5,7 +5,7 @@ package mlbigbook.wordcount
  * for words in a corpus.  The TFIDF object's apply does this computation. Other methods defined
  * in TFIDF support this computation. A different notable method is docTFIDF: it produces a function
  * for doing TF-IDF weighting on a per-document basis, given a corpus as a basis for the IDF computation.
- * 
+ *
  * @author Malcolm Greaves
  */
 object TFIDF {
@@ -58,10 +58,10 @@ object TFIDF {
   /**
    * Given a corpus, docTFIDF produces a function that performs the TF-IDF weighting of any document.
    * When applied, the resluting mapping will re-map each word count (wc) to:
-   *          ("word", wc) => 
-   *  ( wc / (sum of other wc' in document) ) *  1/(document frequency of "word" in corpus) 
+   *          ("word", wc) =>
+   *  ( wc / (sum of other wc' in document) ) *  1/(document frequency of "word" in corpus)
    *
-   * also written as: TF("word") * IDF("word") 
+   * also written as: TF("word") * IDF("word")
    */
   def docTFIDF(documents: Data.Corpus): Data.Document => Data.NormalizedWordCount = {
     val multByIDF = MultiplyMap.Real.multiplyWith(invDocFreq(documents)) _
