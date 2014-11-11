@@ -65,7 +65,6 @@ object TFIDF {
    */
   def docTFIDF(documents: Data.Corpus): Data.Document => Data.NormalizedWordCount = {
     val multByIDF = MultiplyMap.Real.multiplyWith(invDocFreq(documents)) _
-
     (doc: Data.Document) => {
       val docTermFreq = termFreq(Count.wordcountDocument(doc))
       multByIDF(docTermFreq)
