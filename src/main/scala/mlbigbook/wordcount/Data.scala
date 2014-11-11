@@ -83,7 +83,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
   val empty: Map[String, N] = Map()
 
-  def mark(m: Map[String, N], k: String, v: N): Map[String, N] = {
+  def add(m: Map[String, N], k: String, v: N): Map[String, N] = {
     m.get(k) match {
       case Some(existing) => (m - k) + (k -> (existing + v))
       case None           => m + (k -> v)
@@ -103,7 +103,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
 object IndicatorMap extends AddMap[Long] {
 
-  override def mark(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] = mark(m, word)
+  override def add(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] = mark(m, word)
 
   def mark(m: Map[String, Long], word: String): Map[String, Long] = {
     m.get(word) match {
