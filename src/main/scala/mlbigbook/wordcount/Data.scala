@@ -36,7 +36,7 @@ trait DistData[A] {
 
   def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B
 
-  def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A]
+  def sortBy[B: ClassTag](f: A ⇒ B)(implicit ord: math.Ordering[B]): DistData[A]
 
   def take(k: Int): Traversable[A]
 

@@ -58,7 +58,7 @@ object Vector {
     })
   }
 
-  type DistanceFn = (Vector, Vector) => Double
+  type Distance = (Vector, Vector) => Double
 
   /**
    * Computes the cosine similairty between two vectors, which is defined as:
