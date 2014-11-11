@@ -22,7 +22,7 @@ object Rank {
    * against. 
    */
   def apply(
-    dist: Vector.DistanceFn,
+    dist: Vector.Distance,
     docLimit: Int,
     mkVec: Vectorizer.Maker,
     documents: Data.Corpus): Type = {
