@@ -147,7 +147,7 @@ object Vectorizer {
     val index2word: IndexedSeq[Data.Word] = {
       corpCount(documents).aggregate(Set.empty[Data.Word])(
         { case (words, (word, _)) => words + word },
-        { case (words1, words2) => words1 ++ words2 }
+        _ ++ _
       ).toIndexedSeq
     }
 
