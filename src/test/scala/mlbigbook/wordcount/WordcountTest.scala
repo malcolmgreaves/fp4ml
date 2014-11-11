@@ -5,6 +5,7 @@ import org.apache.spark.SparkContext
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
 
 import scala.collection.Map
+import scala.util.Random
 
 object WordcountTest {
 
@@ -86,6 +87,16 @@ object WordcountTest {
     assert(actualSum == countedSum, s"$countedSum total counts, expecting $actualSum total counts")
   }
 
+}
+
+class DataTest extends FunSuite {
+
+  test("definition of indicator map"){
+    val m:Map[String, Long] = Map()
+    (0 until 25).foreach(_ => {
+      assert(IndicatorMap.add(m, "hello", Random.nextLong()) == IndicatorMap.mark(m, "hello"))
+    })
+  }
 }
 
 class WordcountTest extends FunSuite {
