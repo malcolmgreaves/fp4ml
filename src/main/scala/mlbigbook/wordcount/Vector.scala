@@ -13,9 +13,7 @@ import scala.collection.Map
  * The Vector trait defines operations on data that behaves as a dense numerical vector.
  */
 trait Vector {
-  /**
-   * The size of the feature space that this vector is based on.
-   */
+  /** The size of the feature space that this vector is based on. */
   val cardinality: Int
 
   def valueAt(dimension: Int): Double
@@ -41,7 +39,7 @@ trait Vector {
 object Vector {
 
   /**
-   * Compte the dot-product of two vectors.
+   * Compute the dot-product of two vectors.
    *
    * Fails with assertion error if the vector cardinalities do not match up.
    */
@@ -147,15 +145,10 @@ object Vectorizer {
 
     // each index corresponds to an individual word
     val index2word: IndexedSeq[Data.Word] = {
-
-      val word2index = corpCount(documents).foldLeft((Data.EmptyWordCount, 0))({
-        case ((word2count, nextIndex), (word, _)) => word2count.get(word) match {
-          case Some(existingIndex) => (word2count, nextIndex)
-          case None                => (word2count + (word -> nextIndex), nextIndex + 1)
-        }
-      })._1
-
-      word2index.toSeq.sortBy(_._2).map(_._1).toIndexedSeq
+      corpCount(documents).aggregate(Set.empty[Data.Word])(
+        { case (words, (word, _)) => words + word },
+        { case (words1, words2) => words1 ++ words2 }
+      ).toIndexedSeq
     }
 
     val docCount = mkDocCount(documents)
