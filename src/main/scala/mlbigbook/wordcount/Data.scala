@@ -18,7 +18,7 @@ object Data {
 
   /** A sentence is a sequence of words. */
   case class Sentence(words: Traversable[Word]) {
-    override def toString = "(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
+    override def toString = s"(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
   }
 
   /** A document is a sequence of sentences. */
@@ -27,7 +27,7 @@ object Data {
       val x = sentences.foldLeft((1, List.empty[String]))({
         case ((i, a), s) => (i + 1, a :+ s"S$i:$s")
       })._2
-      "(${x.size} documents)" + x.take(5).mkString(";") + (if (x.size > 5) "..." else "")
+      s"(${x.size} documents)" + x.take(5).mkString(";") + (if (x.size > 5) "..." else "")
     }
   }
 
@@ -114,8 +114,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
   val empty: Map[String, N] = Map()
 
-  /** Adds the value v to the key k in the map m. Unpresent keys have a value of 0. */
-  def mark(m: Map[String, N], k: String, v: N): Map[String, N] = {
+  def add(m: Map[String, N], k: String, v: N): Map[String, N] = {
     m.get(k) match {
       case Some(existing) => (m - k) + (k -> (existing + v))
       case None           => m + (k -> v)
@@ -140,8 +139,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 /** Class that supports operations on maps that indicate the presense of keys. */
 object IndicatorMap extends AddMap[Long] {
 
-  /** Alias for mark(m,word); ignores input long */
-  override def mark(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] = mark(m, word)
+  override def add(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] = mark(m, word)
 
   /** Ensures that word is in the resulting map with a value of 1 */
   def mark(m: Map[String, Long], word: String): Map[String, Long] = {

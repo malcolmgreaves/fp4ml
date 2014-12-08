@@ -36,5 +36,5 @@ object Count {
   }
 
   // Increment the count of a word in a mapping by 1.
-  @inline private def add1(m: Map[String, Long], word: String) = AddMap.Whole.mark(m, word, 1)
+  @inline private def add1(m: Map[String, Long], word: String) = AddMap.Whole.add(m, word, 1)
 }

@@ -5,6 +5,7 @@ import org.apache.spark.SparkContext
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
 
 import scala.collection.Map
+import scala.util.Random
 
 object WordcountTest {
 
@@ -68,7 +69,7 @@ object WordcountTest {
     val e: Map[String, Long] = Map()
     actualCounts.foldLeft(e)({
       case (m, (_, actual)) => actual.foldLeft(m)({
-        case (a, (k, v)) => AddMap.Whole.mark(a, k, v)
+        case (a, (k, v)) => AddMap.Whole.add(a, k, v)
       })
     })
   }
@@ -86,6 +87,16 @@ object WordcountTest {
     assert(actualSum == countedSum, s"$countedSum total counts, expecting $actualSum total counts")
   }
 
+}
+
+class DataTest extends FunSuite {
+
+  test("definition of indicator map"){
+    val m:Map[String, Long] = Map()
+    (0 until 25).foreach(_ => {
+      assert(IndicatorMap.add(m, "hello", Random.nextLong()) == IndicatorMap.mark(m, "hello"))
+    })
+  }
 }
 
 class WordcountTest extends FunSuite {
@@ -132,7 +143,7 @@ class TFIDFTest extends FunSuite {
   val expectedFoxTF = {
     val nWords = sentFox.words.size.toDouble
     sentFox.words.foldLeft(emptyD)({
-      case (a, word) => AddMap.Real.mark(a, word, 1.0 / nWords)
+      case (a, word) => AddMap.Real.add(a, word, 1.0 / nWords)
     })
   }
 
