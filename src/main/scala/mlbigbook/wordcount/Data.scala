@@ -112,6 +112,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
   import scala.Numeric.Implicits._
 
+  /** An empty map. Is immutable */
   val empty: Map[String, N] = Map()
 
   /** Adds the value v to the key k in the map m. Unpresent keys have a value of 0. */
@@ -177,7 +178,6 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
   import scala.Numeric.Implicits._
 
   private val addmap = new AddMap[N]()
-  private val empty:Map[String, N] = Map()
 
   /** 
    * Constructs a mapping where all elements' values are multiplied together.
@@ -185,12 +185,29 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
    * The keys that are not in the resulting mapping would have value 0.
    */
   def multiplyWith(larger: Map[String, N])(smaller: Map[String, N]): Map[String, N] = {
-    smaller.aggregate(empty)(
+    smaller.aggregate(addmap.empty)(
       {
-        case (aggmap, (k, v)) => larger.get(k) match {
-          case Some(existing) => (aggmap - k) + (k -> (existing * v))
-          case None           => aggmap // (anything) * 0 = 0
+        case (aggmap, (k, v)) => {
+          if(v != 0.0){
+      larger.get(k) match {
+            case Some(existing) => {
+              if(existing != 0.0){
+                addmap.mark(aggmap, k, existing * v)
+              }
+              val mult = existing * v
+              if(mult != 0.0){
+
+              }
+              
+            }
+            case None           => aggmap // (anything) * 0 = 0
+          }
+
         }
+
+          } else {
+            aggmap
+          }
       },
       addmap.combine
     )
