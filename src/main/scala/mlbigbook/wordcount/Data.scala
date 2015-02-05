@@ -8,8 +8,8 @@ import scala.reflect.ClassTag
 /**
  * Definitions of data structures. Includes definition of the distributed data trait DistData.
  * DistData defines methods for transforming and manipulating data of any size.
- * 
- * @author Malcolm Greaves 
+ *
+ * @author Malcolm Greaves
  */
 
 object Data {
@@ -31,7 +31,7 @@ object Data {
     }
   }
 
-  /** A corpus is a collection of documents. */ 
+  /** A corpus is a collection of documents. */
   type Corpus = DistData[Data.Document]
 
   /** The result of counting words from text. */
@@ -53,7 +53,7 @@ trait DistData[A] {
   /** Transform a dataset by applying f to each element. */
   def map[B: ClassTag](f: A => B): DistData[B]
 
-  /** 
+  /**
    * Starting from a defined zero value, perform an operation seqOp on each element
    * of a dataset. Combine results of seqOp using combOp for a final value.
    */
@@ -80,7 +80,7 @@ object DistData {
 }
 
 /**
- * Wraps a Traversable as a DistData. 
+ * Wraps a Traversable as a DistData.
  */
 case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
   override def map[B: ClassTag](f: A => B): DistData[B] = new TravDistData(ls.map(f))
@@ -121,7 +121,7 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
     }
   }
 
-  /** 
+  /**
    * Combines two maps. If maps m1 and m2 both have key k, then the resulting
    * map will have m1(k) + m2(k) for the value of k.
    */
@@ -175,9 +175,9 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
   import scala.Numeric.Implicits._
 
   private val addmap = new AddMap[N]()
-  private val empty:Map[String, N] = Map()
+  private val empty: Map[String, N] = Map()
 
-  /** 
+  /**
    * Constructs a mapping where all elements' values are multiplied together.
    * Note that only keys that appear in both maps will be present in the resulting mapping.
    * The keys that are not in the resulting mapping would have value 0.
