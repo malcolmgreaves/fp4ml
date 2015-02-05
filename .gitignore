@@ -5,6 +5,7 @@ project
 ####    IDE
 .idea/*
 .idea_modules/*
+*.iml
 
 
 #### 	compiled source
