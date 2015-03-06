@@ -1,5 +1,7 @@
 package mlbigbook.wordcount
 
+import scala.reflect.ClassTag
+
 /**
  * The Rank object contains type definitions and the apply method for constructing a
  * document ranking function.
@@ -10,7 +12,7 @@ object Rank {
 
   type Score = Double
 
-  type RankedDoc = (Score, Data.Document)
+  type RankedDoc = (Double, Data.Document)
 
   type Type = Data.Document => Traversable[RankedDoc]
 
@@ -33,10 +35,21 @@ object Rank {
     (inputDoc: Data.Document) => {
 
       val vecInputDoc = vectorizer(inputDoc)
-      vectorizedDocuments
-        .map({ case (doc, vec) => (dist(vec, vecInputDoc), doc) })
-        .sortBy(-_._1)
-        .take(docLimit)
+
+      takeTopK(
+        docLimit,
+        vectorizedDocuments.map({ case (doc, vec) => (dist(vec, vecInputDoc), doc) })
+      )
     }
   }
+
+  /**
+   * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
+   * returned Traversable has at most limit items.
+   */
+  def takeTopK[T, N](limit: Int, elements: DistData[(N, T)])(implicit n: Numeric[N], c: ClassTag[N]): Traversable[(N, T)] =
+    elements
+      .sortBy(_._1)(c, n.reverse)
+      .take(limit)
+
 }
