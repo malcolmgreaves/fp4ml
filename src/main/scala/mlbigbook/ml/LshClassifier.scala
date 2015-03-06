@@ -48,7 +48,7 @@ object LshClassifier {
   def apply(
     nLSHFuncs: Int,
     bandSize: Int)(
-    dist: Vector.Distance,
+    dist: Vector.Similarity,
     kNeighborhoodSize: Int)(
     mkVec: Vectorizer.Maker,
     labeledCorpus: LabeledCorpus): Type = {

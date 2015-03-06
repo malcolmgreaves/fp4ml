@@ -9,7 +9,7 @@ object LSH {
   import DistData._
 
   def apply(config: LSH[Data.Document])(
-    dist: Vector.DistanceFn,
+    dist: Vector.Similarity,
     docLimit: Int,
     mkVec: Vectorizer.Maker,
     documents: Data.Corpus): Rank.Type = {

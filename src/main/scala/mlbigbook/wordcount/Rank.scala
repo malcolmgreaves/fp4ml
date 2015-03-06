@@ -24,7 +24,7 @@ object Rank {
    * against. 
    */
   def apply(
-    dist: Vector.Distance,
+    dist: Vector.Similarity,
     docLimit: Int,
     mkVec: Vectorizer.Maker,
     documents: Data.Corpus): Type = {

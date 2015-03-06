@@ -24,7 +24,7 @@ object KNN {
   import Labeled._
 
   def apply(
-    dist: Vector.Distance,
+    dist: Vector.Similarity,
     kNeighborhoodSize: Int)(
     mkVec: Vectorizer.Maker,
     labeledCorpus: LabeledCorpus): Type = {
