@@ -68,9 +68,9 @@ trait DistData[A] {
   /** Load all elements of the dataset into an array in main memory. */
   def toSeq(): Seq[A]
 
-  def flatMap[B:ClassTag](f: A => TraversableOnce[B]):DistData[B]
+  def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B]
 
-  def groupBy[B:ClassTag](f: A => B): DistData[(B, Iterable[A])]
+  def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])]
 }
 
 /**
@@ -103,10 +103,10 @@ case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
   override def toSeq(): Seq[A] =
     ls.toSeq
 
-  override def flatMap[B:ClassTag](f: A => TraversableOnce[B]):DistData[B] =
+  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
     new TravDistData(ls.flatMap(f))
 
-  override def groupBy[B:ClassTag](f: A => B):DistData[(B, Iterable[A])] =
+  override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
     new TravDistData(ls.groupBy(f).toTraversable.map({ case (b, iter) => (b, iter.toIterable) }))
 }
 
@@ -130,10 +130,10 @@ case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
   override def toSeq(): Seq[A] =
     d.collect().toSeq
 
-  override def flatMap[B:ClassTag](f: A => TraversableOnce[B]):DistData[B] =
+  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
     new RDDDistData(d.flatMap(f))
 
-  override def groupBy[B:ClassTag](f: A => B):DistData[(B, Iterable[A])] =
+  override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
     new RDDDistData(d.groupBy(f))
 }
 

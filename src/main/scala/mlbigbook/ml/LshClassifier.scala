@@ -13,60 +13,30 @@ object LshClassifier {
 
   type LabeledDocVector = (String, Vector)
 
-  type LSHTable = Set[LabeledDocVector]
-
-
-  def initializeHashTables(bandSize: Int, empty:LSHTable): Map[Int, LSHTable] =
-    (0 until bandSize).foldLeft(Map.empty[Int, LSHTable])(
-      (m, band) => m + (band -> empty)
-    )
-
   def createHashTablesForCorpus(
-    bandSize:Int, 
-    lshFuncs:Seq[LSH.Type],
-    vectorizedLabeledData:DistData[(String, Vector)]):Seq[Seq[LabeledDocVector]] = {
+    bandSize: Int,
+    lshFuncs: Seq[LSH.Type],
+    vectorizedLabeledData: DistData[(String, Vector)]): Seq[DistData[LabeledDocVector]] = {
 
-    val initial = initializeHashTables(bandSize, Set.empty[LabeledDocVector])
+    val hts: DistData[(Int, Iterable[LabeledDocVector])] =
+      vectorizedLabeledData
+        .map({
+          case (_, vector) => (vector, lshFuncs.map(h => h(vector)).toSet)
+        }).flatMap({
+          case (vector, hashIndices) => hashIndices.map(hIndex => (hIndex, vector))
+        }).groupBy(_._1)
 
+    ???
 
-    vectorizedLabeledData match {
-      case RDDDistData(d) =>
-        d
-          .map({ case (_, vector) => (vector, lshFuncs.map(h => h(vector)).toSet) })
-          .flatMap({ case (vector, hashIndices) => hashIndices.map(hIndex => (hIndex, vector))})
-          .groupBy(_._1)
-    }
-
-    val hts = vectorizedLabeledData.aggregate(initial)(
-        (tables, labeledDocument) =>
-          lshFuncs.map(h => h(labeledDocument._2)).foldLeft(tables)(
-            (updatingTables, hashedIndex) => {
-              val updatedSet = updatingTables(hashedIndex) + labeledDocument
-              (updatingTables - hashedIndex) + (hashedIndex -> updatedSet)
-            }
-          ),
-        (table1, table2) =>
-          table1.foldLeft(table2)({
-            case (updating, (hashedIndex, documentSet)) =>
-              val updated4hashedIndex = updating(hashedIndex) ++ documentSet
-              (updating - hashedIndex) + (hashedIndex -> updated4hashedIndex)
-          })
-      )
-
-
-
-      (0 until bandSize).foldLeft(Seq.empty[Seq[LabeledDocVector]])(
-        (ht, index) => ht :+ hts(index).toSeq
-      )
   }
 
   def apply(
     nLSHFuncs: Int,
     bandSize: Int)(
-    dist: Vector.Similarity,
-    kNeighborhoodSize: Int)(
-    mkVec: Vectorizer.Maker,
-    labeledCorpus: LabeledCorpus): Type = {
+      dist: Vector.Similarity,
+      kNeighborhoodSize: Int)(
+        mkVec: Vectorizer.Maker,
+        labeledCorpus: LabeledCorpus): Type = {
 
     val vectorizer = mkVec(labeledCorpus.corpus.map(_.example))
     val vectorizedLabeledData = labeledCorpus.corpus.map(d => (d.label, vectorizer(d.example)))

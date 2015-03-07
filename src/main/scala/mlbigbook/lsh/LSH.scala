@@ -24,8 +24,8 @@ object LSH {
    */
   def create(vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): Type = {
     val selectedDimensions = (0 until vectorspaceSize).foldLeft(IndexedSeq.empty[Int])(
-      (selected, dimension) => 
-        if(rand.nextBoolean)
+      (selected, dimension) =>
+        if (rand.nextBoolean)
           selected :+ dimension
         else
           selected

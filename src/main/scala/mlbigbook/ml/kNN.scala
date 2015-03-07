@@ -26,8 +26,8 @@ object KNN {
   def apply(
     dist: Vector.Similarity,
     kNeighborhoodSize: Int)(
-    mkVec: Vectorizer.Maker,
-    labeledCorpus: LabeledCorpus): Type = {
+      mkVec: Vectorizer.Maker,
+      labeledCorpus: LabeledCorpus): Type = {
 
     val vectorizer = mkVec(labeledCorpus.corpus.map(_.example))
     val vectorizedLabeledDocuments = labeledCorpus.corpus.map(d => (d.label, vectorizer(d.example)))
@@ -51,8 +51,8 @@ object KNN {
 
 object NearestNeighbors {
 
-  /** 
-   * Counts the number of times each element occurs in neighborhood. 
+  /**
+   * Counts the number of times each element occurs in neighborhood.
    * Returns this information as a mapping.
    */
   def countNeighborhoodVotes(neighborhood: Traversable[String]): Map[String, Int] =
@@ -66,7 +66,7 @@ object NearestNeighbors {
         }
     )
 
-  /** 
+  /**
    * Evaluates to the String associated with the largest value (of Numeric type N). If the input
    * elements is empty, evaluates to the empty string ("").
    */
