@@ -1,10 +1,9 @@
 package mlbigbook.ml
 
-import mlbigbook.wordcount.{ Data, DistData, Vector, Vectorizer, Rank }
+import mlbigbook.wordcount._
 import mlbigbook.lsh.LSH
 import scala.util.Random
-import mlbigbook.wordcount.Rank
-import mlbigbook.wordcount.DistData
+import mlbigbook.ml.LabeledCorpus
 
 object LshClassifier {
 
@@ -14,9 +13,12 @@ object LshClassifier {
 
   type LabeledDocVector = (String, Vector)
 
-  def initializeHashTables(bandSize: Int): Map[Int, Set[LabeledDocVector]] =
-    (0 until bandSize).foldLeft(Map.empty[Int, Set[LabeledDocVector]])(
-      (m, band) => m + (band -> Set.empty[LabeledDocVector])
+  type LSHTable = Set[LabeledDocVector]
+
+
+  def initializeHashTables(bandSize: Int, empty:LSHTable): Map[Int, LSHTable] =
+    (0 until bandSize).foldLeft(Map.empty[Int, LSHTable])(
+      (m, band) => m + (band -> empty)
     )
 
   def createHashTablesForCorpus(
@@ -24,7 +26,18 @@ object LshClassifier {
     lshFuncs:Seq[LSH.Type],
     vectorizedLabeledData:DistData[(String, Vector)]):Seq[Seq[LabeledDocVector]] = {
 
-    val hts = vectorizedLabeledData.aggregate(initializeHashTables(bandSize))(
+    val initial = initializeHashTables(bandSize, Set.empty[LabeledDocVector])
+
+
+    vectorizedLabeledData match {
+      case RDDDistData(d) =>
+        d
+          .map({ case (_, vector) => (vector, lshFuncs.map(h => h(vector)).toSet) })
+          .flatMap({ case (vector, hashIndices) => hashIndices.map(hIndex => (hIndex, vector))})
+          .groupBy(_._1)
+    }
+
+    val hts = vectorizedLabeledData.aggregate(initial)(
         (tables, labeledDocument) =>
           lshFuncs.map(h => h(labeledDocument._2)).foldLeft(tables)(
             (updatingTables, hashedIndex) => {
@@ -35,10 +48,12 @@ object LshClassifier {
         (table1, table2) =>
           table1.foldLeft(table2)({
             case (updating, (hashedIndex, documentSet)) =>
-              val updated4hashedIndex = (updating(hashedIndex) ++ documentSet)
+              val updated4hashedIndex = updating(hashedIndex) ++ documentSet
               (updating - hashedIndex) + (hashedIndex -> updated4hashedIndex)
           })
       )
+
+
 
       (0 until bandSize).foldLeft(Seq.empty[Seq[LabeledDocVector]])(
         (ht, index) => ht :+ hts(index).toSeq
