@@ -21,13 +21,22 @@ object LshClassifier {
     val hts: DistData[(Int, Iterable[LabeledDocVector])] =
       vectorizedLabeledData
         .map({
-          case (_, vector) => (vector, lshFuncs.map(h => h(vector)).toSet)
+          case (label, vector) => ((label, vector), lshFuncs.map(h => h(vector)).toSet)
         }).flatMap({
-          case (vector, hashIndices) => hashIndices.map(hIndex => (hIndex, vector))
+          case (labeledVector, hashIndices) => hashIndices.map(hIndex => (hIndex, labeledVector))
         }).groupBy(_._1)
+        .map({
+          case (hIndex, iterable) => (hIndex, iterable.map(_._2))
+        })
 
-    ???
+    val hashTables:Seq[DistData[LabeledDocVector]] = {
 
+      ???
+    }
+
+
+
+    hashTables
   }
 
   def apply(
