@@ -3,7 +3,6 @@ package mlbigbook.ml
 import mlbigbook.wordcount._
 import mlbigbook.lsh.LSH
 import scala.util.Random
-import mlbigbook.ml.LabeledCorpus
 
 object LshClassifier {
 
@@ -16,25 +15,26 @@ object LshClassifier {
   def createHashTablesForCorpus(
     bandSize: Int,
     lshFuncs: Seq[LSH.Type],
-    vectorizedLabeledData: DistData[(String, Vector)])(implicit ddContx:DistDataContext): Seq[DistData[LabeledDocVector]] = {
+    vectorizedLabeledData: DistData[(String, Vector)])(
+    implicit ddContext:DistDataContext): Seq[DistData[LabeledDocVector]] = {
 
-    val hts: DistData[(Int, Iterable[LabeledDocVector])] =
-      vectorizedLabeledData
-        .map({
-          case (label, vector) => ((label, vector), lshFuncs.map(h => h(vector)).toSet)
-        }).flatMap({
-          case (labeledVector, hashIndices) => hashIndices.map(hIndex => (hIndex, labeledVector))
-        }).groupBy(_._1)
-        .map({
-          case (hIndex, iterable) => (hIndex, iterable.map(_._2))
+    vectorizedLabeledData
+      .map({
+        case (label, vector) => ((label, vector), lshFuncs.map(h => h(vector)).toSet)
+      })
+      .flatMap({
+         case (labeledVector, hashIndices) => hashIndices.map(hIndex => (hIndex, labeledVector))
+       })
+       .groupBy(_._1)
+       .map({
+         case (hIndex, iterable) => (hIndex, iterable.map(_._2))
+       })
+       .toSeq
+       .map({
+          case (hIndex, labeledVectorItr) => (hIndex, ddContext.from(labeledVectorItr))
         })
-
-    val hashTables:Seq[DistData[LabeledDocVector]] = {
-
-      ???
-    }
-
-    hashTables
+       .sortBy(_._1)
+       .map(_._2)
   }
 
   def apply(
@@ -43,7 +43,7 @@ object LshClassifier {
       dist: Vector.Similarity,
       kNeighborhoodSize: Int)(
         mkVec: Vectorizer.Maker,
-        labeledCorpus: LabeledCorpus): Type = {
+        labeledCorpus: LabeledCorpus)(implicit ddContext:DistDataContext): Type = {
 
     val vectorizer = mkVec(labeledCorpus.corpus.map(_.example))
     val vectorizedLabeledData = labeledCorpus.corpus.map(d => (d.label, vectorizer(d.example)))
