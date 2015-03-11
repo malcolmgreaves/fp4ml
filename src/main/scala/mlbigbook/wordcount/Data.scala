@@ -1,5 +1,6 @@
 package mlbigbook.wordcount
 
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 import scala.collection.{ mutable, Map }
@@ -79,13 +80,16 @@ trait DistData[A] {
  * includes Seq and List.
  */
 object DistData {
-  implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] = TravDistData(l)
-  implicit def rdd2DistData[A](d: RDD[A]): DistData[A] = RDDDistData(d)
+  /** Implicitly converts a Traversable into a DistData type. */
+  implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] = 
+    TravDistData(l)
+
+  /** Implicitly converts an RDD into a DistData type. */
+  implicit def rdd2DistData[A](d: RDD[A]): DistData[A] = 
+    RDDDistData(d)
 }
 
-/**
- * Wraps a Traversable as a DistData.
- */
+/** Wraps a Traversable as a DistData. */
 case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
 
   override def map[B: ClassTag](f: A => B): DistData[B] =
@@ -110,9 +114,7 @@ case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
     new TravDistData(ls.groupBy(f).toTraversable.map({ case (b, iter) => (b, iter.toIterable) }))
 }
 
-/**
- * Wraps a Spark RDD as a DistData.
- */
+/** Wraps a Spark RDD as a DistData. */
 case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
 
   override def map[B: ClassTag](f: A => B) =
@@ -135,6 +137,36 @@ case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
 
   override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
     new RDDDistData(d.groupBy(f))
+}
+
+/** Type that allows us to convert an interable sequence of data into a DistData type. */
+trait DistDataContext {
+  def from[T:ClassTag](data:Iterable[T]):DistData[T]
+}
+
+/** Implicit conversions to DistDataContext types. */
+object DistDataContext {
+  /** Implicitly converts a SparkContext into a DistDataContext type. */
+  implicit def sparkContext2DistDataContext(sc:SparkContext):DistDataContext = 
+    SparkDistDataContext(sc)
+
+  implicit val travDDContext = TraversableDistDataContext
+}
+
+case class SparkDistDataContext(sc:SparkContext) extends DistDataContext {
+
+  import DistData._
+
+  override def from[T:ClassTag](data:Iterable[T]):DistData[T] = 
+    sc.parallelize(data.toSeq)
+}
+
+object TraversableDistDataContext extends DistDataContext {
+
+  import DistData._
+
+  override def from[T:ClassTag](data:Iterable[T]):DistData[T] =
+    data.toSeq
 }
 
 /** Object for adding double and long maps together */

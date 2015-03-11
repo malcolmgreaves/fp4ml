@@ -16,7 +16,7 @@ object LshClassifier {
   def createHashTablesForCorpus(
     bandSize: Int,
     lshFuncs: Seq[LSH.Type],
-    vectorizedLabeledData: DistData[(String, Vector)]): Seq[DistData[LabeledDocVector]] = {
+    vectorizedLabeledData: DistData[(String, Vector)])(implicit ddContx:DistDataContext): Seq[DistData[LabeledDocVector]] = {
 
     val hts: DistData[(Int, Iterable[LabeledDocVector])] =
       vectorizedLabeledData
@@ -33,8 +33,6 @@ object LshClassifier {
 
       ???
     }
-
-
 
     hashTables
   }
