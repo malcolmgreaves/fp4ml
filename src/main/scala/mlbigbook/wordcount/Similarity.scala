@@ -7,7 +7,6 @@ package mlbigbook.wordcount
 
 import mlbigbook.data.Vector
 
-/** Contains implementation for cosine similarity function. */
 object Similarity {
 
   import mlbigbook.data.Vector._

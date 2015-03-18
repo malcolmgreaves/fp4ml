@@ -5,7 +5,7 @@
  */
 package mlbigbook.data
 
-import mlbigbook.data
+import scala.reflect.ClassTag
 
 /** Represents something that has a label. */
 trait Labeled {
@@ -21,4 +21,15 @@ object Labeled {
 }
 
 /** Represents a piece of labeled data. */
-case class LabeledData[T](label: String, example: T) extends Labeled
+case class LabeledData[T: ClassTag](label: String, example: T) extends Labeled
+
+object LabeledData {
+
+  @inline def unlabeled[T: ClassTag](example: T): LabeledData[T] =
+    LabeledData(noLabel, example)
+
+  @inline def isUnlabeled(x: LabeledData[_]): Boolean =
+    x.label == noLabel
+
+  private val noLabel = ""
+}
