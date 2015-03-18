@@ -1,7 +1,8 @@
-package mlbigbook.lsh
+package mlbigbook.ml
+
+import mlbigbook.data.Vector
 
 import scala.util.Random
-import mlbigbook.data.Vector
 
 /** Type represetning a locality sensitive hash function. */
 trait LSH extends (Vector => Int)

@@ -1,7 +1,6 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.lsh.LSH
 import scala.reflect.ClassTag
 import scala.util.Random
 
