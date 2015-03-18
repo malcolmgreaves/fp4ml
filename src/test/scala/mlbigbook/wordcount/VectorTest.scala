@@ -1,5 +1,7 @@
 package mlbigbook.wordcount
 
+import mlbigbook.data.Vector
+
 import org.scalatest.FunSuite
 
 class VectorTest extends FunSuite {
@@ -56,8 +58,8 @@ object VectorTest {
   val nonzeroBoth = nonzeroFox ++ nonzeroSanta
   val knownCardinality = nonzeroBoth.size
 
-  val wordcountVectorizer = Vectorizer(Counters.WordCorpusCounter, Counters.WordDocumentCounter) _
-  val tfidfVectorizer = Vectorizer(Counters.NormCorpusCounter, Counters.NormDocumentCounter) _
+  val wordcountVectorizer = DocVectorizer(Counters.WordCorpusCounter, Counters.WordDocumentCounter) _
+  val tfidfVectorizer = DocVectorizer(Counters.NormCorpusCounter, Counters.NormDocumentCounter) _
 
   def checkVec(nonZero: Set[Int], v: Vector) = {
     (0 until knownCardinality).foreach(i => {

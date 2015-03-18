@@ -1,19 +1,19 @@
 package mlbigbook.lsh
 
 import scala.util.Random
-import mlbigbook.wordcount.Vector
+import mlbigbook.data.Vector
+
+/** Type represetning a locality sensitive hash function. */
+trait LSH extends (Vector => Int)
 
 object LSH {
-
-  /** Type definition for a locality sensitive hash function. */
-  type Type = Vector => Int
 
   /**
    * Constructs nLSHFuncs LSH functions, each of which are appropriate for vectors
    * of size vectorspaceSize.
    */
-  def create(nLSHFuncs: Int, vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): Seq[LSH.Type] =
-    Seq.fill(nLSHFuncs)(create(vectorspaceSize, bandSize))
+  def apply(nLSHFuncs: Int, vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): Seq[LSH] =
+    Seq.fill(nLSHFuncs)(apply(vectorspaceSize, bandSize))
 
   /**
    * Constructs a locality sensistive hash function that is appropriate for a vector space
@@ -22,7 +22,7 @@ object LSH {
    * be used to project coordinates from vectors, sum these projected coordinates, and then
    * compute the modulo of this summation with respect to the band size (bandSize).
    */
-  def create(vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): Type = {
+  def apply(vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): LSH = {
     val selectedDimensions = (0 until vectorspaceSize).foldLeft(IndexedSeq.empty[Int])(
       (selected, dimension) =>
         if (rand.nextBoolean)
@@ -38,5 +38,10 @@ object LSH {
       projectedSum.round.toInt % bandSize
     }
   }
+
+  implicit def fn2lsh(f: Vector => Int): LSH =
+    new LSH {
+      override def apply(x: Vector): Int = f(x)
+    }
 
 }

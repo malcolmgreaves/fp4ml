@@ -1,5 +1,7 @@
 package mlbigbook.wordcount
 
+import mlbigbook.data.{ MultiplyMap, IndicatorMap, AddMap, Data }
+
 /**
  * Collection of functions that compute the term frequency - inverse document frequency weighting
  * for words in a corpus.  The TFIDF object's apply does this computation. Other methods defined

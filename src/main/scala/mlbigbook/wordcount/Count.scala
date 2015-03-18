@@ -1,7 +1,13 @@
+/*
+ * Contains methods for producing word count mappings from text data.
+ *
+ * @author Malcolm Greaves
+ */
 package mlbigbook.wordcount
 
+import mlbigbook.data.{ AddMap, Data }
+
 import scala.collection.Map
-import scala.io.Source
 
 /**
  * The Count object contains methods for computing the word count on a corpus, document,
@@ -38,3 +44,4 @@ object Count {
   // Increment the count of a word in a mapping by 1.
   @inline private def add1(m: Map[String, Long], word: String) = AddMap.Whole.add(m, word, 1)
 }
+

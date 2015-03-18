@@ -1,11 +1,9 @@
 package mlbigbook.wordcount
 
-import scala.collection.Map
+import mlbigbook.data.Data
+import mlbigbook.ml.Ranker
 
-import org.scalatest.{ BeforeAndAfterAll, Suite, FunSuite }
-
-import org.apache.spark.SparkContext
-import org.apache.log4j.{ Level, Logger }
+import org.scalatest.FunSuite
 
 class RankerTest extends FunSuite {
 
@@ -15,8 +13,7 @@ class RankerTest extends FunSuite {
   test("[seq] rank documents from corpus") {
 
     val check = {
-      val ranker = Rank(
-        Vector.cosineSimilarity,
+      val ranker = DocRanker(
         docLimit,
         VectorTest.wordcountVectorizer,
         corpus
@@ -33,8 +30,8 @@ object RankerTest {
 
   val docLimit = 1
 
-  def checkInOutSame(ranker: Rank.Type)(doc: Data.Document) = {
-    val ranked = ranker(doc).toSeq(0)._2
+  def checkInOutSame(ranker: Ranker[Data.Document])(doc: Data.Document) = {
+    val ranked = ranker(doc).toSeq.head._2
     assert(ranked == doc, s"expecting ranked: $ranked to be $doc")
   }
 

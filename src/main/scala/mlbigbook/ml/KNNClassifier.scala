@@ -1,48 +1,34 @@
 package mlbigbook.ml
 
-import mlbigbook.wordcount.{ Data, DistData, Vector, Vectorizer, Rank }
+import mlbigbook.data._
 
-trait Labeled {
-  def label: String
-}
+object KNNClassifier {
 
-object Labeled {
-  implicit def str2labeled(s: String): Labeled =
-    new Labeled {
-      val label = s
-    }
-}
+  import Labeled.str2labeled
+  import Classifier._
 
-case class LabeledData[T](label: String, example: T) extends Labeled
+  def apply[T](
+    dist: Distance,
+    kNeighborhoodSize: Int,
+    mkVec: VectorizerMaker[T],
+    labeledCorpus: DistData[LabeledData[T]]): Classifier[T] = {
 
-case class LabeledCorpus(corpus: DistData[LabeledData[Data.Document]])
+    val vectorizer = mkVec(labeledCorpus.map(_.example))
+    val vectorizedLabeledDocuments = labeledCorpus.map(d => (d.label, vectorizer(d.example)))
 
-object KNN {
+    (input: T) => {
 
-  type Type = Data.Document => Labeled
+      val vecInputDoc = vectorizer(input)
 
-  import Labeled._
-
-  def apply(
-    dist: Vector.Similarity,
-    kNeighborhoodSize: Int)(
-      mkVec: Vectorizer.Maker,
-      labeledCorpus: LabeledCorpus): Type = {
-
-    val vectorizer = mkVec(labeledCorpus.corpus.map(_.example))
-    val vectorizedLabeledDocuments = labeledCorpus.corpus.map(d => (d.label, vectorizer(d.example)))
-
-    (inputDoc: Data.Document) => {
-
-      val vecInputDoc = vectorizer(inputDoc)
-
-      val neighborhood = Rank.takeTopK(
+      val neighborhood = Ranker.takeTopK(
         kNeighborhoodSize,
         vectorizedLabeledDocuments.map({ case (label, vec) => (dist(vec, vecInputDoc), label) })
       )
 
-      NearestNeighbors.takeLargest(
-        NearestNeighbors.countNeighborhoodVotes(neighborhood.map(_._2)).toIndexedSeq
+      str2labeled(
+        NearestNeighbors.takeLargest(
+          NearestNeighbors.countNeighborhoodVotes(neighborhood.map(_._2)).toIndexedSeq
+        )
       )
     }
   }

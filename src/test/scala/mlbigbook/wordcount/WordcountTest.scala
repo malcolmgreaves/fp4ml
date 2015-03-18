@@ -1,5 +1,6 @@
 package mlbigbook.wordcount
 
+import mlbigbook.data.{ IndicatorMap, AddMap, Data }
 import org.apache.log4j.{ Level, Logger }
 import org.apache.spark.SparkContext
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
@@ -91,8 +92,8 @@ object WordcountTest {
 
 class DataTest extends FunSuite {
 
-  test("definition of indicator map"){
-    val m:Map[String, Long] = Map()
+  test("definition of indicator map") {
+    val m: Map[String, Long] = Map()
     (0 until 25).foreach(_ => {
       assert(IndicatorMap.add(m, "hello", Random.nextLong()) == IndicatorMap.mark(m, "hello"))
     })
