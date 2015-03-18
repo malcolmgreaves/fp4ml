@@ -49,11 +49,11 @@ trait DistData[A] {
  */
 object DistData {
   /** Implicitly converts a Traversable into a DistData type. */
-  implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] =
+  @inline implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] =
     TravDistData(l)
 
   /** Implicitly converts an RDD into a DistData type. */
-  implicit def rdd2DistData[A](d: RDD[A]): DistData[A] =
+  @inline implicit def rdd2DistData[A](d: RDD[A]): DistData[A] =
     RDDDistData(d)
 }
 

@@ -7,8 +7,8 @@ trait Classifier[T] extends (T => Labeled)
 
 object Classifier {
 
-  implicit def fn2classifier[T](f: T => Labeled): Classifier[T] =
+  @inline implicit def fn2classifier[T](f: T => Labeled): Classifier[T] =
     new Classifier[T] {
-      override def apply(x: T): Labeled = f(x)
+      @inline override def apply(x: T): Labeled = f(x)
     }
 }

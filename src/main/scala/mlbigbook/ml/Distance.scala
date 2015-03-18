@@ -22,7 +22,7 @@ trait Distance extends ((Vector, Vector) => Double)
 
 object Distance {
 
-  implicit def fn2distance(f: (Vector, Vector) => Double): Distance =
+  @inline implicit def fn2distance(f: (Vector, Vector) => Double): Distance =
     new Distance {
       @inline override def apply(v1: Vector, v2: Vector): Double = f(v1, v2)
     }

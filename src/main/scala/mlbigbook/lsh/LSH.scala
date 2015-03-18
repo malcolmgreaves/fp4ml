@@ -39,9 +39,9 @@ object LSH {
     }
   }
 
-  implicit def fn2lsh(f: Vector => Int): LSH =
+  @inline implicit def fn2lsh(f: Vector => Int): LSH =
     new LSH {
-      override def apply(x: Vector): Int = f(x)
+      @inline override def apply(x: Vector): Int = f(x)
     }
 
 }

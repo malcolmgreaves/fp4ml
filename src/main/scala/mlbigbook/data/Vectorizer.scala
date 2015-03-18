@@ -11,9 +11,9 @@ trait Vectorizer[T] extends (T => Vector)
 
 object Vectorizer {
 
-  implicit def fn2vectorizer[T](f: T => Vector): Vectorizer[T] =
+  @inline implicit def fn2vectorizer[T](f: T => Vector): Vectorizer[T] =
     new Vectorizer[T] {
-      override def apply(x: T): Vector = f(x)
+      @inline override def apply(x: T): Vector = f(x)
     }
 
 }
@@ -23,8 +23,8 @@ trait VectorizerMaker[T] extends (DistData[T] => Vectorizer[T])
 
 object VectorizerMaker {
 
-  implicit def fn2maker[T](f: DistData[T] => Vectorizer[T]): VectorizerMaker[T] =
+  @inline implicit def fn2maker[T](f: DistData[T] => Vectorizer[T]): VectorizerMaker[T] =
     new VectorizerMaker[T] {
-      override def apply(x: DistData[T]): Vectorizer[T] = f(x)
+      @inline override def apply(x: DistData[T]): Vectorizer[T] = f(x)
     }
 }

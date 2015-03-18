@@ -14,7 +14,7 @@ trait Labeled {
 
 object Labeled {
 
-  implicit def str2labeled(s: String): Labeled =
+  @inline implicit def str2labeled(s: String): Labeled =
     new Labeled {
       override val label = s
     }
