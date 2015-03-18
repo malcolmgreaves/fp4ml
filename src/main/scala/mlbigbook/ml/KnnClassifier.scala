@@ -25,24 +25,27 @@ object KnnClassifier {
     dist: Distance,
     kNeighborhoodSize: Int,
     mkVec: VectorizerMaker[T],
-    labeledCorpus: DistData[LabeledData[T]]): Classifier[T] = {
+    labeledCorpus: DistData[LabeledData[T]]): Classifier[T] =
 
-    val unlabeledVectorizerMaker = (d: DistData[LabeledData[T]]) => {
-      val vectorizerT = mkVec(d.map(_.example))
-      fn2vectorizer(
-        (labeled: LabeledData[T]) => vectorizerT(labeled.example)
-      )
-    }
+    apply(
+      NnRanker(dist, kNeighborhoodSize, unlabeledVectorizerMaker(mkVec), labeledCorpus)
+    )
 
-    val nn = NnRanker(dist, kNeighborhoodSize, unlabeledVectorizerMaker, labeledCorpus)
-
+  def apply[T: ClassTag](nearestNeighborsRanker: Ranker[LabeledData[T]]): Classifier[T] =
     (input: T) => {
-      val neighborhood = nn(LabeledData.unlabeled(input)).map(_._2.label)
+      val neighborhood = nearestNeighborsRanker(LabeledData.unlabeled(input)).map(_._2.label)
       str2labeled(
         takeLargest(countVotes(neighborhood))
       )
     }
-  }
+
+  def unlabeledVectorizerMaker[T: ClassTag](mkVec: VectorizerMaker[T]): VectorizerMaker[LabeledData[T]] =
+    (labeledData: DistData[LabeledData[T]]) => {
+      val vectorizerT = mkVec(labeledData.map(_.example))
+      fn2vectorizer(
+        (ignoreLabelHere: LabeledData[T]) => vectorizerT(ignoreLabelHere.example)
+      )
+    }
 
   /**
    * Counts the number of times each element occurs in neighborhood.
