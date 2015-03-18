@@ -24,13 +24,13 @@ object Distance {
 
   implicit def fn2distance(f: (Vector, Vector) => Double): Distance =
     new Distance {
-      override def apply(v1: Vector, v2: Vector): Double = f(v1, v2)
+      @inline override def apply(v1: Vector, v2: Vector): Double = f(v1, v2)
     }
 }
 
 case object Euclidian extends Distance {
 
-  override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: Vector, v2: Vector): Double =
     Math.sqrt(
       v1.zip(v2)
         .foldLeft(0.0)({
@@ -45,7 +45,7 @@ case object Euclidian extends Distance {
 
 case object Manhattan extends Distance {
 
-  override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: Vector, v2: Vector): Double =
     v1.zip(v2)
       .foldLeft(0.0)({
         case (d, (_, value1, value2)) => {
@@ -57,6 +57,6 @@ case object Manhattan extends Distance {
 
 case object Cosine extends Distance {
 
-  override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: Vector, v2: Vector): Double =
     1.0 - Similarity.cosine(v1, v2)
 }

@@ -6,7 +6,7 @@ package mlbigbook.ml
 //import mlbigbook.lsh.LSH
 //import scala.util.Random
 //
-//object LshClassifier {
+//object LshClassifier {                                                                            h
 //
 //  type Type = Data.Document => Labeled
 //
