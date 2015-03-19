@@ -2,14 +2,9 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 import scala.reflect.ClassTag
-import scala.util.Random
 
 object LshClassifier {
 
-  import LshRanker.createHashTablesForCorpus
-
-  import Classifier._
-  import Labeled.str2labeled
   import KnnClassifier._
 
   def apply[T: ClassTag](

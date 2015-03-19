@@ -35,17 +35,19 @@ object DocVectorizer {
       // each word is mapped to an index
       val word2index = index2word.zipWithIndex.toMap
 
-      val docCount = mkDocCount(documents)
+      val allCardinality = index2word.size
+
+      val docCounter = mkDocCount(documents)
 
       Vectorizer.fn2vectorizer(
         (d: Data.Document) => {
 
-          val countedD = docCount(d)
+          val countedD = docCounter(d)
 
           new Vector {
 
             override val cardinality =
-              index2word.size
+              allCardinality
 
             override val nonZeros =
               countedD.flatMap({
@@ -62,7 +64,8 @@ object DocVectorizer {
                   else
                     None
 
-              }).toTraversable
+              }).toSeq
+                .sortBy(_._1)
 
             override def valueAt(dim: Int): Double =
               if (dim >= 0 && dim < cardinality) {
