@@ -81,7 +81,7 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
   import scala.Numeric.Implicits._
 
   private val addmap = new AddMap[N]()
-  private lazy val empty:Map[String, N] = Map()
+  private lazy val empty: Map[String, N] = Map()
 
   /**
    * Constructs a mapping where all elements' values are multiplied together.

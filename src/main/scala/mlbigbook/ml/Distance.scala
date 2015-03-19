@@ -6,7 +6,6 @@
 package mlbigbook.ml
 
 import mlbigbook.data.Vector
-import mlbigbook.wordcount.Similarity
 
 /**
  * Type for a distance function.
@@ -34,11 +33,10 @@ case object Euclidian extends Distance {
     Math.sqrt(
       v1.zip(v2)
         .foldLeft(0.0)({
-          case (d, (_, value1, value2)) => {
+          case (d, (_, value1, value2)) =>
             val difference = value1 - value2
             val squared = difference * difference
             d + squared
-          }
         })
     )
 }
@@ -48,15 +46,130 @@ case object Manhattan extends Distance {
   @inline override def apply(v1: Vector, v2: Vector): Double =
     v1.zip(v2)
       .foldLeft(0.0)({
-        case (d, (_, value1, value2)) => {
+        case (d, (_, value1, value2)) =>
           val difference = value1 - value2
           d + difference
-        }
       })
 }
 
+/**
+ * Computes the cosine distance between two vectors, which is defined as:
+ *
+ *                  | v1 * v2 |
+ *       1.0  -  -----------------
+ *                  |v1| * |v2|
+ *
+ * where * is dot product and |...| is L1 norm.
+ */
 case object Cosine extends Distance {
 
+  import mlbigbook.data.Vector._
+
   @inline override def apply(v1: Vector, v2: Vector): Double =
-    1.0 - Similarity.cosine(v1, v2)
+    1.0 - Math.abs(dotProduct(v1, v2)) / (absoluteValue(v1) * absoluteValue(v2))
 }
+
+case object Chebyshev extends Distance {
+
+  @inline override def apply(v1: Vector, v2: Vector): Double =
+    v1.zip(v2)
+      .foldLeft(Option.empty[Double])({
+        case (max, (_, value1, value2)) =>
+
+          val absDiff = Math.abs(value1 - value2)
+          max match {
+
+            case m @ Some(maxValue) =>
+              if (maxValue < absDiff)
+                Some(absDiff)
+              else
+                m
+
+            case None =>
+              Some(absDiff)
+          }
+      }) match {
+
+        case Some(maximumFound) =>
+          maximumFound
+
+        case None =>
+          0.0
+      }
+}
+
+case object BrayCurtis extends Distance {
+
+  @inline override def apply(v1: Vector, v2: Vector): Double = {
+
+    val (sumAbsPairwiseDiff, sumAbsPairwiseSum) =
+      v1.zip(v2)
+        .foldLeft((0.0, 0.0))({
+          case ((absDiffSum, absPairSum), (_, value1, value2)) =>
+            (absDiffSum + Math.abs(value1 - value2), absPairSum + Math.abs(value1 + value2))
+        })
+
+    sumAbsPairwiseDiff / sumAbsPairwiseSum
+  }
+
+}
+
+case object Canberra extends Distance {
+
+  @inline override def apply(v1: Vector, v2: Vector): Double =
+    v1.zip(v2)
+      .foldLeft(0.0)({
+        case (sum, (_, value1, value2)) =>
+          val absDiff = Math.abs(value1 - value2)
+          val indivAbsSum = Math.abs(value1) + Math.abs(value2)
+          sum + (absDiff / indivAbsSum)
+      })
+}
+
+case object MinkowskiMaker {
+  def apply(p: Int): Distance =
+    new Distance {
+
+      @inline private def raiseAbsDiffToP(v1: Double, v2: Double): Double =
+        Math.pow(Math.abs(v1 - v2), p)
+
+      private val pInv = 1.0 / p
+
+      @inline private def raiseTo1OverP(x: Double): Double =
+        Math.pow(x, pInv)
+
+      @inline override def apply(v1: Vector, v2: Vector): Double =
+        raiseTo1OverP(
+          v1.zip(v2)
+            .foldLeft(0.0)({
+              case (sum, (_, value1, value2)) =>
+                sum + raiseAbsDiffToP(value1, value2)
+            })
+        )
+    }
+}
+
+// Not ready yet...
+// Defined as:
+//
+//    1−(u−u¯)⋅(v−v¯)||(u−u¯)||2||(v−v¯)||2
+//
+//  where u~ is the mean of u
+// ============================================================================
+//case object CorrelationDist extends Distance {
+//
+//  @inline def computeMean(v: Vector): Double = {
+//
+//    val elementSum =
+//      v.nonZeros.foldLeft(0.0)({
+//        case (sum, (_, value)) =>
+//          sum + value
+//      })
+//
+//    elementSum / v.cardinality.toDouble
+//  }
+//
+//  @inline override def apply(v1: Vector, v2: Vector): Double =
+//    ???
+//
+//}

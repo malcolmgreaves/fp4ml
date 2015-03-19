@@ -43,8 +43,6 @@ class VectorTest extends FunSuite {
 
     // all values in TFIDF-vectorized vectors should have the same
     // nonzero indicies as their non-TFIDF ones
-    println(stringify(vecFox))
-    println(vecFox.nonZeros)
     checkVec(nonzeroFox, vecFox)
     checkVec(nonzeroSanta, vecSanta)
     checkVec(nonzeroBoth, vecBoth)
