@@ -12,14 +12,6 @@ trait Labeled {
   def label: String
 }
 
-object Labeled {
-
-  @inline implicit def str2labeled(s: String): Labeled =
-    new Labeled {
-      override val label = s
-    }
-}
-
 /** Represents a piece of labeled data. */
 case class LabeledData[T: ClassTag](label: String, example: T) extends Labeled
 

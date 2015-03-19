@@ -11,23 +11,22 @@ object LshRanker {
 
   def apply[T](
     nLSHFuncs: Int,
-    bandSize: Int)(
+    binSize: Int)(
       dist: Distance,
       kNeighborhoodSize: Int,
       mkVec: VectorizerMaker[T],
       data: DistData[T])(
-        implicit ddContext: DistDataContext): Ranker[T] = {
+        implicit ddContext: DistDataContext, rand: Random): Ranker[T] = {
 
     val vectorizer = mkVec(data)
     val vectorizedData = data.map(d => (d, vectorizer(d)))
 
-    val lshFuncs = {
-      val vectorspaceSize = vectorizedData.take(1).toSeq.head._2.cardinality
-      implicit val rand = new Random()
-      LSH(nLSHFuncs, vectorspaceSize, bandSize)
-    }
+    val lshFuncs = LSH(
+      nLSHFuncs,
+      vectorizedData.take(1).toSeq.head._2.cardinality, binSize
+    )
 
-    val hashTables = createHashTablesForCorpus(bandSize, lshFuncs, vectorizedData)
+    val hashTables = createHashTables(binSize, lshFuncs, vectorizedData)
 
     val perTableRankers = hashTables.map(ht =>
       (vecInput: Vector) =>
@@ -54,13 +53,13 @@ object LshRanker {
     }
   }
 
-  def createHashTablesForCorpus[T](
+  def createHashTables[T](
     bandSize: Int,
     lshFuncs: Seq[LSH],
-    vectorizedLabeledData: DistData[(T, Vector)])(
+    vectorizedData: DistData[(T, Vector)])(
       implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
 
-    vectorizedLabeledData
+    vectorizedData
       .map({
         case (data, vector) =>
           ((data, vector), lshFuncs.map(h => h(vector)).toSet)
@@ -81,4 +80,5 @@ object LshRanker {
       })
       .sortBy(_._1)
       .map(_._2)
+
 }

@@ -16,9 +16,9 @@ object NnRanker {
    */
   def apply[T](
     dist: Distance,
-    kNeighborhoodSize: Int,
+    neighborhoodSize: Int,
     mkVec: VectorizerMaker[T],
     data: DistData[T]): Ranker[T] =
 
-    Ranker(dist.apply, kNeighborhoodSize, mkVec, data)
+    Ranker(dist.apply, neighborhoodSize, mkVec, data)
 }
