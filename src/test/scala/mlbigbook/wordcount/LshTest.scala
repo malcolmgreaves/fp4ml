@@ -7,15 +7,15 @@ import org.scalatest.{ BeforeAndAfterAll, Suite, FunSuite }
 import org.apache.spark.SparkContext
 import org.apache.log4j.{ Level, Logger }
 
-class LSHTest extends FunSuite {
+class LshTest extends FunSuite {
   import WordcountTest._
-  import LSHTest._
+  import LshTest._
 
   ignore("[seq] ranking using locally sensitive hashing") {
 
   }
 }
 
-object LSHTest {
+object LshTest {
 
 }

@@ -12,6 +12,14 @@ trait Labeled {
   def label: String
 }
 
+object Labeled {
+
+  def apply(l: String): Labeled =
+    new Labeled {
+      override val label = l
+    }
+}
+
 /** Represents a piece of labeled data. */
 case class LabeledData[T: ClassTag](label: String, example: T) extends Labeled
 

@@ -6,43 +6,46 @@
  */
 package mlbigbook.ml
 
-import mlbigbook.data.{ VectorizerMaker, Vector, DistData, Vectorizer }
+import mlbigbook.data._
 
 import scala.reflect.ClassTag
 
-trait Ranker[T] extends (T => Traversable[(Double, T)])
+trait Ranker[T] extends (T => Traversable[(T, Double)])
+
+case class RankerIn(rankFn: (Vector, Vector) => Double, limit: Int)
 
 object Ranker {
 
-  type RankingFn = (Vector, Vector) => Double
+  def apply[T](r: RankerIn)(vecData: VectorDataIn[T]): Ranker[T] = {
 
-  def apply[T](rank: RankingFn, docLimit: Int, mkVec: VectorizerMaker[T], data: DistData[T]): Ranker[T] = {
+    val (vectorizer, data) = vecData()
 
-    val vectorizer = mkVec(data)
-    val vectorizedDocuments = data.map(d => (d, vectorizer(d)))
-
-    (input: T) => {
-      val vecInputDoc = vectorizer(input)
-      takeTopK(
-        docLimit,
-        vectorizedDocuments.map({ case (doc, vec) => (rank(vec, vecInputDoc), doc) })
-      )
-    }
+    fn2ranker(
+      (input: T) => {
+        val vecInput = vectorizer(input)
+        takeTopK(
+          r.limit,
+          data.map({
+            case (item, vecItem) => (item, r.rankFn(vecInput, vecItem))
+          })
+        )
+      }
+    )
   }
 
   /**
    * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
    * returned Traversable has at most limit items.
    */
-  def takeTopK[T, N](limit: Int, elements: DistData[(N, T)])(
-    implicit n: Numeric[N], c: ClassTag[N]): Traversable[(N, T)] =
+  def takeTopK[T, N](limit: Int, elements: DistData[(T, N)])(
+    implicit n: Numeric[N], c: ClassTag[N]): Traversable[(T, N)] =
     elements
-      .sortBy(_._1)(c, n.reverse)
+      .sortBy(_._2)(c, n.reverse)
       .take(limit)
 
-  implicit def fn2ranker[T](f: T => Traversable[(Double, T)]): Ranker[T] =
+  implicit def fn2ranker[T](f: T => Traversable[(T, Double)]): Ranker[T] =
     new Ranker[T] {
-      override def apply(x: T): Traversable[(Double, T)] = f(x)
+      override def apply(x: T) = f(x)
     }
 
 }

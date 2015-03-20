@@ -9,19 +9,11 @@ object LshClassifier {
 
   import KnnClassifier._
 
-  def apply[T: ClassTag](
-    nLSHFuncs: Int,
-    bandSize: Int)(
-      dist: Distance,
-      kNeighborhoodSize: Int,
-      mkVec: VectorizerMaker[T],
-      labeledCorpus: DistData[LabeledData[T]])(
-        implicit ddContext: DistDataContext, rand: Random): Classifier[T] =
+  def apply[T: ClassTag](nLshFuncs: Int, nBins: Int)(n: NearNeighIn)(v: VectorDataIn[LabeledData[T]])(
+    implicit ddContext: DistDataContext, rand: Random): Classifier[T] =
 
     KnnClassifier(
-      LshRanker(nLSHFuncs, bandSize)(
-        dist, kNeighborhoodSize, unlabeledVectorizerMaker(mkVec), labeledCorpus)(
-          ddContext, rand)
+      LshRanker(nLshFuncs, nBins)(n)(v)(ddContext, rand)
     )
 
 }

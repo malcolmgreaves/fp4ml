@@ -7,6 +7,8 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+case class NearNeighIn(dist: Distance, neighborhoodSize: Int)
+
 object NnRanker {
 
   /**
@@ -14,11 +16,9 @@ object NnRanker {
    *
    * Uses Ranker.apply underneath as the ranking algorithm.
    */
-  def apply[T](
-    dist: Distance,
-    neighborhoodSize: Int,
-    mkVec: VectorizerMaker[T],
-    data: DistData[T]): Ranker[T] =
+  def apply[T](n: NearNeighIn)(vdata: VectorDataIn[T]): Ranker[T] =
+    Ranker(n)(vdata)
 
-    Ranker(dist.apply, neighborhoodSize, mkVec, data)
+  implicit def nnIn2RankerIn(n: NearNeighIn): RankerIn =
+    RankerIn(n.dist.apply, n.neighborhoodSize)
 }

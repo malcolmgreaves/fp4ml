@@ -7,33 +7,26 @@ import scala.util.Random
 
 object LshRanker {
 
-  import Ranker._
+  def apply[T](nLshFuncs: Int, nBins: Int)(n: NearNeighIn)(vdata: VectorDataIn[T])(
+    implicit ddContext: DistDataContext, rand: Random): Ranker[T] = {
 
-  def apply[T](
-    nLSHFuncs: Int,
-    binSize: Int)(
-      dist: Distance,
-      kNeighborhoodSize: Int,
-      mkVec: VectorizerMaker[T],
-      data: DistData[T])(
-        implicit ddContext: DistDataContext, rand: Random): Ranker[T] = {
+    val (vectorizer, vectorizedData) = vdata()
 
-    val vectorizer = mkVec(data)
-    val vectorizedData = data.map(d => (d, vectorizer(d)))
-
-    val lshFuncs = LSH(
-      nLSHFuncs,
-      vectorizedData.take(1).toSeq.head._2.cardinality, binSize
+    val lshFuncs = Lsh(nLshFuncs)(
+      LshIn(
+        vectorizedData.take(1).toSeq.head._2.cardinality,
+        nBins
+      )
     )
 
-    val hashTables = createHashTables(binSize, lshFuncs, vectorizedData)
+    val hashTables = createHashTables(nBins, lshFuncs, vectorizedData)
 
     val perTableRankers = hashTables.map(ht =>
       (vecInput: Vector) =>
         Ranker.takeTopK[T, Double](
-          kNeighborhoodSize,
+          n.neighborhoodSize,
           ht.map({
-            case (d, vec) => (dist(vec, vecInput), d)
+            case (item, vecItem) => (item, n.dist(vecInput, vecItem))
           })
         )
     ).toIndexedSeq
@@ -47,7 +40,7 @@ object LshRanker {
       val examplesFromAllBins = hashIndicies.flatMap(hIndex => perTableRankers(hIndex)(vecInput))
 
       Ranker.takeTopK(
-        kNeighborhoodSize,
+        n.neighborhoodSize,
         examplesFromAllBins
       )
     }
@@ -55,7 +48,7 @@ object LshRanker {
 
   def createHashTables[T](
     bandSize: Int,
-    lshFuncs: Seq[LSH],
+    lshFuncs: Seq[Lsh],
     vectorizedData: DistData[(T, Vector)])(
       implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
 

@@ -11,8 +11,6 @@ import scala.reflect.ClassTag
 
 object KnnClassifier {
 
-  import Vectorizer.fn2vectorizer
-  import VectorizerMaker._
   import Classifier._
 
   /**
@@ -20,30 +18,16 @@ object KnnClassifier {
    *
    * Uses NnRanker.apply underneath to perform the nearest neighbors search.
    */
-  def apply[T: ClassTag](
-    dist: Distance,
-    kNeighborhoodSize: Int,
-    mkVec: VectorizerMaker[T],
-    labeledDataset: DistData[LabeledData[T]]): Classifier[T] =
-
-    apply(
-      NnRanker(dist, kNeighborhoodSize, unlabeledVectorizerMaker(mkVec), labeledDataset)
-    )
+  def apply[T: ClassTag](n: NearNeighIn)(vdata: VectorDataIn[LabeledData[T]]): Classifier[T] =
+    apply(NnRanker(n)(vdata))
 
   def apply[T: ClassTag](nearestNeighborsRanker: Ranker[LabeledData[T]]): Classifier[T] =
     (input: T) => {
-      val neighborhood = nearestNeighborsRanker(LabeledData.unlabeled(input)).map(_._2.label)
-      new Labeled {
-        override val label = takeLargest(countVotes(neighborhood))
-      }
-    }
+      val neighborhood =
+        nearestNeighborsRanker(LabeledData.unlabeled(input))
+          .map(_._1.label)
 
-  def unlabeledVectorizerMaker[T: ClassTag](mkVec: VectorizerMaker[T]): VectorizerMaker[LabeledData[T]] =
-    (labeledData: DistData[LabeledData[T]]) => {
-      val vectorizerT = mkVec(labeledData.map(_.example))
-      fn2vectorizer(
-        (ignoreLabelHere: LabeledData[T]) => vectorizerT(ignoreLabelHere.example)
-      )
+      Labeled(takeLargest(countVotes(neighborhood)))
     }
 
   /**

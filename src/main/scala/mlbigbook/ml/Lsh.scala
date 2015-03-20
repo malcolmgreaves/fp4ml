@@ -1,17 +1,19 @@
 package mlbigbook.ml
 
-import mlbigbook.data.Vector
+import mlbigbook.data.{ DistData, Vector }
 
 import scala.util.Random
 
 /** Type represetning a locality sensitive hash function. */
-trait LSH extends (Vector => Int)
+trait Lsh extends (Vector => Int)
 
-object LSH {
+case class LshIn(cardinality: Int, nBins: Int)
+
+object Lsh {
 
   /** Constructs nLshFuncs LSH functions. */
-  def apply(nLSHFuncs: Int, vectorspaceSize: Int, bandSize: Int)(implicit rand: Random): Seq[LSH] =
-    Seq.fill(nLSHFuncs)(apply(vectorspaceSize, bandSize))
+  def apply(nLshFuncs: Int)(c: LshIn)(implicit rand: Random): Seq[Lsh] =
+    Seq.fill(nLshFuncs)(apply(c))
 
   /**
    * Constructs a locality sensitive hash function.
@@ -22,9 +24,9 @@ object LSH {
    * [0, nBins) ). The implicit random number generator is used to select
    * dimensions from the vector space to project vector coordinates into.
    */
-  def apply(vectorspaceSize: Int, nBins: Int)(implicit rand: Random): LSH = {
+  def apply(c: LshIn)(implicit rand: Random): Lsh = {
     val selectedDimensions =
-      (0 until vectorspaceSize).foldLeft(IndexedSeq.empty[Int])(
+      (0 until c.cardinality).foldLeft(IndexedSeq.empty[Int])(
         (selected, dimension) =>
           if (rand.nextBoolean)
             selected :+ dimension
@@ -36,12 +38,12 @@ object LSH {
       val projectedSum = selectedDimensions.foldLeft(0.0)(
         (sum, dimension) => sum + v.valueAt(dimension)
       )
-      projectedSum.round.toInt % nBins
+      projectedSum.round.toInt % c.nBins
     }
   }
 
-  @inline implicit def fn2lsh(f: Vector => Int): LSH =
-    new LSH {
+  @inline implicit def fn2lsh(f: Vector => Int): Lsh =
+    new Lsh {
       @inline override def apply(x: Vector): Int = f(x)
     }
 
