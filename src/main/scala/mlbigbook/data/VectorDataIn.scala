@@ -20,3 +20,4 @@ object VectorDataIn {
     PreComputedVDIn(vectorizer, vectors)
   }
 }
+

@@ -11,9 +11,4 @@ object Classifier {
     new Classifier[T] {
       @inline override def apply(x: T): Labeled = f(x)
     }
-
-  import Vectorizer._
-
-  @inline implicit def unlabeledVectorizer[T](v: Vectorizer[T]): Vectorizer[LabeledData[T]] =
-    (ignoreLabelHere: LabeledData[T]) => v(ignoreLabelHere.example)
 }

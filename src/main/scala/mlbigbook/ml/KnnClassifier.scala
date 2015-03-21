@@ -24,7 +24,7 @@ object KnnClassifier {
   def apply[T: ClassTag](nearestNeighborsRanker: Ranker[LabeledData[T]]): Classifier[T] =
     (input: T) => {
       val neighborhood =
-        nearestNeighborsRanker(LabeledData.unlabeled(input))
+        nearestNeighborsRanker(UnlabeledData(input))
           .map(_._1.label)
 
       Labeled(takeLargest(countVotes(neighborhood)))
