@@ -20,17 +20,15 @@ object Ranker {
 
     val (vectorizer, data) = vecData()
 
-    fn2ranker(
-      (input: T) => {
-        val vecInput = vectorizer(input)
-        takeTopK(
-          r.limit,
-          data.map({
-            case (item, vecItem) => (item, r.rankFn(vecInput, vecItem))
-          })
-        )
-      }
-    )
+    (input: T) => {
+      val vecInput = vectorizer(input)
+      takeTopK(
+        r.limit,
+        data.map({
+          case (item, vecItem) => (item, r.rankFn(vecInput, vecItem))
+        })
+      )
+    }
   }
 
   /**
