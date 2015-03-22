@@ -47,8 +47,8 @@ case object Manhattan extends Distance {
     v1.zip(v2)
       .foldLeft(0.0)({
         case (d, (_, value1, value2)) =>
-          val difference = value1 - value2
-          d + difference
+          val absDifference = Math.abs(value1 - value2)
+          d + absDifference
       })
 }
 
