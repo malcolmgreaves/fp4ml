@@ -19,7 +19,8 @@ object DocRanker {
   import mlbigbook.data.Vector._
 
   /** Computes the cosine similarity of two vectors: cos(angle between v1 and v2). */
-  @inline def cosineSimilarity(v1: Vector, v2: Vector): Double =
-    Math.abs(dotProduct(v1, v2)) / (absoluteValue(v1) * absoluteValue(v2))
+  private val cosineSimilarity =
+    (v1: Vector, v2: Vector) =>
+      Math.abs(dotProduct(v1, v2)) / (absoluteValue(v1) * absoluteValue(v2))
 
 }

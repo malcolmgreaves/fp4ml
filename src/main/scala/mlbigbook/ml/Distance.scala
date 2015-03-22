@@ -35,8 +35,7 @@ case object Euclidian extends Distance {
         .foldLeft(0.0)({
           case (d, (_, value1, value2)) =>
             val difference = value1 - value2
-            val squared = difference * difference
-            d + squared
+            d + difference * difference
         })
     )
 }
@@ -47,8 +46,7 @@ case object Manhattan extends Distance {
     v1.zip(v2)
       .foldLeft(0.0)({
         case (d, (_, value1, value2)) =>
-          val absDifference = Math.abs(value1 - value2)
-          d + absDifference
+          d + Math.abs(value1 - value2)
       })
 }
 
