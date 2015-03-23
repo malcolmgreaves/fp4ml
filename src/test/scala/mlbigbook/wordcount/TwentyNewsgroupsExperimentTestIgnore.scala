@@ -2,7 +2,7 @@ package mlbigbook.wordcount
 
 import java.io.File
 
-import mlbigbook.data.{ Data, DistData }
+import mlbigbook.data.{ NeedsApplicationVDIn, Data, DistData }
 import mlbigbook.ml.Ranker
 import org.apache.spark.SparkContext
 import org.scalatest.FunSuite
@@ -47,9 +47,9 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
   def doExperimentPrintResults(docLimit: Int)(train: DistData[Data.Document], test: DistData[Data.Document]): Unit = {
 
-    val rankWC = DocRanker(docLimit, VectorTest.wordcountVectorizer, train)
+    val rankWC = DocRanker(docLimit)(NeedsApplicationVDIn(VectorTest.wordcountVectorizer, train))
 
-    val rankTFIDF = DocRanker(docLimit, VectorTest.tfidfVectorizer, train)
+    val rankTFIDF = DocRanker(docLimit)(NeedsApplicationVDIn(VectorTest.tfidfVectorizer, train))
 
     test.map(doc => {
 

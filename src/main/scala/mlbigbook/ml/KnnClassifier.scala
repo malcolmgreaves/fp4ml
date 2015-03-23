@@ -1,8 +1,3 @@
-/*
- * A k-Nearest Neighbor classifier implementation.
- *
- * @author Malcolm Greaves
- */
 package mlbigbook.ml
 
 import mlbigbook.data._

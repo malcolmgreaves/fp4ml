@@ -26,14 +26,18 @@ case class LabeledData[T: ClassTag](label: String, example: T) extends Labeled
 object UnlabeledData {
 
   @inline def apply[T: ClassTag](example: T): LabeledData[T] =
-    LabeledData("", example)
+    LabeledData(unlabeledStr, example)
 
   @inline def isA(ld: LabeledData[_]): Boolean =
-    "" == ld.label
+    unlabeledStr == ld.label
 
   import Vectorizer._
 
   @inline implicit def vectorizer[T](v: Vectorizer[T]): Vectorizer[LabeledData[T]] =
     (ignoreLabelHere: LabeledData[T]) => v(ignoreLabelHere.example)
+
+  val asLabled = Labeled(unlabeledStr)
+
+  private val unlabeledStr = ""
 
 }

@@ -5,6 +5,7 @@
  */
 package mlbigbook.data
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 /** Type defines operations on data that behaves as a dense numerical vector. */
@@ -28,7 +29,7 @@ trait Vector {
 
     val buf = mutable.UnrolledBuffer.empty[(Int, Double, Double)]
 
-    @inline def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
+    @tailrec @inline def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
       aNZ.headOption match {
 
         case Some((aIndex, aHead)) => bNZ.headOption match {
@@ -97,7 +98,8 @@ object Vector {
    */
   def dotProduct(v1: Vector, v2: Vector): Double = {
     v1.zip(v2).foldLeft(0.0)({
-      case (dpSum, (_, elementV1, elementV2)) => dpSum + elementV1 * elementV2
+      case (dpSum, (_, elementV1, elementV2)) =>
+        dpSum + elementV1 * elementV2
     })
   }
 
@@ -109,4 +111,11 @@ object Vector {
       case (absval, dimension) => absval + Math.abs(v.valueAt(dimension))
     })
   }
+
+  def absElemDiff(v1: Vector, v2: Vector): Double =
+    v1.zip(v2).foldLeft(0.0)({
+      case (sum, (_, value1, value2)) =>
+        sum + Math.abs(value1 - value2)
+    })
+
 }

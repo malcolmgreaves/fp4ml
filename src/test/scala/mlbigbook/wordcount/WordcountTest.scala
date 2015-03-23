@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ IndicatorMap, AddMap, Data }
+import mlbigbook.data.{ PreComputedVDIn, IndicatorMap, AddMap, Data }
 import org.apache.log4j.{ Level, Logger }
 import org.apache.spark.SparkContext
 import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
