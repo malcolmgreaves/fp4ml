@@ -114,11 +114,13 @@ trait DistDataContext {
 
 /** Implicit conversions to DistDataContext types. */
 object DistDataContext {
+
   /** Implicitly converts a SparkContext into a DistDataContext type. */
   implicit def sparkContext2DistDataContext(sc: SparkContext): DistDataContext =
     SparkDistDataContext(sc)
 
-  implicit val travDDContext = TraversableDistDataContext
+  implicit val travDDContext:DistDataContext =
+    TraversableDistDataContext
 }
 
 case class SparkDistDataContext(sc: SparkContext) extends DistDataContext {
@@ -129,7 +131,7 @@ case class SparkDistDataContext(sc: SparkContext) extends DistDataContext {
     sc.parallelize(data.toSeq)
 }
 
-object TraversableDistDataContext extends DistDataContext {
+case object TraversableDistDataContext extends DistDataContext {
 
   import DistData._
 

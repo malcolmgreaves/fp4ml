@@ -19,7 +19,7 @@ object LshRanker {
       )
     )
 
-    val hashTables = createHashTables(nBins, lshFuncs, vectorizedData)
+    val hashTables = createHashTables(lshFuncs, vectorizedData)
 
     val perTableRankers = hashTables.map(ht =>
       (vecInput: Vector) =>
@@ -46,32 +46,38 @@ object LshRanker {
     }
   }
 
-  def createHashTables[T](
-    bandSize: Int,
-    lshFuncs: Seq[Lsh],
-    vectorizedData: DistData[(T, Vector)])(
+  def createHashTables[T](lshFuncs: Seq[Lsh], vdata: DistData[(T, Vector)])(
       implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
 
-    vectorizedData
-      .map({
-        case (data, vector) =>
-          ((data, vector), lshFuncs.map(h => h(vector)).toSet)
-      })
+    vdata
+      // use the LSH functions to compute the set of hash table indicies
+      // for each (T, Vector) pair
+      // and output each individual index with this pair
       .flatMap({
-        case (dataAndVector, hashIndices) =>
-          hashIndices.map(hIndex => (hIndex, dataAndVector))
+        case dataAndVector @ (_, v) =>
+          val hashIndicies = lshFuncs.map(h => h(v)).toSet
+          hashIndicies.map(hIndex => (hIndex, dataAndVector))
       })
+      // group the data + vector pairs by their hash indicies
       .groupBy(_._1)
+      // strip the index from the iterable of each data-vector triple,
+      // so that we only have pairs of hash index and an iterable of
+      // associated data-value pairs
       .map({
         case (hIndex, iterable) =>
           (hIndex, iterable.map(_._2))
       })
+      // convert this DistData[...] into a Seq[...], (size lshFuncs.size)
       .toSeq
+      // convert each Iterable inside each Seq element into a DistData instance
+      // using the DistDataContext implicit value
       .map({
         case (hIndex, dataAndVectorItr) =>
           (hIndex, ddContext.from(dataAndVectorItr))
       })
+      // re-arrange this Seq into ascending order on the hash index
       .sortBy(_._1)
+      // finally, remove these (now redundant) indicies
       .map(_._2)
 
 }
