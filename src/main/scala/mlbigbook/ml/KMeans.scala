@@ -6,11 +6,35 @@ import mlbigbook.data._
 
 import scala.annotation.tailrec
 
-case class VectorizedCenters[T](cardinality: Int, v: Vectorizer[T], centers: IndexedSeq[Center])
-
-case class Center(id: String, mean: Vector)
-
+/** Input for the KMeans clustering algorithm.
+  *
+  * The Distance function (d) controls the k-means algorithm's notion of closeness
+  * and farness. The nClusters value is the k in k-means; it's the number of clusters.
+  *
+  * The tolerance and maxIterations values describe the stopping conditions of the
+  * k-means algorithm. If the absolute value of the sum of the differences in
+  * cluster centers between two iterations is less than tolerance, then the algorithm
+  * halts. Or, if the number of iterations exceeds maxIterations, then the algorithm
+  * halts.
+  */
 case class KMeansIn(d: Distance, nClusters: Int, tolerance: Double, maxIterations: Int)
+
+/** Evaluated result from clustering. Describes indexed clusters.
+  *
+  * The Vectorizer[T] type (v) allows one to make vectors that will be in the
+  * same space as these cluster centers. The cardinality is the size of the
+  * vectorspace for all of the clusters. The centers value is this indexed
+  * sequence of cluster centers.
+  */
+case class VectorizedCenters[T]
+(cardinality: Int, v: Vectorizer[T], centers: IndexedSeq[Center])
+
+/** Represents a cluster center.
+  *
+  * The id value is helpful for naming clusters. The mean value is the vector
+  * representation of the cluster's center.
+  */
+case class Center(id: String, mean: Vector)
 
 object KMeans {
 

@@ -39,7 +39,7 @@ object DocVectorizer {
 
       val docCounter = mkDocCount(documents)
 
-      Vectorizer.fn2vectorizer(
+      Vectorizer.Fn(
         (d: Data.Document) => {
 
           val countedD = docCounter(d)

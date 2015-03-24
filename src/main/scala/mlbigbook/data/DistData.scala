@@ -83,6 +83,7 @@ object DistData {
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
       d.aggregate(zero)(seqOp, combOp)
 
+//<<<<<<< HEAD
     override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
       new RDDDistData(d.sortBy(f))
 
@@ -115,7 +116,7 @@ object DistDataContext {
   implicit def sparkContext2DistDataContext(sc: SparkContext): DistDataContext =
     SparkDistDataContext(sc)
 
-  implicit val travDDContext: DistDataContext =
+  implicit val travDDContext:DistDataContext =
     TraversableDistDataContext
 }
 
