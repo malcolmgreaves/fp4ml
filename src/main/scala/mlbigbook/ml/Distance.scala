@@ -6,6 +6,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data.Vector
+import mlbigbook.wordcount.Similarity
 
 /**
  * Type for a distance function.
@@ -64,7 +65,7 @@ case object Cosine extends Distance {
   import mlbigbook.data.Vector._
 
   @inline override def apply(v1: Vector, v2: Vector): Double =
-    1.0 - Math.abs(dotProduct(v1, v2)) / (absoluteValue(v1) * absoluteValue(v2))
+    1.0 - Similarity.cosine(v1, v2)
 }
 
 case object Chebyshev extends Distance {
