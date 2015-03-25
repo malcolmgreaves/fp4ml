@@ -1,5 +1,6 @@
 package mlbigbook.ml
 
+import mlbigbook.data.{ VectorizerMaker, DenseVector, Vectorizer }
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 
@@ -34,7 +35,7 @@ object NearestNeighborsLSHTest {
             sum
       })
 
-    if(errors.nonEmpty)
+    if (errors.nonEmpty)
       Some(s"""Found ${errors.length} differences: ${errors.mkString("\n")}""")
     else
       None
@@ -45,6 +46,30 @@ object NearestNeighborsLSHTest {
   lazy val nLshFuncs = 5
 
   lazy val lshConfig = LshIn(???, nLshFuncs)
+
+  import AddressData._
+
+  val apartments = Seq(
+    Address(Location(1, 2), Some("apartment A")),
+    Address(Location(0, 0), Some("apartment B")),
+    Address(Location(3, 2), Some("apartment C")),
+    Address(Location(5, 2), Some("apartment D")),
+    Address(Location(4, 5), Some("apartment E")),
+    Address(Location(0, 5), Some("apartment F")),
+    Address(Location(4, 4), Some("apartment G")),
+    Address(Location(3, 2), Some("apartment H")),
+    Address(Location(2, 1), Some("apartment I")),
+    Address(Location(5, 3), Some("apartment J"))
+  )
+
+  import Vectorizer._
+
+  def addressVectorizer[N: Numeric]: Vectorizer[Address[N]] =
+    (a: Address[N]) =>
+      DenseVector(Array(implicitly[Numeric[N]].toDouble(a.loc.x), implicitly[Numeric[N]].toDouble(a.loc.y)))
+
+  def mkAddressVectorizer[N](implicit n: Numeric[N]): VectorizerMaker[Address[N]] =
+    ???
 
 }
 

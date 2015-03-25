@@ -50,6 +50,7 @@ object KnnClassifier {
   /**
    * Evaluates to the String associated with the largest value (of Numeric type N). If the input
    * elements is empty, evaluates to the empty string ("").
+   *
    */
   def takeLargest[N](elements: IndexedSeq[(String, N)])(implicit n: Numeric[N]): String =
     elements.size match {

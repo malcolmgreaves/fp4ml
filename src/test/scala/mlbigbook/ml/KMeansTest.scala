@@ -1,6 +1,5 @@
 package mlbigbook.ml
 
-import mlbigbook.data.Labeled
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 
@@ -28,7 +27,7 @@ object KMeansTest {
             sum
       })
 
-    if(errors.nonEmpty)
+    if (errors.nonEmpty)
       Some(s"""Found ${errors.length} differences: ${errors.mkString("\n")}""")
     else
       None

@@ -8,7 +8,7 @@
 package mlbigbook.data
 
 import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
+import org.apache.spark.rdd.{ PairRDDFunctions, RDD }
 
 import scala.reflect.ClassTag
 
@@ -35,7 +35,7 @@ trait DistData[A] {
   def take(k: Int): Traversable[A]
 
   /** Load all elements of the dataset into an array in main memory. */
-  def toSeq(): Seq[A]
+  def toSeq: Seq[A]
 
   def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B]
 
@@ -72,7 +72,7 @@ case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
   override def take(k: Int): Traversable[A] =
     ls.take(k)
 
-  override def toSeq(): Seq[A] =
+  override def toSeq: Seq[A] =
     ls.toSeq
 
   override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
@@ -104,7 +104,10 @@ case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
     new RDDDistData(d.flatMap(f))
 
   override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
-    new RDDDistData(d.groupBy(f))
+    new RDDDistData(
+      new PairRDDFunctions(d.groupBy(f))
+        .partitionBy(???)
+    )
 }
 
 /** Type that allows us to convert an interable sequence of data into a DistData type. */
@@ -127,6 +130,7 @@ case class SparkDistDataContext(sc: SparkContext) extends DistDataContext {
 
   import DistData._
 
+  @Deprecated
   override def from[T: ClassTag](data: Iterable[T]): DistData[T] =
     sc.parallelize(data.toSeq)
 }
