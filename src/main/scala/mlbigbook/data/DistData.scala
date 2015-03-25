@@ -119,7 +119,7 @@ object DistDataContext {
   implicit def sparkContext2DistDataContext(sc: SparkContext): DistDataContext =
     SparkDistDataContext(sc)
 
-  implicit val travDDContext:DistDataContext =
+  implicit val travDDContext: DistDataContext =
     TraversableDistDataContext
 }
 

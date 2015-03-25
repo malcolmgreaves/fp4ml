@@ -47,7 +47,7 @@ object LshRanker {
   }
 
   def createHashTables[T](lshFuncs: Seq[Lsh], vdata: DistData[(T, Vector)])(
-      implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
+    implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
 
     vdata
       // use the LSH functions to compute the set of hash table indicies
