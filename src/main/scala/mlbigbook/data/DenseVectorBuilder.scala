@@ -70,7 +70,6 @@ object DenseVectorBuilder {
             denseValues(i) /= value
             i += 1
           }
-          this
         }
 
       override def create: Vector =

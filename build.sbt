@@ -1,5 +1,7 @@
 import AssemblyKeys._
 
+import wartremover._
+
 name := "mlbigbook"
 
 version := "0.1"
@@ -36,4 +38,8 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 instrumentSettings
 
 CoverallsPlugin.coverallsSettings
+
+wartremoverSettings
+
+//wartremoverErrors ++= Warts.unsafe
 
