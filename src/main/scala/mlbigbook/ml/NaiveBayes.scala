@@ -4,10 +4,6 @@ import mlbigbook.data._
 
 case class NaiveBayesIn(yes: String, no: String)
 
-object NaiveBayes {
-
-}
-
 object NaiveBayesMulticlass {
 
   def apply[T](knownClasses: Seq[Labeled])(vdata: VectorDataIn[LabeledData[T]]): Seq[ProbabilityEstimater[T]] =
