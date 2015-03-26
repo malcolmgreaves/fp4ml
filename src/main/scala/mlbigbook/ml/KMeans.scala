@@ -113,7 +113,8 @@ object KMeans {
               (updatedCB, n1 + n2)
           })
 
-    val newCenters = newCenterBuilders.toIndexedSeq
+    val newCenters =
+      newCenterBuilders.toIndexedSeq
       // get the centers back in their original order
       .sortBy(_._2._2)
       .map({
