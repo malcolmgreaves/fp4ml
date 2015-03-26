@@ -1,5 +1,3 @@
-import AssemblyKeys._
-
 name := "mlbigbook"
 
 version := "0.1"

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/malcolmgreaves/bigmlbook.svg?branch=master)](https://travis-ci.org/malcolmgreaves/bigmlbook) [![Coverage Status](https://img.shields.io/coveralls/malcolmgreaves/bigmlbook.svg)](https://coveralls.io/r/malcolmgreaves/bigmlbook)
+[![Build Status](https://travis-ci.org/malcolmgreaves/bigmlbook.svg?branch=master)](https://travis-ci.org/malcolmgreaves/bigmlbook) [![Coverage Status](https://img.shields.io/coveralls/malcolmgreaves/bigmlbook.svg)](https://coveralls.io/r/malcolmgreaves/bigmlbook) [![Codacy Badge](https://www.codacy.com/project/badge/11dadc2315a3490ba45ade59881aab7b)](https://www.codacy.com/public/greavesmalcolm/bigmlbook)
 ==========================================================================================
 Using sbt for building, tests, running programs, and interative shell.
 ==========================================================================================

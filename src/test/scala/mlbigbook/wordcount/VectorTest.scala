@@ -1,5 +1,7 @@
 package mlbigbook.wordcount
 
+import mlbigbook.data.Vector
+
 import org.scalatest.FunSuite
 
 class VectorTest extends FunSuite {
@@ -39,9 +41,10 @@ class VectorTest extends FunSuite {
       && vecFox.cardinality == knownCardinality,
       s"cardinality is not the same for computed document vectors")
 
-    // all values in TFIDF-vectorized vectors should be non-zero
-    checkVec(nonzeroBoth, vecFox)
-    checkVec(nonzeroBoth, vecSanta)
+    // all values in TFIDF-vectorized vectors should have the same
+    // nonzero indicies as their non-TFIDF ones
+    checkVec(nonzeroFox, vecFox)
+    checkVec(nonzeroSanta, vecSanta)
     checkVec(nonzeroBoth, vecBoth)
 
     assert(vecFox.valueAt(-1) == 0.0)
@@ -56,11 +59,11 @@ object VectorTest {
   val nonzeroBoth = nonzeroFox ++ nonzeroSanta
   val knownCardinality = nonzeroBoth.size
 
-  val wordcountVectorizer = Vectorizer(Counters.WordCorpusCounter, Counters.WordDocumentCounter) _
-  val tfidfVectorizer = Vectorizer(Counters.NormCorpusCounter, Counters.NormDocumentCounter) _
+  val wordcountVectorizer = DocVectorizer(Counters.WordCorpusCounter, Counters.WordDocumentCounter) _
+  val tfidfVectorizer = DocVectorizer(Counters.NormCorpusCounter, Counters.NormDocumentCounter) _
 
-  def checkVec(nonZero: Set[Int], v: Vector) = {
-    (0 until knownCardinality).foreach(i => {
+  def checkVec(nonZero: Set[Int], v: Vector): Unit = {
+    (0 until v.cardinality).foreach(i => {
       v.valueAt(i) match {
         case 0.0 => assert(!nonZero(i), s"index $i was zero, should be non-zero")
         case _   => assert(nonZero(i), s"index $i was non-zero, should be zero")
@@ -68,5 +71,6 @@ object VectorTest {
     })
   }
 
-  def stringify(v: Vector) = (0 until v.cardinality).map(i => v.valueAt(i)).mkString(",")
+  def stringify(v: Vector): String =
+    (0 until v.cardinality).map(i => v.valueAt(i)).mkString(",")
 }
