@@ -115,17 +115,17 @@ object KMeans {
 
     val newCenters =
       newCenterBuilders.toIndexedSeq
-      // get the centers back in their original order
-      .sortBy(_._2._2)
-      .map({
-        case (id, centerBuilder) =>
-          // mutates the dense vector builder
-          // divide the summed vector by the # of observed vectors to obtain
-          // the mean: the new, updated, center
-          centerBuilder._1.normalize(nVecs)
-          // construct a side-effect free vector from this builder
-          Center(id, centerBuilder._1.create)
-      })
+        // get the centers back in their original order
+        .sortBy(_._2._2)
+        .map({
+          case (id, centerBuilder) =>
+            // mutates the dense vector builder
+            // divide the summed vector by the # of observed vectors to obtain
+            // the mean: the new, updated, center
+            centerBuilder._1.normalize(nVecs)
+            // construct a side-effect free vector from this builder
+            Center(id, centerBuilder._1.create)
+        })
 
     current.copy[T](centers = newCenters)
   }
