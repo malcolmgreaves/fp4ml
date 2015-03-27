@@ -41,9 +41,8 @@ object Ranker {
       .sortBy(_._2)(c, n.reverse)
       .take(limit)
 
-  implicit def fn2ranker[T](f: T => Traversable[(T, Double)]): Ranker[T] =
-    new Ranker[T] {
-      override def apply(x: T) = f(x)
-    }
+  implicit class Fn[T](val f: T => Traversable[(T, Double)]) extends Ranker[T] {
+    override def apply(x: T) = f(x)
+  }
 
 }

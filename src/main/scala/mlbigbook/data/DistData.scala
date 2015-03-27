@@ -42,72 +42,65 @@ trait DistData[A] {
   def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])]
 }
 
-/**
- * Collection of implicit conversions from common data types to DistData. Currently can
- * convert an RDD (from Spark) or anything that extends scala.collections.Traversable, which
- * includes Seq and List.
- */
 object DistData {
-  /** Implicitly converts a Traversable into a DistData type. */
-  @inline implicit def traversable2DistData[A: ClassTag](l: Traversable[A]): DistData[A] =
-    TravDistData(l)
 
-  /** Implicitly converts an RDD into a DistData type. */
-  @inline implicit def rdd2DistData[A](d: RDD[A]): DistData[A] =
-    RDDDistData(d)
-}
+  /** Wraps a Traversable as a DistData. */
+  implicit class TravDistData[A](val ls: Traversable[A]) extends DistData[A] {
 
-/** Wraps a Traversable as a DistData. */
-case class TravDistData[A: ClassTag](ls: Traversable[A]) extends DistData[A] {
+    override def map[B: ClassTag](f: A => B): DistData[B] =
+      new TravDistData(ls.map(f))
 
-  override def map[B: ClassTag](f: A => B): DistData[B] =
-    new TravDistData(ls.map(f))
+    override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
+      ls.aggregate(zero)(seqOp, combOp)
 
-  override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
-    ls.aggregate(zero)(seqOp, combOp)
+    override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
+      new TravDistData(ls.toSeq.sortBy(f))
 
-  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
-    new TravDistData(ls.toSeq.sortBy(f))
+    override def take(k: Int): Traversable[A] =
+      ls.take(k)
 
-  override def take(k: Int): Traversable[A] =
-    ls.take(k)
+    override def toSeq: Seq[A] =
+      ls.toSeq
 
-  override def toSeq: Seq[A] =
-    ls.toSeq
+    override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
+      new TravDistData(ls.flatMap(f))
 
-  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
-    new TravDistData(ls.flatMap(f))
+    override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
+      new TravDistData(
+        ls
+          .groupBy(f)
+          .toTraversable
+          .map({ case (b, iter) => (b, iter.toIterable) })
+      )
+  }
 
-  override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
-    new TravDistData(ls.groupBy(f).toTraversable.map({ case (b, iter) => (b, iter.toIterable) }))
-}
+  /** Wraps a Spark RDD as a DistData. */
+  implicit class RDDDistData[A](d: RDD[A]) extends DistData[A] {
 
-/** Wraps a Spark RDD as a DistData. */
-case class RDDDistData[A](d: RDD[A]) extends DistData[A] {
+    override def map[B: ClassTag](f: A => B) =
+      new RDDDistData(d.map(f))
 
-  override def map[B: ClassTag](f: A => B) =
-    new RDDDistData(d.map(f))
+    override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
+      d.aggregate(zero)(seqOp, combOp)
 
-  override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
-    d.aggregate(zero)(seqOp, combOp)
+    override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
+      new RDDDistData(d.sortBy(f))
 
-  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
-    new RDDDistData(d.sortBy(f))
+    override def take(k: Int): Traversable[A] =
+      d.take(k)
 
-  override def take(k: Int): Traversable[A] =
-    d.take(k)
+    override def toSeq(): Seq[A] =
+      d.collect().toSeq
 
-  override def toSeq(): Seq[A] =
-    d.collect().toSeq
+    override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
+      new RDDDistData(d.flatMap(f))
 
-  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
-    new RDDDistData(d.flatMap(f))
-
-  override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
-    new RDDDistData(
-      new PairRDDFunctions(d.groupBy(f))
-        .partitionBy(???)
-    )
+    override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
+      new RDDDistData(
+        new PairRDDFunctions(d.groupBy(f))
+          .partitionBy(???)
+      )
+  }
 }
 
 /** Type that allows us to convert an interable sequence of data into a DistData type. */
