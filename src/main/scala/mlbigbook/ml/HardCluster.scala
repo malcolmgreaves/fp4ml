@@ -6,8 +6,10 @@ import mlbigbook.data.{ UnlabeledData, Labeled }
 object HardCluster {
 
   /**
-   * Makes a classifier from a set of cluster centers. The returned class is equal
-   * to one of the cluster center's id's.
+   * Makes a classifier from a set of cluster centers.
+   *
+   * The returned class is equal to the id of the cluster Center that the
+   * input is closest to.
    */
   def apply[T](d: Distance)(vcents: VectorizedCenters[T]): Classifier[T] =
 
@@ -43,5 +45,4 @@ object HardCluster {
 
       }
     }
-
 }

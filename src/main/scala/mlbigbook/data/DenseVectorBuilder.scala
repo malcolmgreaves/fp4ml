@@ -2,16 +2,34 @@ package mlbigbook.data
 
 import java.util.Random
 
+/**
+ * A mutable type. Allows for efficient mutation a fixed-size array with a
+ * restricted interface and a safe way to create immutable Vector instances
+ * using the builder's contents.
+ */
 trait DenseVectorBuilder {
 
+  /**
+   * Immutable operation.
+   *
+   * Size of the builder’s vector space.
+   */
   val cardinality: Int
 
   /**
    * Mutable operation.
    *
-   * Assigns
+   * Assigns the input value at the builder's index.
    */
   def update(index: Int, value: Double): Unit
+
+  /**
+   * Immutable operation.
+   *
+   * Obtains the current value of the builder at the input index.
+   * Evaluates to 0.0 if the index is out of bounds.
+   */
+  def get(index: Int): Double
 
   /**
    * Mutable operation.
@@ -30,7 +48,9 @@ trait DenseVectorBuilder {
   def normalize(value: Double): Unit
 
   /**
-   * Create a Vector instance using the current contents of this builder.
+   * Immutable operation.
+   *
+   * Creates a Vector instance using the current contents of this builder.
    *
    * The evaluated Vector instance is free from side effects. Namely, further
    * updated to this builder will not affect the evalauted Vector's contents.
@@ -45,13 +65,20 @@ object DenseVectorBuilder {
 
     new DenseVectorBuilder {
 
-      private val denseValues = new Array[Double](knownCardinality)
-
       override val cardinality =
         knownCardinality
 
+      private val denseValues =
+        new Array[Double](cardinality)
+
+      @inline override def get(index: Int): Double =
+        if (index >= 0 && index < cardinality)
+          denseValues(index)
+        else
+          0.0
+
       @inline override def add(v: Vector): Unit =
-        if (v.cardinality == knownCardinality) {
+        if (v.cardinality == cardinality) {
           v.nonZeros.foreach({
             case (index, value) =>
               denseValues(index) += value
@@ -59,14 +86,14 @@ object DenseVectorBuilder {
         }
 
       @inline override def update(index: Int, value: Double): Unit =
-        if (index >= 0 && index < knownCardinality) {
+        if (index >= 0 && index < cardinality) {
           denseValues.update(index, value)
         }
 
       @inline def normalize(value: Double): Unit =
         if (value != 0.0) {
           var i = 0
-          while (i < knownCardinality) {
+          while (i < cardinality) {
             denseValues(i) /= value
             i += 1
           }
@@ -74,7 +101,6 @@ object DenseVectorBuilder {
 
       override def create: Vector =
         DenseVector(denseValues, copyValues = true)
-
     }
 
 }
@@ -93,15 +119,15 @@ object DenseVector {
    * every value of the vector. So frozenValues(i) == the value of the
    * vector's ith dimension. The first valid dimension value is 0.
    */
-  def apply(frozenValues: Array[Double], copyValues:Boolean=true): Vector =
+  def apply(frozenValues: Array[Double], copyValues: Boolean = true): Vector =
 
     new Vector {
 
       override val cardinality =
         frozenValues.length
-                   frozenDenseValues
+
       private val frozenDenseValues =
-        if(copyValues) {
+        if (copyValues) {
           val copy = new Array[Double](cardinality)
           System.arraycopy(frozenValues, 0, copy, 0, cardinality)
           copy
