@@ -3,49 +3,78 @@ package mlbigbook.data
 import java.util.Random
 
 /**
- * A mutable type. Allows for efficient mutation a fixed-size array with a
+ * WARNING: DenseVectorBuilder is a highly mutable class!
+ *
+ * Allows for efficient mutation a fixed-size array with a
  * restricted interface and a safe way to create immutable Vector instances
  * using the builder's contents.
+ *
+ * The field cardinality indicates the size of the vector space size that
+ * this class is building in.
  */
-trait DenseVectorBuilder {
+class DenseVectorBuilder(val cardinality: Int) {
 
-  /**
-   * Immutable operation.
-   *
-   * Size of the builder’s vector space.
-   */
-  val cardinality: Int
-
-  /**
-   * Mutable operation.
-   *
-   * Assigns the input value at the builder's index.
-   */
-  def update(index: Int, value: Double): Unit
+  // internal storage of the builder's values
+  private val denseValues = new Array[Double](cardinality)
 
   /**
    * Immutable operation.
    *
    * Obtains the current value of the builder at the input index.
+   *
    * Evaluates to 0.0 if the index is out of bounds.
    */
-  def get(index: Int): Double
+  @inline def get(index: Int): Double =
+    if (index >= 0 && index < cardinality)
+      denseValues(index)
+    else
+      0.0
 
   /**
    * Mutable operation.
    *
    * For each non-zero value in the input vector v, it adds this value
    * to the current value at this vector builder's appropriate index.
+   *
+   * If the builder's and input vector's cardinality differs, then the
+   * add call is a no-op.
    */
-  def add(v: Vector): Unit
+  @inline def add(v: Vector): Unit =
+    if (v.cardinality == cardinality) {
+      v.nonZeros.foreach({
+        case (index, value) =>
+          denseValues(index) += value
+      })
+    }
 
   /**
    * Mutable operation.
    *
-   * Divides each element by the input value. If the value is 0, then no
-   * operation is performed as division by zero is undefined.
+   * Assigns the input value at the builder's index.
+   *
+   * If the index is out of bounds, then the call to update is a no-op.
    */
-  def normalize(value: Double): Unit
+  @inline def update(index: Int, value: Double): Unit =
+    if (index >= 0 && index < cardinality) {
+      denseValues.update(index, value)
+    }
+
+  /**
+   * Mutable operation.
+   *
+   * Divides each element by the input value.
+   *
+   * If the value is 0, then no operation is performed as division by
+   * zero is undefined.
+   */
+  @inline def normalize(value: Double): Unit =
+    if (value != 0.0) {
+      var i = 0
+      while (i < cardinality) {
+        denseValues(i) /= value
+        i += 1
+      }
+    }
 
   /**
    * Immutable operation.
@@ -55,53 +84,8 @@ trait DenseVectorBuilder {
    * The evaluated Vector instance is free from side effects. Namely, further
    * updated to this builder will not affect the evalauted Vector's contents.
    */
-  def create: Vector
-
-}
-
-object DenseVectorBuilder {
-
-  def apply(knownCardinality: Int): DenseVectorBuilder =
-
-    new DenseVectorBuilder {
-
-      override val cardinality =
-        knownCardinality
-
-      private val denseValues =
-        new Array[Double](cardinality)
-
-      @inline override def get(index: Int): Double =
-        if (index >= 0 && index < cardinality)
-          denseValues(index)
-        else
-          0.0
-
-      @inline override def add(v: Vector): Unit =
-        if (v.cardinality == cardinality) {
-          v.nonZeros.foreach({
-            case (index, value) =>
-              denseValues(index) += value
-          })
-        }
-
-      @inline override def update(index: Int, value: Double): Unit =
-        if (index >= 0 && index < cardinality) {
-          denseValues.update(index, value)
-        }
-
-      @inline def normalize(value: Double): Unit =
-        if (value != 0.0) {
-          var i = 0
-          while (i < cardinality) {
-            denseValues(i) /= value
-            i += 1
-          }
-        }
-
-      override def create: Vector =
-        DenseVector(denseValues, copyValues = true)
-    }
+  def create(copyValues: Boolean = true): Vector =
+    DenseVector(denseValues, copyValues)
 
 }
 

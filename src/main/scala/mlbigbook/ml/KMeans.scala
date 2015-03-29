@@ -128,7 +128,7 @@ object KMeans {
                 cbs1.keys.foldLeft(cbs2)({
                   case (updatingCbs2, id) =>
                     // mutates dense vector builder in mapping
-                    updatingCbs2(id)._1.add(cbs1(id)._1.create)
+                    updatingCbs2(id)._1.add(cbs1(id)._1.create(copyValues = true))
                     // keep mapping the same
                     updatingCbs2
                 })
@@ -147,7 +147,7 @@ object KMeans {
             // the mean: the new, updated, center
             centerBuilder._1.normalize(nVecs)
             // construct a side-effect free vector from this builder
-            Center(id, centerBuilder._1.create)
+            Center(id, centerBuilder._1.create(copyValues = false))
         })
 
     current.copy[T](centers = newCenters)
@@ -170,7 +170,7 @@ object KMeans {
     prevCenters.centers.zipWithIndex
       .map({
         case (c, index) =>
-          (c.id, (DenseVectorBuilder(prevCenters.cardinality), index))
+          (c.id, (new DenseVectorBuilder(prevCenters.cardinality), index))
       }).toMap
 
   /**
