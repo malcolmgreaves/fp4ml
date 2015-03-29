@@ -8,7 +8,7 @@ object NaiveBayesMulticlass {
 
   def apply[T](knownClasses: Seq[Labeled])(vdata: VectorDataIn[LabeledData[T]]): Seq[ProbabilityEstimater[T]] =
     ???
-  
+
 }
 
 object NaiveBayesBinary {
