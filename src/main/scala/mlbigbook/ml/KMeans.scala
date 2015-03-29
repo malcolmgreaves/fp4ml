@@ -26,8 +26,7 @@ case class KMeansIn(d: Distance, nClusters: Int, tolerance: Double, maxIteration
   * vectorspace for all of the clusters. The centers value is this indexed
   * sequence of cluster centers.
   */
-case class VectorizedCenters[T]
-(cardinality: Int, v: Vectorizer[T], centers: IndexedSeq[Center])
+case class VectorizedCenters[T](cardinality: Int, v: Vectorizer[T], centers: IndexedSeq[Center])
 
 /** Represents a cluster center.
   *
