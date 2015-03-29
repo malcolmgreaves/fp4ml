@@ -73,11 +73,7 @@ object DenseVectorBuilder {
         }
 
       override def create: Vector =
-        DenseVector({
-          val copy = new Array[Double](knownCardinality)
-          System.arraycopy(denseValues, 0, copy, 0, knownCardinality)
-          copy
-        })
+        DenseVector(denseValues, copyValues = true)
 
     }
 
@@ -85,12 +81,33 @@ object DenseVectorBuilder {
 
 object DenseVector {
 
-  def apply(frozenDenseValues: Array[Double]): Vector =
+  /**
+   * Creates a Vector instance that is backed up by the mutable array.
+   *
+   * It is ABSOLUTELY CRITICAL that these frozenValues are NOT MUTATED
+   * after calling apply. Otherwise, it will break the Vector type contract.
+   *
+   * When in doubt, set copyValues to true (it defaults to this behavior).
+   *
+   * The input Array[Double] frozenValues is assumed to have each and
+   * every value of the vector. So frozenValues(i) == the value of the
+   * vector's ith dimension. The first valid dimension value is 0.
+   */
+  def apply(frozenValues: Array[Double], copyValues:Boolean=true): Vector =
 
     new Vector {
 
       override val cardinality =
-        frozenDenseValues.length
+        frozenValues.length
+
+      private val frozenDenseValues =
+        if(copyValues) {
+          val copy = new Array[Double](cardinality)
+          System.arraycopy(frozenValues, 0, copy, 0, cardinality)
+          copy
+        } else {
+          frozenValues
+        }
 
       @inline override def valueAt(dimension: Int): Double =
         if (dimension >= 0 && dimension < cardinality)

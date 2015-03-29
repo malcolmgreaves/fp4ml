@@ -60,7 +60,7 @@ object KMeans {
   }
 
   /**
-   * Runs the k-means algorithm using the initial centers.
+   * Runs the k-means algorithm using the given centers.
    *
    * If the initial center's cardinality is non-positive, or if the KMeansIn's nClusters
    * doesn't equal the number of initial vectorized centers, then this method will
