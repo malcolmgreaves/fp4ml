@@ -99,7 +99,7 @@ object DenseVector {
 
       override val cardinality =
         frozenValues.length
-
+                   frozenDenseValues
       private val frozenDenseValues =
         if(copyValues) {
           val copy = new Array[Double](cardinality)
@@ -124,6 +124,7 @@ object DenseVector {
 
     }
 
+  /** Creates a Vector of knownCardinality size; dimensions drawn uniformly from [0,1]. */
   def mkRandom(knownCardinality: Int)(implicit rand: Random): Vector = {
     val uniformRandomValues = new Array[Double](knownCardinality)
 
