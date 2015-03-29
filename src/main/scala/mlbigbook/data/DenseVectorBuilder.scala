@@ -50,6 +50,23 @@ class DenseVectorBuilder(val cardinality: Int) {
   /**
    * Mutable operation.
    *
+   * Adds each value of the input DenseVectorBuilder to this internal storage.
+   *
+   * If the builder's and input vector's cardinality differs, then the
+   * add call is a no-op.
+   */
+  @inline def add(dvb: DenseVectorBuilder): Unit =
+    if (dvb.cardinality == cardinality) {
+      var i = 0
+      while (i < cardinality) {
+        denseValues(i) += dvb.denseValues(i)
+        i += 1
+      }
+    }
+
+  /**
+   * Mutable operation.
+   *
    * Assigns the input value at the builder's index.
    *
    * If the index is out of bounds, then the call to update is a no-op.
@@ -81,8 +98,10 @@ class DenseVectorBuilder(val cardinality: Int) {
    *
    * Creates a Vector instance using the current contents of this builder.
    *
-   * The evaluated Vector instance is free from side effects. Namely, further
-   * updated to this builder will not affect the evalauted Vector's contents.
+   * If copyValues=true, then the evaluated Vector instance is free from side effects.
+   * Namely, further updated to this builder will not affect the evaluated Vector's contents.
+   * This is the prefered invocation. Only call with copyValues=false if you can guarentee
+   * that the builder will be discarded after calling create.
    */
   def create(copyValues: Boolean = true): Vector =
     DenseVector(denseValues, copyValues)

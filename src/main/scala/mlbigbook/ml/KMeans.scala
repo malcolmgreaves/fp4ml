@@ -128,7 +128,7 @@ object KMeans {
                 cbs1.keys.foldLeft(cbs2)({
                   case (updatingCbs2, id) =>
                     // mutates dense vector builder in mapping
-                    updatingCbs2(id)._1.add(cbs1(id)._1.create(copyValues = true))
+                    updatingCbs2(id)._1.add(cbs1(id)._1)
                     // keep mapping the same
                     updatingCbs2
                 })
