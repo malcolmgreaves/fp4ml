@@ -25,6 +25,8 @@ case class LabeledData[T: ClassTag](label: String, example: T) extends Labeled
 
 object UnlabeledData {
 
+  private val unlabeledStr = ""
+
   @inline def apply[T: ClassTag](example: T): LabeledData[T] =
     LabeledData(unlabeledStr, example)
 
@@ -37,7 +39,5 @@ object UnlabeledData {
     (ignoreLabelHere: LabeledData[T]) => v(ignoreLabelHere.example)
 
   val asLabled = Labeled(unlabeledStr)
-
-  private val unlabeledStr = ""
 
 }

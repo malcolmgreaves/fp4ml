@@ -98,15 +98,19 @@ object KMeans {
         apply_h(k, updated, updatedTol, currIter + 1, data)
     }
 
-  /** The performs a single assignment and update step of k-means. */
+  /** Performs a single assignment and update step of k-means. */
   def updateCenters[T](
     k: KMeansIn,
     data: DistData[(T, Vector)],
     current: VectorizedCenters[T]): VectorizedCenters[T] = {
 
+    // uses the current cluster centers to construct a classifier, which
+    // will assign a datapoint to the nearest cluster
+    val clusterAssigner = HardCluster(k.d)(current)
+
     val (newCenterBuilders, nVecs) =
       // assign each vector in the data to a cluster center using the current centers
-      assignment(HardCluster(k.d)(current))(data)
+      assignment(clusterAssigner)(data)
         // create empty dense vector builders
         // and
         // aggregate each new center by summing all vectors that are assigned to a center
@@ -162,7 +166,7 @@ object KMeans {
 
   /**
    * Create mutable vector-builders, one for each cluster center.
-   * Used in the update step. Mutability is required for efficency.
+   * Used in the update step. Mutability is required for efficiency.
    */
   def mkCenterBuilders(prevCenters: VectorizedCenters[_]): Map[String, (DenseVectorBuilder, Int)] =
     prevCenters.centers.zipWithIndex
