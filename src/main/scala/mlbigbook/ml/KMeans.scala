@@ -55,11 +55,14 @@ object KMeans {
       )
     )
 
-    if (cardinality != 0)
-      apply_h(k, initialCenters, 0.0, 0, vectorized)
-    else
-      initialCenters
+    apply(initialCenters)(k)(vectorized)
   }
+
+  def apply[T](prevCenters: VectorizedCenters[T])(k: KMeansIn)(vectorized: DistData[(T, Vector)]): VectorizedCenters[T] =
+    if (prevCenters.cardinality > 0 && k.nClusters == prevCenters.centers.size)
+      apply_h(k, prevCenters, 0.0, 0, vectorized)
+    else
+      prevCenters
 
   /*
     :: from Wikipedia page on k-means ::
@@ -146,7 +149,7 @@ object KMeans {
         .map({
           case (id, centerBuilder) =>
             // mutates the dense vector builder
-            // divide the summed vector by the # of observed vectors to obtain
+            // divide the summed vector by tvecorizedshe # of observed vectors to obtain
             // the mean: the new, updated, center
             centerBuilder._1.normalize(nVecs)
             // construct a side-effect free vector from this builder
