@@ -38,9 +38,7 @@ case class VectorizedCenters[T](cardinality: Int, v: Vectorizer[T], centers: Ind
  */
 case class Center(id: String, mean: Vector)
 
-/**
- * Contains methods for performing the k-means clustering algorithm.
- */
+/** Contains methods for performing the k-means clustering algorithm. */
 object KMeans {
 
   /** Creates randomized initial cluster centers and then runs the k-means algorithm. */
