@@ -3,6 +3,7 @@ package mlbigbook.ml
 import java.util.Random
 
 import mlbigbook.data._
+import mlbigbook.data.mut.{DenseVector, DenseVectorBuilder}
 
 import scala.annotation.tailrec
 

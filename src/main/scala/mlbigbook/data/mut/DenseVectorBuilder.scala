@@ -1,6 +1,8 @@
-package mlbigbook.data
+package mlbigbook.data.mut
 
 import java.util.Random
+
+import mlbigbook.data.Vector
 
 /**
  * WARNING: DenseVectorBuilder is a highly mutable class!
