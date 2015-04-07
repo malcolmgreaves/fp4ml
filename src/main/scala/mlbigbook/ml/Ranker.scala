@@ -23,36 +23,41 @@ object Ranker {
     val (vectorizer, data) = vecData()
 
     (input: T) => {
+      val vecInput = vectorizer(input)
+      takeTopK(
+        r.limit,
+        data.map({
+          case (item, vecItem) => (item, r.rankFn(vecInput, vecItem))
+        })
+      )
+    }
+  }
+
+  def apply[T](d: Distance, limit: Int)(vecData: VectorDataIn[T]): Ranker[T] = {
+
+    val (vectorizer, data) = vecData()
+
+    (input: T) => {
 
       val vecInput = vectorizer(input)
 
-      val f = (v:Vector) => r.rankFn(vecInput, v)
+      val f = (v: Vector) => d(vecInput, v)
 
-      val top = takeTopK(f, r.limit, data)
-
-      top.map(x => (x._1, f(x._2)))
+      takeTopK(f, limit, data)
+        .map(x => (x._1, f(x._2)))
     }
-//      {
-//      val vecInput = vectorizer(input)
-//      OLD_takeTopK(
-//        r,
-//        data.map({
-//          case (item, vecItem) => (item, r.rankFn(vecInput, vecItem))
-//        })
-//      )
-//    }
+
   }
 
   /**
    * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
    * returned Traversable has at most limit items.
    */
+  def takeTopK[T](f: Vector => Double, limit: Int, elements: DistData[(T, Vector)]): Traversable[(T, Vector)] = {
 
-  def takeTopK[T](f:Vector => Double, limit:Int, elements: DistData[(T, Vector)]): Traversable[(T, Vector)] = {
+    val BoundPq = BoundedPriorityQueue.create[(T, Vector)](Vector.rankFnOrdering[T](f))(limit)
 
-    val BoundPq = BoundedPriorityQueue.create[(T,Vector)](Vector.rankFnOrdering[T](f))(limit)
-
-    @tailrec @inline def toTraversable(pq:BoundPq.T, existing:Seq[(T,Vector)]):Traversable[(T,Vector)] =
+    @tailrec @inline def toTraversable(pq: BoundPq.T, existing: Seq[(T, Vector)]): Traversable[(T, Vector)] =
       BoundPq.takeMin(pq) match {
 
         case None =>
@@ -64,22 +69,25 @@ object Ranker {
 
     val resultingBpq =
       elements
-      .aggregate(BoundPq.empty)(
-        {
-          case (pq, dataAndVector) =>
-            BoundPq.insert(dataAndVector)(pq)
-        },
-        {
-          case (pq1, pq2) =>
-            BoundPq.merge(pq1, pq2)
-        }
-      )(ClassTag(BoundPq.empty.getClass))
+        .aggregate(BoundPq.empty)(
+          {
+            case (pq, dataAndVector) =>
+              BoundPq.insert(dataAndVector)(pq)
+          },
+          {
+            case (pq1, pq2) =>
+              BoundPq.merge(pq1, pq2)
+          }
+        )(ClassTag(BoundPq.empty.getClass))
 
-    toTraversable(resultingBpq, Seq.empty[(T,Vector)])
+    toTraversable(resultingBpq, Seq.empty[(T, Vector)])
   }
 
-  @deprecated
-  def OLD_takeTopK[T, N](limit: Int, elements: DistData[(T, N)])(
+  /**
+   * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
+   * returned Traversable has at most limit items.
+   */
+  def takeTopK[T, N](limit: Int, elements: DistData[(T, N)])(
     implicit n: Numeric[N], c: ClassTag[N]): Traversable[(T, N)] =
     elements
       .sortBy(_._2)(c, n.reverse)

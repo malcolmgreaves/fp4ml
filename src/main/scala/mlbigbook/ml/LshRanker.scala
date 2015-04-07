@@ -23,11 +23,10 @@ object LshRanker {
 
     val perTableRankers = hashTables.map(ht =>
       (vecInput: Vector) =>
-        Ranker.OLD_takeTopK[T, Double](
+        Ranker.takeTopK[T](
+          (v: Vector) => n.dist(vecInput, v),
           n.neighborhoodSize,
-          ht.map({
-            case (item, vecItem) => (item, n.dist(vecInput, vecItem))
-          })
+          ht
         )
     ).toIndexedSeq
 
@@ -39,10 +38,13 @@ object LshRanker {
 
       val examplesFromAllBins = hashIndicies.flatMap(hIndex => perTableRankers(hIndex)(vecInput))
 
-      Ranker.OLD_takeTopK(
+      val f = (v: Vector) => n.dist(vecInput, v)
+
+      Ranker.takeTopK[T](
+        f,
         n.neighborhoodSize,
         examplesFromAllBins
-      )
+      ).map(x => (x._1, f(x._2)))
     }
   }
 

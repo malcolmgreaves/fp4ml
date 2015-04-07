@@ -29,7 +29,7 @@ object BoundedPriorityQueue {
 
   val doubleOrdering = math.Ordering.Double
 
-  def create[A](O: A => Double)(boundedMaximumSize: Int):BoundedPriorityQueue[A] =
+  def create[A](O: A => Double)(boundedMaximumSize: Int): BoundedPriorityQueue[A] =
     new BoundedPriorityQueue[A] {
 
       sealed trait T {

@@ -120,7 +120,7 @@ object Vector {
         sum + Math.abs(value1 - value2)
     })
 
-  def rankFnOrdering[T](f: Vector => Double):((T,Vector)) => Double =
-    (x:(T,Vector)) => f(x._2)
+  def rankFnOrdering[T](f: Vector => Double): ((T, Vector)) => Double =
+    (x: (T, Vector)) => f(x._2)
 
 }

@@ -8,7 +8,7 @@ class BoundedPriorityQueueTest extends FunSuite {
 
   import Modules._
 
-  val intBindPQ = BoundedPriorityQueue.create((x:Int) => x.toDouble) _
+  val intBindPQ = BoundedPriorityQueue.create((x: Int) => x.toDouble) _
 
   val Bound1PQ = intBindPQ(1)
 
