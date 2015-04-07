@@ -5,6 +5,8 @@
  */
 package mlbigbook.data
 
+import mlbigbook.ml.Distance
+
 import scala.annotation.tailrec
 import scala.collection.mutable
 
@@ -117,5 +119,8 @@ object Vector {
       case (sum, (_, value1, value2)) =>
         sum + Math.abs(value1 - value2)
     })
+
+  def rankFnOrdering[T](f: Vector => Double):((T,Vector)) => Double =
+    (x:(T,Vector)) => f(x._2)
 
 }
