@@ -6,6 +6,8 @@ trait BoundedPriorityQueue[A] {
 
   val maxSize: Int
 
+  val empty: T
+
   def peekMin(existing: T): Option[A]
 
   def takeMin(existing: T): Option[(A, T)]
@@ -14,9 +16,17 @@ trait BoundedPriorityQueue[A] {
 
 }
 
+object Modules {
+
+  implicit class Piper[A](val x: A) extends AnyVal {
+    def |>[B](f: A => B) = f(x)
+  }
+
+}
+
 object BoundedPriorityQueue {
 
-  def create[A](boundedMaximumSize: Int, O: Ordering[A]): BoundedPriorityQueue[A] =
+  def create[A](O: Ordering[A])(boundedMaximumSize: Int): BoundedPriorityQueue[A] =
     new BoundedPriorityQueue[A] {
 
       sealed trait T {
@@ -31,13 +41,19 @@ object BoundedPriorityQueue {
         override val size = left.size + 1 + right.size
       }
 
-      override val maxSize: Int = boundedMaximumSize
+      override val empty: T = Empty
+
+      override val maxSize = boundedMaximumSize
 
       override def insert(item: A)(existing: T): T =
+        insert_h(item, existing, existing.size)
+
+
+      @inline private def insert_h(item:A, existing:T, size:Int):T =
         existing match {
 
           case Empty =>
-            if (existing.size < maxSize)
+            if (size < maxSize)
               Full(Empty, item, Empty)
             else
               existing
@@ -45,20 +61,19 @@ object BoundedPriorityQueue {
           case f @ Full(left, heapItem, right) =>
             val cmp = O.compare(item, heapItem)
             if (cmp < 0)
-              // item is "more minimum" than heap item:
-              // push heap-item down
+            // item is "more minimum" than heap item:
+            // push heap-item down
               if (right.size > left.size)
-                Full(insert(heapItem)(left), item, right)
+                Full(insert_h(heapItem, left, size), item, right)
               else
-                Full(left, item, insert(heapItem)(right))
+                Full(left, item, insert_h(heapItem, right, size))
 
-            else
-            // item is either "less minimum" or "the same priority" to the heap item:
+            else // item is either "less minimum" or "the same priority" to the heap item:
             // continue down heap to find appropriate spot
             if (right.size > left.size)
-              Full(insert(item)(left), heapItem, right)
+              Full(insert_h(item, left, size), heapItem, right)
             else
-              Full(left, heapItem, insert(item)(right))
+              Full(left, heapItem, insert_h(item, right, size))
         }
 
       override def peekMin(existing: T): Option[A] =
@@ -128,7 +143,7 @@ object BoundedPriorityQueue {
                         // either case, promote right subtree
                         (
                           item,
-              // item is "more minimum" than heap item
+                          // item is "more minimum" than heap item
                           Full(
                             left,
                             rightMin,
