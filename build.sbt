@@ -31,6 +31,8 @@ libraryDependencies ++= Seq(
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
+parallelExecution in Test := false
+
 instrumentSettings
 
 CoverallsPlugin.coverallsSettings
