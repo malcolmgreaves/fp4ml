@@ -56,10 +56,81 @@ object NaiveBayes {
       data.aggregate((Map.empty[Labeled, Long], Map.empty[Labeled, Map[Int, Double]]))(
         {
           case ((lc, fvc), (ld, vec)) =>
-            ???
-        }, {
+
+            val l = Labeled(ld.label)
+
+            val updatedLc = lc.get(l) match {
+
+              case Some(existing) =>
+                (lc - l) + (l -> (existing + 1L))
+
+              case None =>
+                lc + (l -> 1L)
+
+            }
+
+            val updatedFvc = fvc.get(l) match {
+
+              case Some(featureCountsForL) =>
+                val x =
+                  vec.nonZeros.foldLeft(featureCountsForL)({
+                    case (m, (index, value)) =>
+                      m.get(index) match {
+                        case Some(v) =>
+                          (m - index) + (index -> (v + value))
+                        case None =>
+                          m + (index -> value)
+                      }
+                  })
+                (fvc - l) + (l -> x)
+
+              case None =>
+                fvc + (l -> vec.nonZeros.toMap)
+            }
+
+            (updatedLc, updatedFvc)
+        },
+        {
           case ((lc1, fvc1), (lc2, fvc2)) =>
-            ???
+            (
+              lc1.foldLeft(lc2)({
+                case (m, (label, value)) =>
+                  m.get(label) match {
+
+                    case Some(existing) =>
+                      (m - label) + (label -> (existing + value))
+
+                    case None =>
+                      m + (label -> value)
+
+                  }
+              }),
+
+              fvc1.foldLeft(fvc2)({
+                case (m, (label, fvsForLabel)) =>
+                  val update =
+                    fvsForLabel.foldLeft(m.getOrElse(label, Map.empty[Int, Double]))({
+                      case (m2, (index, value)) =>
+                        m2.get(index) match {
+
+                          case Some(existing) =>
+                            (m2 - index) + (index -> (existing + value))
+
+                          case None =>
+                            m2 + (index -> value)
+                        }
+                    })
+
+                  m.get(label) match {
+
+                    case Some(_) =>
+                      (m - label) + (label -> update)
+
+                    case None =>
+                      m + (label -> update)
+                  }
+              })
+            )
         }
       )
 
@@ -118,15 +189,10 @@ trait ProbabilityEstimator[T] extends (T => Distribution)
 
 object ProbabilityEstimator {
 
-  import language.implicitConversions
-
   implicit class Fn[T](f: T => Distribution) extends ProbabilityEstimator[T] {
     override def apply(x: T) = f(x)
   }
-
 }
-
-trait OldProbabilityEstimator[T] extends (T => Double)
 
 object ProbabilityClassifier {
 
@@ -155,5 +221,4 @@ object ProbabilityClassifier {
           else
             no
       }
-
 }
