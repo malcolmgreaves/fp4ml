@@ -16,11 +16,7 @@ case class BinaryLS(no: Labeled, yes: Labeled, theshold: Double = 0.5) extends L
 }
 
 object BinaryLS {
-
   val DEFAULT_NO = Labeled("NOT_RELATED")
-
-  def apply(yes: Labeled): BinaryLS =
-    BinaryLS(DEFAULT_NO, yes)
 }
 
 case class MultiLS(labels: Seq[Labeled]) extends LabelSet
@@ -28,14 +24,23 @@ case class MultiLS(labels: Seq[Labeled]) extends LabelSet
 /** Represents something that has a label. */
 trait Labeled {
   def label: String
+
+  final override def equals(o: Any) =
+    o match {
+      case that: Labeled => that.label == label
+      case _             => false
+    }
+
+  final override def hashCode = label.hashCode
+
 }
 
 object Labeled {
 
   def apply(l: String): Labeled =
-    new Labeled {
-      override val label = l
-    }
+    Concrete(l)
+
+  private case class Concrete(label: String) extends Labeled
 }
 
 /** Represents a piece of labeled data. */

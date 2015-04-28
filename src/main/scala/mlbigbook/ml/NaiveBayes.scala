@@ -26,7 +26,7 @@ object NaiveBayes {
   // count features
   // incorporate smoothing
   // for each vector, v:
-  //    c = v.class()
+  //    c = v.class()                                             assert(shouldBeNeg.)
   //    for each feature, f:
   //      if v(f) is nonzero:
   //        featurevaluecount[c][f] += v(f) // by class
