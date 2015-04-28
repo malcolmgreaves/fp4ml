@@ -7,6 +7,24 @@ package mlbigbook.data
 
 import scala.reflect.ClassTag
 
+sealed trait LabelSet {
+  def labels: Seq[Labeled]
+}
+
+case class BinaryLS(no: Labeled, yes: Labeled, theshold: Double = 0.5) extends LabelSet {
+  override val labels = Seq(no, yes)
+}
+
+object BinaryLS {
+
+  val DEFAULT_NO = Labeled("NOT_RELATED")
+
+  def apply(yes: Labeled): BinaryLS =
+    BinaryLS(DEFAULT_NO, yes)
+}
+
+case class MultiLS(labels: Seq[Labeled]) extends LabelSet
+
 /** Represents something that has a label. */
 trait Labeled {
   def label: String
