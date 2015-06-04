@@ -1,12 +1,29 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ PreComputedVDIn, IndicatorMap, AddMap, Data }
-import org.apache.log4j.{ Level, Logger }
-import org.apache.spark.SparkContext
-import org.scalatest.{ BeforeAndAfterAll, FunSuite, Suite }
+import mlbigbook.data.{ AddMap, Data }
+import org.scalatest.FunSuite
 
 import scala.collection.Map
-import scala.util.Random
+
+class WordcountTest extends FunSuite {
+
+  import mlbigbook.wordcount.WordcountTest._
+
+  test("[seq] wordcount sentence") {
+    assertCountsL(actualCounts(idFox), Count.wordcountSentence(sentFox))
+    assertCountsL(actualCounts(idSanta), Count.wordcountSentence(sentSanta))
+  }
+
+  test("[seq] wordcount document") {
+    assertCountsL(actualCounts(idFox), Count.wordcountDocument(docFox))
+    assertCountsL(actualCounts(idSanta), Count.wordcountDocument(docSanta))
+    assertCountsL(actualCounts(idBoth), Count.wordcountDocument(docBoth))
+  }
+
+  test("[seq] wordcount corpus") {
+    assertCountsL(all, Count.wordcountCorpus(corpus))
+  }
+}
 
 object WordcountTest {
 
@@ -86,148 +103,6 @@ object WordcountTest {
     val actualSum = actual.map(_._2).foldLeft(0L)(_ + _)
     val countedSum = counted.map(_._2).foldLeft(0L)(_ + _)
     assert(actualSum == countedSum, s"$countedSum total counts, expecting $actualSum total counts")
-  }
-
-}
-
-class DataTest extends FunSuite {
-
-  test("definition of indicator map") {
-    val m: Map[String, Long] = Map()
-    (0 until 25).foreach(_ => {
-      assert(IndicatorMap.add(m, "hello", Random.nextLong()) == IndicatorMap.mark(m, "hello"))
-    })
-  }
-}
-
-class WordcountTest extends FunSuite {
-
-  import mlbigbook.wordcount.WordcountTest._
-
-  test("[seq] wordcount sentence") {
-    assertCountsL(actualCounts(idFox), Count.wordcountSentence(sentFox))
-    assertCountsL(actualCounts(idSanta), Count.wordcountSentence(sentSanta))
-  }
-
-  test("[seq] wordcount document") {
-    assertCountsL(actualCounts(idFox), Count.wordcountDocument(docFox))
-    assertCountsL(actualCounts(idSanta), Count.wordcountDocument(docSanta))
-    assertCountsL(actualCounts(idBoth), Count.wordcountDocument(docBoth))
-  }
-
-  test("[seq] wordcount corpus") {
-    assertCountsL(all, Count.wordcountCorpus(corpus))
-  }
-
-}
-
-class TFIDFTest extends FunSuite {
-
-  import mlbigbook.wordcount.WordcountTest._
-
-  private val emptyL: Map[String, Long] = Map()
-  private val emptyD: Map[String, Double] = Map()
-
-  def assertCountsD(actual: Map[String, Double], counted: Map[String, Double]) = {
-    counted.foreach({
-      case (word, count) => assert(actual(word) == count,
-        s"$word is unexpected (has count $count)")
-    })
-
-    assert(counted.size == actual.size, s"${counted.size} found, expecting ${actual.size} entries")
-
-    val actualSum = actual.map(_._2).foldLeft(0.0)(_ + _)
-    val countedSum = counted.map(_._2).foldLeft(0.0)(_ + _)
-    assert(actualSum == countedSum, s"$countedSum total counts, expecting $actualSum total counts")
-  }
-
-  val expectedFoxTF = {
-    val nWords = sentFox.words.size.toDouble
-    sentFox.words.foldLeft(emptyD)({
-      case (a, word) => AddMap.Real.add(a, word, 1.0 / nWords)
-    })
-  }
-
-  test("[seq] term frequency sentence") {
-    val observedFoxTF = TFIDF.termFreq(actualCounts(idFox))
-    assertCountsD(expectedFoxTF, observedFoxTF)
-  }
-
-  ignore("[unk] TFIDF corpus") {
-    val corpusNormCounts = TFIDF(corpus)
-    corpusNormCounts.toSeq.sortBy(-_._2).foreach(println)
-  }
-
-  test("[seq] document frequency corpus") {
-    val observedDF = TFIDF.docfreqCorpus(corpus)
-    val sentFoxSet = sentFox.words.toSet
-    val dfSum = observedDF.foldLeft(0L)({
-      case (s, (word, df)) => {
-        if (sentFoxSet(word)) {
-          assert(df == 2,
-            s"expecting DF of FOX sentence to be 2, actual $df")
-        } else {
-          assert(df == 2,
-            s"expecting DF of SANTA sentence to be 2, actual $df")
-        }
-        s + df
-      }
-    })
-    val expectedDFSum = {
-      sentFox.words.size * 2 + // all words in FOX sentence are in 2 documents
-        sentSanta.words.size * 2 - // all words in SANTA sentence are in 2 documents
-        2 // "the" is double counted, it only has {0,1} DF count per document!
-    }
-    assert(dfSum == expectedDFSum,
-      s"expecting DF sum $expectedDFSum actual $dfSum")
-  }
-
-}
-
-class SparkWordcountTest extends FunSuite with LocalSparkContext {
-
-  import mlbigbook.wordcount.WordcountTest._
-
-  lazy val corpusRDD = sc.parallelize(corpus)
-
-  test("[RDD] wordcount corpus") {
-    assertCountsL(all, Count.wordcountCorpus(corpusRDD))
-  }
-
-}
-
-trait LocalSparkContext extends BeforeAndAfterAll {
-  self: Suite =>
-  @transient var sc: SparkContext = _
-
-  override def beforeAll() = {
-    SparkUtil.silenceSpark()
-    sc = new SparkContext("local[2]", "test")
-    super.beforeAll()
-  }
-
-  override def afterAll() = {
-    if (sc != null) {
-      sc.stop()
-    }
-    System.clearProperty("spark.driver.port")
-    super.afterAll()
-  }
-}
-
-object SparkUtil {
-  def silenceSpark() = {
-    setLogLevels(Level.WARN, Seq("spark", "org.eclipse.jetty", "akka"))
-  }
-
-  def setLogLevels(level: org.apache.log4j.Level, loggers: TraversableOnce[String]) = {
-    loggers.map {
-      loggerName =>
-        val logger = Logger.getLogger(loggerName)
-        val prevLevel = logger.getLevel
-        logger.setLevel(level)
-        loggerName -> prevLevel
-    }.toMap
   }
 
 }

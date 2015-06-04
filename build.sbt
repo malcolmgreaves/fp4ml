@@ -6,6 +6,8 @@ organization := "io.malcolmgreaves"
 
 scalaVersion := "2.11.6"
 
+val jvm = "1.7"
+
 // code coverage plugins
 
 resolvers ++= Seq(
@@ -22,10 +24,8 @@ libraryDependencies ++= Seq(
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
-val jvm = "1.8"
-
 scalacOptions ++= Seq(
-  //"-optimize",
+  "-optimize",
   s"-target:jvm-$jvm",
   "-deprecation",
   "-encoding", "UTF-8",
@@ -47,4 +47,8 @@ scalacOptions ++= Seq(
 instrumentSettings
 
 CoverallsPlugin.coverallsSettings
+
+fork in Test := true
+
+parallelExecution in Test := true
 
