@@ -1,10 +1,10 @@
-name := "mlbigbook"
+name := "bigmlbook"
 
-version := "0.1"
+version := "0.1.0"
 
-organization := "org"
+organization := "io.malcolmgreaves"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.6"
 
 // code coverage plugins
 
@@ -16,20 +16,33 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  //"org.scalanlp" % "breeze-core_2.10" % "0.4",
-  //"org.scalanlp" % "breeze-math_2.10" % "0.4",
-  // "org.scalanlp" % "nak" % "1.1.3",
-  // "org.scalanlp" % "chalk" % "1.2.0",
-  "org.apache.spark" % "spark-core_2.10" % "1.1.0",
-  "org.apache.spark" % "spark-tools_2.10" % "1.1.0",
-  // "org.apache.spark" % "spark-mllib_2.10" % "1.1.0",
-  "com.github.scala-incubator.io" % "scala-io_2.10.2" % "0.4.2",
-  // "org.scala-lang" % "scala-pickling_2.10" % "0.8.0",
-  "org.scalatest" %% "scalatest" % "1.9.1" % "test",
-  "org.scalariform" %% "scalariform" % "0.1.4"
+  "org.apache.spark" %% "spark-core" % "1.3.0",
+  "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+
+val jvm = "1.8"
+
+scalacOptions ++= Seq(
+  //"-optimize",
+  s"-target:jvm-$jvm",
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-language:experimental.macros",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Yinline-warnings"
+)
 
 instrumentSettings
 

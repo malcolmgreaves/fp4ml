@@ -41,7 +41,7 @@ class DenseVectorBuilder(val cardinality: Int) {
    * If the builder's and input vector's cardinality differs, then the
    * add call is a no-op.
    */
-  @inline def add(v: Vector): Unit =
+  def add(v: Vector): Unit =
     if (v.cardinality == cardinality) {
       v.nonZeros.foreach({
         case (index, value) =>
@@ -57,7 +57,7 @@ class DenseVectorBuilder(val cardinality: Int) {
    * If the builder's and input vector's cardinality differs, then the
    * add call is a no-op.
    */
-  @inline def add(dvb: DenseVectorBuilder): Unit =
+  def add(dvb: DenseVectorBuilder): Unit =
     if (dvb.cardinality == cardinality) {
       var i = 0
       while (i < cardinality) {
@@ -86,7 +86,7 @@ class DenseVectorBuilder(val cardinality: Int) {
    * If the value is 0, then no operation is performed as division by
    * zero is undefined.
    */
-  @inline def normalize(value: Double): Unit =
+  def normalize(value: Double): Unit =
     if (value != 0.0) {
       var i = 0
       while (i < cardinality) {

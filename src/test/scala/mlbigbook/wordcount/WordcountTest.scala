@@ -200,13 +200,13 @@ trait LocalSparkContext extends BeforeAndAfterAll {
   self: Suite =>
   @transient var sc: SparkContext = _
 
-  override def beforeAll() {
+  override def beforeAll() = {
     SparkUtil.silenceSpark()
-    sc = new SparkContext("local", "test")
+    sc = new SparkContext("local[2]", "test")
     super.beforeAll()
   }
 
-  override def afterAll() {
+  override def afterAll() = {
     if (sc != null) {
       sc.stop()
     }
@@ -216,7 +216,7 @@ trait LocalSparkContext extends BeforeAndAfterAll {
 }
 
 object SparkUtil {
-  def silenceSpark() {
+  def silenceSpark() = {
     setLogLevels(Level.WARN, Seq("spark", "org.eclipse.jetty", "akka"))
   }
 

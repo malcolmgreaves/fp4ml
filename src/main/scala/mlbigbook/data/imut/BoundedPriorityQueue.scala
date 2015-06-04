@@ -51,7 +51,7 @@ object BoundedPriorityQueue {
       override def insert(item: A)(existing: T): T =
         insert_h(item, existing, existing.size)
 
-      @inline private def insert_h(item: A, existing: T, size: Int): T =
+      private def insert_h(item: A, existing: T, size: Int): T =
         existing match {
 
           case Empty =>

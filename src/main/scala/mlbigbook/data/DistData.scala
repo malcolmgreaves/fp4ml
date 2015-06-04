@@ -22,6 +22,9 @@ trait DistData[A] {
   /** Transform a dataset by applying f to each element. */
   def map[B: ClassTag](f: A => B): DistData[B]
 
+  /** Apply a side-effecting function to each element. */
+  def foreach(f: A => Any): Unit
+
   /**
    * Starting from a defined zero value, perform an operation seqOp on each element
    * of a dataset. Combine results of seqOp using combOp for a final value.
@@ -44,11 +47,20 @@ trait DistData[A] {
 
 object DistData {
 
+  implicit def seq2travDD[A](s: Seq[A]): DistData[A] =
+    s.toTraversable
+
+  implicit def indxSeq2travDD[A](s: IndexedSeq[A]): DistData[A] =
+    s.toTraversable
+
   /** Wraps a Traversable as a DistData. */
   implicit class TravDistData[A](val ls: Traversable[A]) extends DistData[A] {
 
     override def map[B: ClassTag](f: A => B): DistData[B] =
       new TravDistData(ls.map(f))
+
+    override def foreach(f: A => Any): Unit =
+      ls.foreach(f)
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
       ls.aggregate(zero)(seqOp, combOp)
@@ -80,27 +92,30 @@ object DistData {
     override def map[B: ClassTag](f: A => B) =
       new RDDDistData(d.map(f))
 
+    override def foreach(f: A => Any): Unit =
+      d.foreach(f)
+
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
       d.aggregate(zero)(seqOp, combOp)
 
-    //<<<<<<< HEAD
     override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DistData[A] =
       new RDDDistData(d.sortBy(f))
 
     override def take(k: Int): Traversable[A] =
       d.take(k)
 
-    override def toSeq(): Seq[A] =
+    override def toSeq: Seq[A] =
       d.collect().toSeq
 
     override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
       new RDDDistData(d.flatMap(f))
 
     override def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])] =
-      new RDDDistData(
-        new PairRDDFunctions(d.groupBy(f))
-          .partitionBy(???)
-      )
+      ???
+    //new RDDDistData(
+    //  new PairRDDFunctions(d.groupBy(f))
+    //    .partitionBy(???)
+    //)
   }
 }
 

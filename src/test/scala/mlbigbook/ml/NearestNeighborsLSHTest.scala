@@ -46,7 +46,8 @@ object NearestNeighborsLSHTest {
 
   lazy val nLshFuncs = 5
 
-  lazy val lshConfig = LshIn(???, nLshFuncs)
+  def lshConfig: LshIn = ???
+  //LshIn(???, nLshFuncs)
 
   import AddressData._
 

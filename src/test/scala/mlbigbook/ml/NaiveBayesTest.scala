@@ -13,14 +13,16 @@ class NaiveBayesTest extends FunSuite {
     val nbpe = NaiveBayes(bls, smooth)(vdata)
     val nbc = ProbabilityClassifier(nbpe)
 
-    println(s"negs: ${nbpe.apply(negs)}")
-    println(s"poss: ${nbpe.apply(poses)}")
+    reviews
+      .foreach {
+        case (ld, vec) =>
+          println(s"classifying a ${ld.label} as ${
+            nbc(ld.example)
+          }")
+      }
 
-    val shouldBeNeg = nbc(negs)
-    val shouldBePos = nbc(poses)
-
-    assert(shouldBeNeg.label === neg.label)
-    assert(shouldBePos.label === pos.label)
+    reviews
+      .foreach { case (ld, vec) => assert(ld.label == nbc(ld.example).label) }
   }
 
 }
@@ -35,7 +37,7 @@ object NaiveBayesTest {
 
     val bls = BinaryLS(neg, pos, 0.5)
 
-    val smooth = new Smoothing { override def apply(): Double = 1.0 }
+    val smooth = new Smoothing { override val apply = 1.0 }
 
     def mkSimple(vals: Seq[Double]): Vector =
       new Vector {
@@ -47,16 +49,37 @@ object NaiveBayesTest {
           vals.zipWithIndex.map(x => (x._2, x._1))
       }
 
-    val negs: Seq[Double] = (0 until 10).map(i => if (i % 2 == 0) 1.0 else 0.0)
+    val nEachClass = 20
+    val nDimension = 5
+    val rand = new scala.util.Random()
 
-    val poses: Seq[Double] = (0 until 10).map(i => if (i % 2 == 0) 0.0 else 1.0)
+    val negs: Seq[Seq[Double]] = {
+      val n = (0 until nDimension).map(i => if (i % 2 == 0) 1.0 else 0.0)
+      IndexedSeq.fill(nEachClass)(Seq.empty[Double])
+        .map(_ => n.map(_ * rand.nextGaussian()))
+    }
 
-    import DistData.TravDistData
+    val negLabeled =
+      negs
+        .map(_.toSeq)
+        .map(x => (LabeledData(neg.label, x), mkSimple(x)))
+
+    val poses: Seq[Seq[Double]] = {
+      val n = (0 until nDimension).map(i => if (i % 2 != 0) 1.0 else 0.0)
+      IndexedSeq.fill(nEachClass)(Seq.empty[Double])
+        .map(_ => n.map(_ * rand.nextGaussian()))
+    }
+
+    val posLabeled =
+      poses
+        .map(_.toSeq)
+        .map(x => (LabeledData(pos.label, x), mkSimple(x)))
+
+    import language.implicitConversions
+    import DistData._
+
     val reviews: DistData[(LabeledData[Seq[Double]], Vector)] =
-      Seq(
-        (LabeledData(neg.label, negs), mkSimple(negs)),
-        (LabeledData(pos.label, poses), mkSimple(poses))
-      )
+      posLabeled ++ negLabeled
 
     val vdata: VectorDataIn[LabeledData[Seq[Double]]] =
       PreComputedVDIn(
