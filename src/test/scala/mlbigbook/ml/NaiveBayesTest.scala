@@ -12,19 +12,18 @@ class NaiveBayesTest extends FunSuite {
     val nbpe = NaiveBayes(smooth)(labels, vdata)
     val nbc = ProbabilityClassifier(nbpe)
 
-    reviews
-      .foreach {
-        case (ld, vec) =>
-          val predicted = nbc(ld.example)
-          val estimate = nbpe(ld.example)
-          println(s"""classifying a ${ld.label} as $predicted ,\nestimated probs: $estimate\n""")
-      }
+    val nReviews = reviews.toSeq.size
 
-    reviews
-      .foreach {
-        case (ld, vec) =>
-          assert(ld.label == nbc(ld.example).label)
-      }
+    val nCorrect =
+      reviews
+        .toSeq
+        .filter {
+          case (ld, vec) =>
+            ld.label == nbc(ld.example).label
+        }
+        .toSeq.size
+
+    assert(nCorrect == nReviews)
   }
 
 }
@@ -52,13 +51,15 @@ object NaiveBayesTest {
       }
 
     val nEachClass = 20
-    val nDimension = 5
+    val nDimension = 3
+    val activeVal = 15
     val rand = new scala.util.Random()
 
     val negs: Seq[Seq[Double]] = {
-      val n = (0 until nDimension).map(i => if (i % 2 == 0) 1.0 else 0.0)
+      val n = (0 until nDimension).map(i => if (i % 2 == 0) activeVal else 0.0)
       IndexedSeq.fill(nEachClass)(Seq.empty[Double])
-        .map(_ => n.map(_ * rand.nextGaussian()))
+        .map(_ => n)
+      //        .map(_ => n.map(_ + rand.nextGaussian()))
     }
 
     val negLabeled =
@@ -67,9 +68,10 @@ object NaiveBayesTest {
         .map(x => (LabeledData(neg.label, x), mkSimple(x)))
 
     val poses: Seq[Seq[Double]] = {
-      val n = (0 until nDimension).map(i => if (i % 2 != 0) 1.0 else 0.0)
+      val n = (0 until nDimension).map(i => if (i % 2 != 0) activeVal else 0.0)
       IndexedSeq.fill(nEachClass)(Seq.empty[Double])
-        .map(_ => n.map(_ * rand.nextGaussian()))
+        .map(_ => n)
+      //        .map(_ => n.map(_ * rand.nextGaussian()))
     }
 
     val posLabeled =

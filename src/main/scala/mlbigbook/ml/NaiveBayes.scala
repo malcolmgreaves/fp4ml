@@ -209,11 +209,11 @@ object ProbabilityClassifier {
 
       zipLabelProb.slice(1, zipLabelProb.size)
         .foldLeft(zipLabelProb.head) {
-          case ((maxLabel, maxProb), (nextLabel, nextProb)) =>
-            if (nextProb > maxProb)
-              (nextLabel, nextProb)
+          case (max @ (_, maxP), next @ (_, nextP)) =>
+            if (nextP > maxP)
+              next
             else
-              (maxLabel, maxProb)
+              max
         }._1
     }
 }
