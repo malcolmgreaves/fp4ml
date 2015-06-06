@@ -37,7 +37,7 @@ object NaiveBayesTest {
 
     val pos = Labeled("positive_sentiment")
 
-    val labels = Seq(pos, neg)
+    val labels = BinaryLabels(yes = pos, no = neg)
 
     val smooth = () => 1.0
 

@@ -25,45 +25,47 @@ object NaiveBayes {
   //    posterior[c'] + s
 
   def apply[T: ClassTag](smoothing: Smoothing.Fn)(
-    labels: Seq[Labeled],
+    ls: Labels,
     vdata: VectorDataIn[LabeledData[T]]): ProbabilityEstimator[T] = {
 
     val (vectorizer, data) = vdata()
 
-    val (labelC, featureValC) =
+    val (labelCount, featureValCount) =
       data.aggregate((Map.empty[Labeled, Long], Map.empty[Labeled, Map[Int, Double]]))(
         {
           case ((lc, fvc), (ld, vec)) =>
 
             val l = Labeled(ld.label)
 
-            val updatedLc = lc.get(l) match {
+            val updatedLc =
+              lc.get(l) match {
 
-              case Some(existing) =>
-                (lc - l) + (l -> (existing + 1L))
+                case Some(existing) =>
+                  (lc - l) + (l -> (existing + 1L))
 
-              case None =>
-                lc + (l -> 1L)
-            }
+                case None =>
+                  lc + (l -> 1L)
+              }
 
-            val updatedFvc = fvc.get(l) match {
+            val updatedFvc =
+              fvc.get(l) match {
 
-              case Some(featureCountsForL) =>
-                val x =
-                  vec.nonZeros.foldLeft(featureCountsForL)({
-                    case (m, (index, value)) =>
-                      m.get(index) match {
-                        case Some(v) =>
-                          (m - index) + (index -> (v + value))
-                        case None =>
-                          m + (index -> value)
-                      }
-                  })
-                (fvc - l) + (l -> x)
+                case Some(featureCountsForL) =>
+                  val x =
+                    vec.nonZeros.foldLeft(featureCountsForL)({
+                      case (m, (index, value)) =>
+                        m.get(index) match {
+                          case Some(v) =>
+                            (m - index) + (index -> (v + value))
+                          case None =>
+                            m + (index -> value)
+                        }
+                    })
+                  (fvc - l) + (l -> x)
 
-              case None =>
-                fvc + (l -> vec.nonZeros.toMap)
-            }
+                case None =>
+                  fvc + (l -> vec.nonZeros.toMap)
+              }
 
             (updatedLc, updatedFvc)
         },
@@ -112,70 +114,80 @@ object NaiveBayes {
         }
       )
 
-    val logPosterior = {
+    val logPrior: Map[Labeled, Double] = {
       val classCountSum =
-        labelC.foldLeft(0.0)({
+        labelCount.foldLeft(0.0)({
           case (s, (_, v)) => s + v
         })
-      labelC
+      labelCount
         .foldLeft(Map.empty[Labeled, Double]) {
-          case (p, (labeled, long)) =>
-            p + (labeled -> math.log(long / classCountSum))
+          case (p, (labeled, v)) =>
+            p + (
+              labeled ->
+              (if (classCountSum == 0 || v == 0) 0.0 else math.log(v / classCountSum))
+            )
         }
     }
 
-    val logPosteriorsInOrder =
-      labels
-        .map(label => (label, logPosterior(label)))
+    val logLabelPriorsInOrder: Seq[(Labeled, Double)] =
+      ls.labels
+        .map(label => (label, logPrior(label)))
 
-    val logLikelihood = {
+    val logLikelihood: Map[Labeled, Map[Int, Double]] = {
 
       val classFeatureValSums =
-        featureValC
+        featureValCount
           .foldLeft(Map.empty[Labeled, Double]) {
             case (m, (label, featureValuesForLabel)) =>
               m + (label -> featureValuesForLabel.values.sum)
           }
 
-      featureValC
+      featureValCount
         .foldLeft(Map.empty[Labeled, Map[Int, Double]]) {
           case (logLike, (label, featureValuesForLabel)) =>
             val sumForLabel = classFeatureValSums(label)
             val x =
               featureValuesForLabel
-                .foldLeft(Map.empty[Int, Double])({
+                .foldLeft(Map.empty[Int, Double]) {
                   case (m, (index, value)) =>
-                    m + (index -> math.log(value / sumForLabel))
-                })
+                    m + (index -> {
+                      val temp = math.log(value / sumForLabel)
+                      if (java.lang.Double.isNaN(temp) || java.lang.Double.isInfinite(temp))
+                        0.0
+                      else
+                        temp
+                    })
+                }
             logLike + (label -> x)
         }
     }
 
-    val mkDist: Any => Distribution =
-      (a: Any) => {
-        var x = true
-        if (x)
-          throw new RuntimeException()
-        else
-          null.asInstanceOf[Distribution]
-      }
+    val mkDist = Distribution.make(ls)
 
     (input: T) => {
       val vecInput = vectorizer(UnlabeledData(input))
-      mkDist(
-        logPosteriorsInOrder
+
+      val logPosteriors =
+        logLabelPriorsInOrder
           .map {
-            case (label, labelPosterior) =>
+            case (label, logLabelPrior) =>
               val fvsForLabel = logLikelihood(label)
               vecInput
                 .nonZeros
-                .foldLeft(labelPosterior) {
+                .foldLeft(logLabelPrior) {
                   case (s, (index, inputValue)) =>
-                    inputValue * fvsForLabel.getOrElse(index, smoothing())
+                    s + fvsForLabel.getOrElse(index, math.log(smoothing())) * inputValue
                 }
           }
-      )
+
+      mkDist(normalize(logPosteriors))
+        .getOrElse(throw new IllegalStateException("unexpected "))
     }
+  }
+
+  @inline def normalize(vs: Seq[Double]): Seq[Double] = {
+    val s: Double = vs.sum
+    vs.map(v => v / s)
   }
 }
 
@@ -198,7 +210,7 @@ object ProbabilityClassifier {
       zipLabelProb.slice(1, zipLabelProb.size)
         .foldLeft(zipLabelProb.head) {
           case ((maxLabel, maxProb), (nextLabel, nextProb)) =>
-            if (maxProb > nextProb)
+            if (nextProb > maxProb)
               (nextLabel, nextProb)
             else
               (maxLabel, maxProb)

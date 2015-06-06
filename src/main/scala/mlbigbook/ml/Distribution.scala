@@ -23,11 +23,11 @@ sealed trait Distribution {
   def size: Int
 }
 
-object DistributionMaker {
+object Distribution {
 
   type Maker = Labels => Seq[Double] => Option[Distribution]
 
-  def apply: Maker =
+  def make: Maker =
     (ls: Labels) =>
       ls match {
 
@@ -63,6 +63,9 @@ case class BinaryDistribution(
 
   override val size =
     2
+
+  override def toString =
+    s"[$yesLabel: $yesProbability , $noLabel : $noProbability]"
 }
 
 case class MultiDistribution(
@@ -73,4 +76,9 @@ case class MultiDistribution(
 
   override val size =
     labels.size
+
+  override def toString =
+    labels.zip(values)
+      .map { case (l, v) => s"($l : $v)" }
+      .mkString("\n")
 }
