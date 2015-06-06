@@ -1,7 +1,6 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 
 class NaiveBayesTest extends FunSuite {
@@ -10,19 +9,22 @@ class NaiveBayesTest extends FunSuite {
 
   test("classify simple sentiment") {
 
-    val nbpe = NaiveBayes(bls, smooth)(vdata)
+    val nbpe = NaiveBayes(smooth)(labels, vdata)
     val nbc = ProbabilityClassifier(nbpe)
 
     reviews
       .foreach {
         case (ld, vec) =>
-          println(s"classifying a ${ld.label} as ${
-            nbc(ld.example)
-          }")
+          val predicted = nbc(ld.example)
+          val estimate = nbpe(ld.example)
+          println(s"""classifying a ${ld.label} as $predicted ,\nestimated probs: $estimate\n""")
       }
 
     reviews
-      .foreach { case (ld, vec) => assert(ld.label == nbc(ld.example).label) }
+      .foreach {
+        case (ld, vec) =>
+          assert(ld.label == nbc(ld.example).label)
+      }
   }
 
 }
@@ -35,9 +37,9 @@ object NaiveBayesTest {
 
     val pos = Labeled("positive_sentiment")
 
-    val bls = BinaryLS(neg, pos, 0.5)
+    val labels = Seq(pos, neg)
 
-    val smooth = new Smoothing { override val apply = 1.0 }
+    val smooth = () => 1.0
 
     def mkSimple(vals: Seq[Double]): Vector =
       new Vector {

@@ -7,40 +7,34 @@ package mlbigbook.data
 
 import scala.reflect.ClassTag
 
-sealed trait LabelSet {
-  def labels: Seq[Labeled]
-}
-
-case class BinaryLS(no: Labeled, yes: Labeled, theshold: Double = 0.5) extends LabelSet {
-  override val labels = Seq(no, yes)
-}
-
-object BinaryLS {
-  val DEFAULT_NO = Labeled("NOT_RELATED")
-}
-
-case class MultiLS(labels: Seq[Labeled]) extends LabelSet
-
 /** Represents something that has a label. */
 trait Labeled {
+
   def label: String
 
   final override def equals(o: Any) =
     o match {
-      case that: Labeled => that.label == label
-      case _             => false
+
+      case that: Labeled =>
+        that.label == label
+
+      case _ =>
+        false
     }
 
-  final override def hashCode = label.hashCode
+  final override def hashCode =
+    label.hashCode
 
+  override def toString =
+    label
 }
 
 object Labeled {
 
   def apply(l: String): Labeled =
-    Concrete(l)
+    L(l)
 
-  private case class Concrete(label: String) extends Labeled
+  private case class L(override val label: String) extends Labeled
 }
 
 /** Represents a piece of labeled data. */
