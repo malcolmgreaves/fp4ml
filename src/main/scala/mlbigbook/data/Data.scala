@@ -13,16 +13,21 @@ object Data {
 
   /** A sentence is a sequence of words. */
   case class Sentence(words: Traversable[Word]) {
-    override def toString = s"(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
+    override def toString: String =
+      s"(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
   }
 
   /** A document is a sequence of sentences. */
   case class Document(sentences: Traversable[Sentence]) {
-    override def toString = {
-      val x = sentences.foldLeft((1, List.empty[String]))({
-        case ((i, a), s) => (i + 1, a :+ s"S$i:$s")
-      })._2
-      s"(${x.size} documents)" + x.take(5).mkString(";") + (if (x.size > 5) "..." else "")
+    override def toString: String = {
+      val strSent =
+        sentences
+          .foldLeft((1, List.empty[String])) {
+            case ((i, a), sent) =>
+              (i + 1, a :+ s"S$i:${sent.toString}")
+          }
+          ._2
+      s"(${strSent.size} sentences)" + strSent.take(5).mkString(";") + (if (strSent.size > 5) "..." else "")
     }
   }
 
