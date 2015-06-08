@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 scalacOptions ++= Seq(
-  "-optimize",
+  //"-optimize",
   s"-target:jvm-$jvm",
   "-deprecation",
   "-encoding", "UTF-8",
