@@ -51,7 +51,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
     val rankTFIDF = DocRanker(docLimit)(NeedsApplicationVDIn(VectorTest.tfidfVectorizer, train))
 
-    test.map(doc => {
+    test.foreach(doc => {
 
       val topdocsWC = rankWC(doc)
       val topdocsTFIDF = rankTFIDF(doc)

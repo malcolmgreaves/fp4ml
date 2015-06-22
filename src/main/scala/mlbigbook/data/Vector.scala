@@ -31,7 +31,7 @@ trait Vector {
 
     val buf = mutable.UnrolledBuffer.empty[(Int, Double, Double)]
 
-    @tailrec @inline def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
+    @tailrec def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
       aNZ.headOption match {
 
         case Some((aIndex, aHead)) => bNZ.headOption match {

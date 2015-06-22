@@ -182,9 +182,9 @@ object KMeans {
    */
   def calculateTolerance(prev: IndexedSeq[Center], curr: IndexedSeq[Center]): Double =
     prev.zip(curr)
-      .foldLeft(0.0)({
+      .foldLeft(0.0) {
         case (tol, (prevCenter, currCenter)) =>
           tol + Vector.absElemDiff(prevCenter.mean, currCenter.mean)
-      })
+      }
 
 }
