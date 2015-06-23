@@ -1,6 +1,6 @@
 organization := "io.malcolmgreaves"
 
-name := "mlbigbook"
+name := "bigmlbook"
 
 version := "0.0.1"
 
