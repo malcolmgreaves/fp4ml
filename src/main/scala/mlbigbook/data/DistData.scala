@@ -45,6 +45,8 @@ trait DistData[A] {
   def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])]
 
   def as: DistData[A] = this
+
+  def reduce[A1 >: A](r: (A1, A1) => A1): A1
 }
 
 object DistData {
@@ -89,6 +91,9 @@ object DistData {
           .toTraversable
           .map({ case (b, iter) => (b, iter.toIterable) })
       )
+
+    override def reduce[A1 >: A](r: (A1, A1) => A1): A1 =
+      ls.reduce(r)
   }
 
   /** Wraps a Spark RDD as a DistData. */
@@ -126,6 +131,9 @@ object DistData {
     //  new PairRDDFunctions(d.groupBy(f))
     //    .partitionBy(???)
     //)
+
+    override def reduce[A1 >: A](r: (A1, A1) => A1): A1 =
+      d.reduce(r)
   }
 }
 

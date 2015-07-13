@@ -25,11 +25,10 @@ abstract class NumericMap[@specialized N: Numeric] {
       map + (e -> times)
 
   final def increment[T](map: M[T], es: DistData[T]): M[T] =
-    es
-      .aggregate(map)(
-        { case (m, e) => increment(m, e) },
-        { case (m1, m2) => combine(m1, m2) }
-      )
+    es.aggregate(map)(
+      { case (m, e) => increment(m, e) },
+      { case (m1, m2) => combine(m1, m2) }
+    )
 
   /**
    * Combines two maps. If maps m1 and m2 both have key k, then the resulting

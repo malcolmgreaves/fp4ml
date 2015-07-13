@@ -18,8 +18,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.3.0",
-  "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+  "org.apache.spark" %% "spark-core" % "1.4.0",
+  "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
