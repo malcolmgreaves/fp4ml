@@ -43,6 +43,8 @@ trait DistData[A] {
   def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B]
 
   def groupBy[B: ClassTag](f: A => B): DistData[(B, Iterable[A])]
+
+  def as: DistData[A] = this
 }
 
 object DistData {
@@ -52,6 +54,9 @@ object DistData {
 
   implicit def indxSeq2travDD[A](s: IndexedSeq[A]): DistData[A] =
     s.toTraversable
+
+  implicit def array2travDd[A](a: Array[A]): DistData[A] =
+    a.toTraversable
 
   /** Wraps a Traversable as a DistData. */
   implicit class TravDistData[A](val ls: Traversable[A]) extends DistData[A] {
@@ -104,8 +109,13 @@ object DistData {
     override def take(k: Int): Traversable[A] =
       d.take(k)
 
-    override def toSeq: Seq[A] =
-      d.collect().toSeq
+    override def toSeq: Seq[A] = {
+      // force evaluated type
+      // ( don't want to invoke implicit conversion
+      //   from Array[A] -> DistData[A] !! )
+      val a: Array[A] = d.collect()
+      a.toIndexedSeq
+    }
 
     override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DistData[B] =
       new RDDDistData(d.flatMap(f))
