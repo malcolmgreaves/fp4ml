@@ -4,7 +4,7 @@ import mlbigbook.data._
 
 import scala.reflect.ClassTag
 
-object NaiveBayes {
+object CountingNaiveBayes {
 
   // count features
   // incorporate smoothing
@@ -23,6 +23,40 @@ object NaiveBayes {
   //    for each feature *f* in new one:
   //      s += likelihood[c'][*f*]
   //    posterior[c'] + s
+
+
+
+  import mlbigbook.wordcount.NumericMap
+
+  type State[Label, Event] = Map[Label, NumericMap[Long]#M[Event]]
+
+  def empty[Label,Event]: State[Label,Event] =
+    Map.empty[Label, NumericMap[Long]#M[Event]]
+
+  def apply[Label: ClassTag, T: ClassTag](nm: NumericMap[Long])(data: DistData[(Label, T)]):State[Label,T] =
+    apply(nm, empty)(data)
+
+  trait Vectorizeable[T] {
+    def as(x: T):Vector
+  }
+
+  def apply[Label : ClassTag, T: ClassTag : Vectorizeable](nm: NumericMap[Long], s: State[Label, T])(data: DistData[(Label, T)]):State[Label, T] =  {
+    data
+      .aggregate(empty)(
+        {
+          case (st, (label, instance)) =>
+            val v = implicitly[Vectorizeable[T]].as(instance)
+            v.nonZeros
+              .foldLeft(st) {
+                case (s, (featureIndex, value)) =>
+                  nm.increment(s, featureIndex, value)
+              }
+        },
+        {}
+       )
+
+
+  }
 
   def apply[T: ClassTag](smoothing: Smoothing.Fn)(
     ls: Labels,
@@ -191,29 +225,29 @@ object NaiveBayes {
   }
 }
 
-//trait ProbabilityEstimator[T] extends (T => Distribution)
-//
-//object ProbabilityEstimator {
-//
-//  implicit class Fn[T](f: T => Distribution) extends ProbabilityEstimator[T] {
-//    override def apply(x: T) = f(x)
-//  }
-//}
-//
-//object ProbabilityClassifier {
-//
-//  def apply[T](pe: ProbabilityEstimator[T]): Classifier[T] =
-//    (input: T) => {
-//      val dist = pe(input)
-//      val zipLabelProb = dist.labels.zip(dist.values)
-//
-//      zipLabelProb.slice(1, zipLabelProb.size)
-//        .foldLeft(zipLabelProb.head) {
-//          case (max @ (_, maxP), next @ (_, nextP)) =>
-//            if (nextP > maxP)
-//              next
-//            else
-//              max
-//        }._1
-//    }
-//}
+trait ProbabilityEstimator[T] extends (T => Distribution)
+
+object ProbabilityEstimator {
+
+  implicit class Fn[T](f: T => Distribution) extends ProbabilityEstimator[T] {
+    override def apply(x: T) = f(x)
+  }
+}
+
+object ProbabilityClassifier {
+
+  def apply[T](pe: ProbabilityEstimator[T]): Classifier[T] =
+    (input: T) => {
+      val dist = pe(input)
+      val zipLabelProb = dist.labels.zip(dist.values)
+
+      zipLabelProb.slice(1, zipLabelProb.size)
+        .foldLeft(zipLabelProb.head) {
+          case (max @ (_, maxP), next @ (_, nextP)) =>
+            if (nextP > maxP)
+              next
+            else
+              max
+        }._1
+    }
+}

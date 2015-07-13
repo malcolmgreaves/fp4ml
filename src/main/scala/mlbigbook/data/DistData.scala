@@ -22,8 +22,12 @@ trait DistData[A] {
   /** Transform a dataset by applying f to each element. */
   def map[B: ClassTag](f: A => B): DistData[B]
 
+  def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): DistData[B]
+
   /** Apply a side-effecting function to each element. */
   def foreach(f: A => Any): Unit
+
+  def foreachParition(f: Iterator[A] => Any): Unit
 
   /**
    * Starting from a defined zero value, perform an operation seqOp on each element
@@ -66,8 +70,16 @@ object DistData {
     override def map[B: ClassTag](f: A => B): DistData[B] =
       new TravDistData(ls.map(f))
 
+    override def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): DistData[B] =
+      f(ls.toIterator).toTraversable
+
     override def foreach(f: A => Any): Unit =
       ls.foreach(f)
+
+    override def foreachPartition(f: Iterator[A] => Any): Unit = {
+      val _ = f(ls.toIterator)
+      Unit
+    }
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
       ls.aggregate(zero)(seqOp, combOp)
@@ -102,8 +114,15 @@ object DistData {
     override def map[B: ClassTag](f: A => B) =
       new RDDDistData(d.map(f))
 
+    override def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): DistData[B] =
+      d.mapPartitions(f)
+
     override def foreach(f: A => Any): Unit =
       d.foreach(f)
+
+    override def foreachPartition(f: Iterator[A] => Any): Unit = {
+      d.foreachPartition()
+    }
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
       d.aggregate(zero)(seqOp, combOp)
