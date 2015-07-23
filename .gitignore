@@ -6,6 +6,7 @@ project
 .idea/*
 .idea_modules/*
 *.iml
+projectFilesBackup/*
 
 
 #### 	compiled source
@@ -46,4 +47,3 @@ project
 Icon?
 ehthumbs.db
 Thumbs.db
-
