@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "org.spire-math" %% "spire" % "0.9.1",
   "org.scalanlp" %% "breeze" % "0.11.2",
   "org.apache.spark" %% "spark-core" % "1.4.0",
+  "com.quantifind" %% "wisp" % "0.0.4",
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 
@@ -25,4 +26,9 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 instrumentSettings
 
 CoverallsPlugin.coverallsSettings
+
+// This is important for Spark tests
+parallelExecution in Test := false
+
+
 
