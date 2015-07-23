@@ -21,6 +21,10 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 
+val jVer = "1.7"
+
+javacOptions ++= Seq("-source", jVer, "-target", jVer)
+
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 instrumentSettings
