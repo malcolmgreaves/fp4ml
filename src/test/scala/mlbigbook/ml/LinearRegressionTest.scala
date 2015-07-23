@@ -51,7 +51,7 @@ class LinearRegressionTest extends FunSpec with Matchers with LocalSparkContext 
     it("should converge correctly using SGD") {
 
       val sgd = commonParams(OptimAlgos.sgd)
-      val lastWeights: DenseVector[Double] = sgd.weights.last
+      val lastWeights = sgd.weights.last
       lastWeights(0) should be (intercept +- plusMinus)
       lastWeights(1) should be (slope +- plusMinus)
     }
