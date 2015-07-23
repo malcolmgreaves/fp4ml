@@ -27,10 +27,6 @@ javacOptions ++= Seq("-source", jVer, "-target", jVer)
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
-instrumentSettings
-
-CoverallsPlugin.coverallsSettings
-
 // This is important for Spark tests
 parallelExecution in Test := false
 
