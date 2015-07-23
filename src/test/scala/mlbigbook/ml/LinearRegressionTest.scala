@@ -1,13 +1,13 @@
 package mlbigbook.ml
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{VectorizedData, DistData, Datum, Labeled}
+import mlbigbook.data.{Datum, DistData, VectorizedData}
+import mlbigbook.optimization.Optimizer.optimize
 import mlbigbook.optimization.Types.WeightUpdate
+import mlbigbook.optimization._
+import mlbigbook.util.DataConversions.toVectorizedData
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest._
-import mlbigbook.util.DataConversions.toVectorizedData
-import mlbigbook.optimization.Optimizer.optimize
-import mlbigbook.optimization._
 
 import scala.util.Random
 
