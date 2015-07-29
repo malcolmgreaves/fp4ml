@@ -7,6 +7,47 @@ package mlbigbook.data
 
 import scala.collection.Map
 
+object MapOps {
+
+  /**
+   * Given two input maps of the same type, re-order them such that the first element of the
+   * resulting tuple has more keys than the second element.
+   */
+  def reoderLargeSmall[A,B](a: Map[A,B], b: Map[A,B]): (Map[A,B], Map[A,B]) =
+    if (a.size < b.size)
+      (a, b)
+    else
+      (b, a)
+
+  object Implicits {
+
+    /**
+     * Implicit AddMap and MultiplyMap instances for Double.
+     */
+    object DoubleM {
+      implicit val Add = new AddMap[Double]
+      implicit val Multiply = new MultiplyMap[Double]
+    }
+
+    /**
+     * Implicit AddMap and MultiplyMap instances for Long.
+     */
+    object LongM {
+      implicit val Add = new AddMap[Long]
+      implicit val Multiply = new MultiplyMap[Long]
+    }
+
+    /**
+     * Implicit AddMap and MultiplyMap instances for Int.
+     */
+    object IntM {
+      implicit val Add = new AddMap[Int]
+      implicit val Multiply = new MultiplyMap[Int]
+    }
+  }
+
+}
+
 /** Object for adding double and long maps together */
 object AddMap {
   val Real = new AddMap[Double]
@@ -45,28 +86,35 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 /** Class that supports operations on maps that indicate the presense of keys. */
 object IndicatorMap extends AddMap[Long] {
 
-  override def add(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] = mark(m, word)
+  override def add(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] =
+    mark(m, word)
 
   /** Ensures that word is in the resulting map with a value of 1 */
-  def mark(m: Map[String, Long], word: String): Map[String, Long] = {
+  def mark(m: Map[String, Long], word: String): Map[String, Long] =
     m.get(word) match {
-      case Some(existing) => {
-        if (existing == 1) {
+
+      case Some(existing) =>
+
+        if (existing == 1)
           m
-        } else {
+        else
           (m - word) + (word -> 1)
-        }
-      }
-      case None => m + (word -> 1)
+
+      case None =>
+        m + (word -> 1)
     }
-  }
 
   /** Constructs a map that has all of the words from the input maps */
   override def combine(m1: Map[String, Long], m2: Map[String, Long]): Map[String, Long] = {
-    val (a, b) = if (m1.size < m2.size) (m1, m2) else (m2, m1)
-    a.foldLeft(b)({
+    val (a, b) =
+      if (m1.size < m2.size)
+        (m1, m2)
+      else
+        (m2, m1)
+
+    a.foldLeft(b) {
       case (aggmap, (k, _)) => mark(aggmap, k)
-    })
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
+import mlbigbook.wordcount.NumericMap
 
 import scala.reflect.ClassTag
 
@@ -24,6 +25,7 @@ object CountingNaiveBayes {
   //      s += likelihood[c'][*f*]
   //    posterior[c'] + s
 
+  def count[E : Equiv](data: DistData[E]) = ???
 
 
   import mlbigbook.wordcount.NumericMap

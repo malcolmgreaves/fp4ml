@@ -6,7 +6,7 @@ project
 .idea/*
 .idea_modules/*
 *.iml
-
+projectFilesBackup
 
 #### 	compiled source
 *.com
