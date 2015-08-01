@@ -27,8 +27,7 @@ trait DistData[A] {
   /** Apply a side-effecting function to each element. */
   def foreach(f: A => Any): Unit
 
-  def foreachParition(f: Iterator[A] => Any): Unit
-
+  def foreachPartition(f: Iterator[A] => Any): Unit
   /**
    * Starting from a defined zero value, perform an operation seqOp on each element
    * of a dataset. Combine results of seqOp using combOp for a final value.
@@ -78,7 +77,6 @@ object DistData {
 
     override def foreachPartition(f: Iterator[A] => Any): Unit = {
       val _ = f(ls.toIterator)
-      Unit
     }
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
@@ -121,7 +119,7 @@ object DistData {
       d.foreach(f)
 
     override def foreachPartition(f: Iterator[A] => Any): Unit = {
-      d.foreachPartition()
+      val _ = d.foreachPartition(x => {val __ = f(x)})
     }
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
