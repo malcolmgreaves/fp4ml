@@ -80,9 +80,9 @@
 //        .map(x => (LabeledData(pos.label, x), mkSimple(x)))
 //
 //    import language.implicitConversions
-//    import DistData._
+//    import Data._
 //
-//    val reviews: DistData[(LabeledData[Seq[Double]], Vector)] =
+//    val reviews: Data[(LabeledData[Seq[Double]], Vector)] =
 //      posLabeled ++ negLabeled
 //
 //    val vdata: VectorDataIn[LabeledData[Seq[Double]]] =

@@ -2,7 +2,7 @@ package mlbigbook.wordcount
 
 import java.io.File
 
-import mlbigbook.data.{ NeedsApplicationVDIn, Data, DistData }
+import mlbigbook.data.{ NeedsApplicationVDIn, TextData, Data }
 import mlbigbook.ml.Ranker
 import org.apache.spark.SparkContext
 import org.scalatest.FunSuite
@@ -12,7 +12,7 @@ import scala.io.Source
 
 class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
-  import DistData._
+  import Data._
   import mlbigbook.wordcount.TwentyNewsgroupsExperimentTestIgnore._
 
   lazy val sc: SparkContext = {
@@ -20,7 +20,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
     new X().sc
   }
 
-  lazy val (trainDocs20Newsgroups, testDocs20Newsgroups): (Data.Corpus, Data.Corpus) = {
+  lazy val (trainDocs20Newsgroups, testDocs20Newsgroups): (TextData.Corpus, TextData.Corpus) = {
     val lns = lines(None) _
     (
       { // train
@@ -45,7 +45,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
     println(s"Finished in ${end - start}ms")
   }
 
-  def doExperimentPrintResults(docLimit: Int)(train: DistData[Data.Document], test: DistData[Data.Document]): Unit = {
+  def doExperimentPrintResults(docLimit: Int)(train: Data[TextData.Document], test: Data[TextData.Document]): Unit = {
 
     val rankWC = DocRanker(docLimit)(NeedsApplicationVDIn(VectorTest.wordcountVectorizer, train))
 
@@ -72,7 +72,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
 object TwentyNewsgroupsExperimentTestIgnore {
 
-  def lines(scOpt: Option[SparkContext])(fi: File): DistData[String] = scOpt match {
+  def lines(scOpt: Option[SparkContext])(fi: File): Data[String] = scOpt match {
     case Some(sc) => sc.textFile(fi.toString).filter(_.size > 0)
     case None     => Source.fromFile(fi).getLines().filter(_.size > 0).foldLeft(List.empty[String])((a, line) => a :+ line)
   }
@@ -109,13 +109,13 @@ object TwentyNewsgroupsExperimentTestIgnore {
     "talk.politics.misc",
     "talk.religion.misc")
 
-  def mkDoc(d: DistData[String]) = Data.Document({
-    var ab = ArrayBuffer.empty[Data.Sentence]
+  def mkDoc(d: Data[String]) = TextData.Document({
+    var ab = ArrayBuffer.empty[TextData.Sentence]
     d.map(convertSentence).map(s => {
       ab += s
     })
     ab.toTraversable
   })
 
-  def convertSentence(s: String) = Data.Sentence(s.split("\\\\s+"))
+  def convertSentence(s: String) = TextData.Sentence(s.split("\\\\s+"))
 }

@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ AddMap, Data }
+import mlbigbook.data.{ AddMap, TextData }
 import org.scalatest.FunSuite
 
 import scala.collection.Map
@@ -31,17 +31,17 @@ object WordcountTest {
     def id(): Int
   }
 
-  case class DocID(id: Int, doc: Data.Document) extends ID
+  case class DocID(id: Int, doc: TextData.Document) extends ID
 
-  val sentFox = Data.Sentence(IndexedSeq("the", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog"))
-  val docFox = Data.Document(IndexedSeq(sentFox))
+  val sentFox = TextData.Sentence(IndexedSeq("the", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog"))
+  val docFox = TextData.Document(IndexedSeq(sentFox))
   val idFox = DocID(0, docFox)
 
-  val sentSanta = Data.Sentence(IndexedSeq("santa", "claus", "is", "coming", "to", "town"))
-  val docSanta = Data.Document(IndexedSeq(sentSanta))
+  val sentSanta = TextData.Sentence(IndexedSeq("santa", "claus", "is", "coming", "to", "town"))
+  val docSanta = TextData.Document(IndexedSeq(sentSanta))
   val idSanta = DocID(1, docSanta)
 
-  val docBoth = Data.Document(IndexedSeq(sentFox, sentSanta))
+  val docBoth = TextData.Document(IndexedSeq(sentFox, sentSanta))
   val idBoth = DocID(2, docBoth)
 
   val corpus = Seq(docFox, docSanta, docBoth)

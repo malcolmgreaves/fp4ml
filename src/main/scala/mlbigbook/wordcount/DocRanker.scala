@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ VectorDataIn, Vector, Data }
+import mlbigbook.data.{ VectorDataIn, Vector, TextData }
 import mlbigbook.ml.{ Ranker, RankerIn }
 
 /** Produces a Ranker suitable for Data.Document instances. */
@@ -13,7 +13,7 @@ object DocRanker {
    * @param docLimit Resulting Ranker will yield at most this many documents per invocation.
    * @param docData Corpus and document vectorization strategy.
    */
-  def apply(docLimit: Int)(docData: VectorDataIn[Data.Document]): Ranker[Data.Document] =
+  def apply(docLimit: Int)(docData: VectorDataIn[TextData.Document]): Ranker[TextData.Document] =
     Ranker(RankerIn(Similarity.cosine, docLimit))(docData)
 }
 

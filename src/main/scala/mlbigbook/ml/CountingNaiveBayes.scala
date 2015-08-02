@@ -38,7 +38,7 @@
 //
 //  type Counts[Label, Feature] = (LabelMap[Label], FeatureMap[Label, Feature])
 //
-//  def count[Label : Equiv, Feature : Equiv](data: DistData[(Label,Iterable[Feature])])(implicit nm: NumericMap[N]): Counts[Label, Feature] =
+//  def count[Label : Equiv, Feature : Equiv](data: Data[(Label,Iterable[Feature])])(implicit nm: NumericMap[N]): Counts[Label, Feature] =
 //    data
 //      .aggregate((nm.empty[Label], FeatureMap.empty[Label, Feature]))(
 //        {

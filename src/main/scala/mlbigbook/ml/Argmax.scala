@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import mlbigbook.data.DistData
+import mlbigbook.data.Data
 
 /**
  * Generic algorithm for finding the maximal argument. Uses the `Val`
@@ -17,7 +17,7 @@ object Argmax {
    *
    * throws IllegalArgumentException Iff `elements` is empty.
    */
-  def apply[B](elements: DistData[B])(implicit ev: Val[B]): B =
+  def apply[B](elements: Data[B])(implicit ev: Val[B]): B =
     if (elements isEmpty)
       throw error
 

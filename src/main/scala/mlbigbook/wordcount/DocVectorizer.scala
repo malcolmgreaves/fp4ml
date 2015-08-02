@@ -19,15 +19,15 @@ object DocVectorizer {
    */
   def apply[N](
     corpCount: CorpusCounter[N],
-    mkDocCount: Data.Corpus => DocCounter[N])(
-      implicit n: Numeric[N]): VectorizerMaker[Data.Document] =
+    mkDocCount: TextData.Corpus => DocCounter[N])(
+      implicit n: Numeric[N]): VectorizerMaker[TextData.Document] =
 
-    (documents: DistData[Data.Document]) => {
+    (documents: Data[TextData.Document]) => {
 
       // each index corresponds to an individual word
       val index2word =
         corpCount(documents)
-          .aggregate(Set.empty[Data.Word])(
+          .aggregate(Set.empty[TextData.Word])(
             { case (words, (word, _)) => words + word },
             _ ++ _
           ).toIndexedSeq
@@ -40,7 +40,7 @@ object DocVectorizer {
       val docCounter = mkDocCount(documents)
 
       Vectorizer.Fn(
-        (d: Data.Document) => {
+        (d: TextData.Document) => {
 
           val countedD = docCounter(d)
 
@@ -89,13 +89,13 @@ object DocVectorizer {
  * Abstract definition of a class that has a function that produces
  * a word count mapping (either whole or real numbered) from a corpus.
  */
-abstract class CorpusCounter[@specialized(Long, Double) N: Numeric] extends (DistData[Data.Document] => Map[Data.Word, N])
+abstract class CorpusCounter[@specialized(Long, Double) N: Numeric] extends (Data[TextData.Document] => Map[TextData.Word, N])
 
 /**
  * Abstract definition of a class that has a function that produces
  * a word count mapping (either whole or real numbered) from a document.
  */
-abstract class DocCounter[@specialized(Long, Double) N: Numeric] extends (Data.Document => Map[Data.Word, N])
+abstract class DocCounter[@specialized(Long, Double) N: Numeric] extends (TextData.Document => Map[TextData.Word, N])
 
 /**
  * Collection of word counting functions that operate on the document and sentence
@@ -105,26 +105,26 @@ abstract class DocCounter[@specialized(Long, Double) N: Numeric] extends (Data.D
 object Counters {
 
   val WordCorpusCounter = new CorpusCounter[Long] {
-    override def apply(d: Data.Corpus): Data.WordCount =
+    override def apply(d: TextData.Corpus): TextData.WordCount =
       Count.wordcountCorpus(d)
   }
 
-  val WordDocumentCounter = (ignored: Data.Corpus) => {
+  val WordDocumentCounter = (ignored: TextData.Corpus) => {
     new DocCounter[Long] {
-      override def apply(d: Data.Document): Data.WordCount =
+      override def apply(d: TextData.Document): TextData.WordCount =
         Count.wordcountDocument(d)
     }
   }
 
   val NormCorpusCounter = new CorpusCounter[Double] {
-    override def apply(d: Data.Corpus): Data.NormalizedWordCount =
+    override def apply(d: TextData.Corpus): TextData.NormalizedWordCount =
       TFIDF(d)
   }
 
-  val NormDocumentCounter = (c: Data.Corpus) => {
+  val NormDocumentCounter = (c: TextData.Corpus) => {
     new DocCounter[Double] {
       val docLevelTFIDF = TFIDF.docTFIDF(c)
-      override def apply(d: Data.Document): Data.NormalizedWordCount =
+      override def apply(d: TextData.Document): TextData.NormalizedWordCount =
         docLevelTFIDF(d)
     }
   }

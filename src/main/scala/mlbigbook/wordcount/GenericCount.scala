@@ -5,7 +5,7 @@
  */
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ DistData, AddMap, Data }
+import mlbigbook.data.{ Data, AddMap, TextData }
 
 import scala.collection.Map
 
@@ -24,7 +24,7 @@ abstract class NumericMap[@specialized N: Numeric] {
     else
       map + (e -> times)
 
-  final def increment[T](map: M[T], es: DistData[T]): M[T] =
+  final def increment[T](map: M[T], es: Data[T]): M[T] =
     es.aggregate(map)(
       { case (m, e) => increment(m, e) },
       { case (m1, m2) => combine(m1, m2) }
@@ -89,11 +89,11 @@ object GenericCount {
   //      else
   //        s + (e -> 1)
   //
-  //    final def count(s: State, es: DistData[T]): State = {
+  //    final def count(s: State, es: Data[T]): State = {
   //
   //    }
   //
-  //    final def count(s: State, es: DistData[T]): State = {
+  //    final def count(s: State, es: Data[T]): State = {
   //      es
   //        .aggregate(s)
   //    }

@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ MultiplyMap, IndicatorMap, AddMap, Data }
+import mlbigbook.data.{ MultiplyMap, IndicatorMap, AddMap, TextData }
 
 /**
  * Collection of functions that compute the term frequency - inverse document frequency weighting
@@ -16,7 +16,7 @@ object TFIDF {
    * Compute the document frequency for every word in the corpus. The resulting mapping
    * is from words to the number of documents where the word was present.
    */
-  def docfreqCorpus(documents: Data.Corpus): Data.WordCount = {
+  def docfreqCorpus(documents: TextData.Corpus): TextData.WordCount = {
     documents
       .map(docfreqDocument)
       .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine, AddMap.Whole.combine)
@@ -25,7 +25,7 @@ object TFIDF {
   /**
    * Construct a mapping of word to 1 for all words in the document.
    */
-  def docfreqDocument(doc: Data.Document): Data.WordCount = {
+  def docfreqDocument(doc: TextData.Document): TextData.WordCount = {
     doc.sentences
       .map(_.words
         .foldLeft(IndicatorMap.empty)(IndicatorMap.mark)
@@ -38,7 +38,7 @@ object TFIDF {
    * the document frequency of word w in some corpus. Then 1/df(w) is the inverse
    * document frequency of w in the corpus.
    */
-  def invDocFreq(documents: Data.Corpus): Data.NormalizedWordCount = {
+  def invDocFreq(documents: TextData.Corpus): TextData.NormalizedWordCount = {
     docfreqCorpus(documents)
       .aggregate(AddMap.Real.empty)(
         { case (accum, (word, df)) => accum + (word -> 1.0 / df) },
@@ -50,7 +50,7 @@ object TFIDF {
    * Produces a normalized word count mapping. The resulting mapping has the property
    * that the sum of the values of each element is 1.
    */
-  def termFreq(m: Data.WordCount): Data.NormalizedWordCount = {
+  def termFreq(m: TextData.WordCount): TextData.NormalizedWordCount = {
     val total = m.foldLeft(0.0)({ case (a, (_, count)) => a + count })
     m.foldLeft(AddMap.Real.empty)({
       case (normalized, (word, count)) => normalized + (word -> count / total)
@@ -65,9 +65,9 @@ object TFIDF {
    *
    * also written as: TF("word") * IDF("word")
    */
-  def docTFIDF(documents: Data.Corpus): Data.Document => Data.NormalizedWordCount = {
+  def docTFIDF(documents: TextData.Corpus): TextData.Document => TextData.NormalizedWordCount = {
     val multByIDF = MultiplyMap.Real.multiplyWith(invDocFreq(documents)) _
-    (doc: Data.Document) => {
+    (doc: TextData.Document) => {
       val docTermFreq = termFreq(Count.wordcountDocument(doc))
       multByIDF(docTermFreq)
     }
@@ -77,7 +77,7 @@ object TFIDF {
    * Perform term frequencey - inverse document frequency weighting on an entire corpus.
    * The resulting mapping will be the TF-IDF weighting of each word that appears in the corpus.
    */
-  def apply(documents: Data.Corpus): Data.NormalizedWordCount = {
+  def apply(documents: TextData.Corpus): TextData.NormalizedWordCount = {
     val docLevelTFIDF = docTFIDF(documents)
     documents
       .map(docLevelTFIDF)

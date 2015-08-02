@@ -5,9 +5,9 @@ import org.scalatest.FunSuite
 import scala.collection.Map
 import scala.util.Random
 
-class DataTest extends FunSuite {
+class TextDataTest extends FunSuite {
 
-  import Data._
+  import TextData._
 
   test("definition of indicator map") {
     val m: Map[String, Long] = Map()

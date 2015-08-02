@@ -2,49 +2,53 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+
+object Feature {
+  type Vector[F] = Data[F]
+}
+
 object NaiveBayesModule {
 
   type Prior[Label] = Label => Dist[_]#Probability
   type Likelihood[Feature, Label] = Label => Feature => Dist[_]#Probability
 
-  type FeatureVector[Feature] = DistData[Feature]
+  def apply[Feature, Label](
+    labels: Data[Label],
+    p: Prior[Label],
+    l: Likelihood[Feature, Label]
+ ): DiscreteEstimator[Feature, Label] =
+  new DiscreteEstimator[Feature, Label] {
+    override val estimator =
+      (features: Feature.Vector[Feature]) =>
+        DiscreteDist {
+          val logPosteriors =
+            labels
+              .map { label =>
+              val labelLikelihood = l(label)
+              (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+            }
 
-  trait DiscreteEstimator[Feature, Label] {
+          val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
 
-    def estimator: FeatureVector[Feature] => DiscreteDist[Label]
-
-    implicit val ev: Val[(Label, Dist[_]#Probability)] = TupleVal2[Label]
-
-    val classifier: FeatureVector[Feature] => Label =
-      (x: FeatureVector[Feature]) =>
-        Argmax(estimator(x) toSeq)(ev)._1
+          logPosteriors
+            .map {
+            case (label, logP) => (label, logP / normalizationConstant)
+          }
+            .toMap
+        }
   }
 
-  def apply[Feature, Label](
-    labels: DistData[Label],
-    p: Prior[Label],
-    l: Likelihood[Feature, Label]): DiscreteEstimator[Feature, Label] =
-    new DiscreteEstimator[Feature, Label] {
-      override val estimator =
-        (features: DistData[Feature]) =>
-          DiscreteDist {
-            val logPosteriors =
-              labels
-                .map { label =>
-                  val labelLikelihood = l(label)
-                  (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
-                }
+}
 
-            val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
+trait DiscreteEstimator[Feature, Label] {
 
-            logPosteriors
-              .map {
-                case (label, logP) => (label, logP / normalizationConstant)
-              }
-              .toMap
-          }
-    }
+  def estimator: Feature.Vector[Feature] => DiscreteDist[Label]
 
+  implicit val ev:Val[(Label, Dist[_]#Probability)] = TupleVal2[Label]
+
+  val classifier: Feature.Vector[Feature] => Label =
+    (x: Feature.Vector[Feature]) =>
+      Argmax(estimator(x) toSeq)(ev)._1
 }
 
 sealed abstract class Dist[A] {
@@ -55,7 +59,7 @@ sealed abstract class Dist[A] {
 
   def pdf: Density
 
-  def range: Option[DistData[Item]]
+  def range: Option[Data[Item]]
 }
 
 case class DiscreteDist[A](m: Map[A, Dist[_]#Probability]) extends Dist[A] {
@@ -67,9 +71,9 @@ case class DiscreteDist[A](m: Map[A, Dist[_]#Probability]) extends Dist[A] {
       else
         0.0
 
-  import DistData._
+  import Data._
 
-  override def range: Option[DistData[Item]] =
+  override def range: Option[Data[Item]] =
     Some(m.keys)
 
   def toSeq: Seq[(A, Dist[_]#Probability)] =
@@ -77,6 +81,6 @@ case class DiscreteDist[A](m: Map[A, Dist[_]#Probability]) extends Dist[A] {
 }
 
 case class ContinuousDist[A](pdf: Dist[A]#Density) extends Dist[A] {
-  override val range: Option[DistData[Item]] =
+  override val range: Option[Data[Item]] =
     None
 }

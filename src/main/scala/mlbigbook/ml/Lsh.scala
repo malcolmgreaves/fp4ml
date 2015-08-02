@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import mlbigbook.data.{ DistData, Vector }
+import mlbigbook.data.{ Data, Vector }
 
 import scala.util.Random
 

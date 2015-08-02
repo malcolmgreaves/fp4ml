@@ -8,7 +8,7 @@ import scala.util.Random
 object LshRanker {
 
   def apply[T](nLshFuncs: Int, nBins: Int)(n: NearNeighIn)(vdata: VectorDataIn[T])(
-    implicit ddContext: DistDataContext, rand: Random): Ranker[T] = {
+    implicit ddContext: DataContext, rand: Random): Ranker[T] = {
 
     val (vectorizer, vectorizedData) = vdata()
 
@@ -48,7 +48,7 @@ object LshRanker {
     }
   }
 
-  def createHashTables[T](lshFuncs: Seq[Lsh], vdata: DistData[(T, Vector)])(implicit ddContext: DistDataContext): Seq[DistData[(T, Vector)]] =
+  def createHashTables[T](lshFuncs: Seq[Lsh], vdata: Data[(T, Vector)])(implicit ddContext: DataContext): Seq[Data[(T, Vector)]] =
 
     vdata
       // use the LSH functions to compute the set of hash table indicies
@@ -68,10 +68,10 @@ object LshRanker {
         case (hIndex, iterable) =>
           (hIndex, iterable.map(_._2))
       })
-      // convert this DistData[...] into a Seq[...], (size lshFuncs.size)
+      // convert this Data[...] into a Seq[...], (size lshFuncs.size)
       .toSeq
-      // convert each Iterable inside each Seq element into a DistData instance
-      // using the DistDataContext implicit value
+      // convert each Iterable inside each Seq element into a Data instance
+      // using the DataContext implicit value
       .map({
         case (hIndex, dataAndVectorItr) =>
           (hIndex, ddContext.from(dataAndVectorItr))
