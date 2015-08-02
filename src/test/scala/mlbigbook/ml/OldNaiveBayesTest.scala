@@ -3,9 +3,9 @@
 //import mlbigbook.data._
 //import org.scalatest.FunSuite
 //
-//class NaiveBayesTest extends FunSuite {
+//class OldNaiveBayesTest extends FunSuite {
 //
-//  import NaiveBayesTest.Sentiment._
+//  import OldNaiveBayesTest.Sentiment._
 //
 //  test("classify simple sentiment") {
 //
@@ -28,7 +28,7 @@
 //
 //}
 //
-//object NaiveBayesTest {
+//object OldNaiveBayesTest {
 //
 //  object Sentiment {
 //

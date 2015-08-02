@@ -11,19 +11,22 @@ object NaiveBayesModule {
   type Prior[Label] = Label => Distribution[_]#Probability
   type Likelihood[Feature, Label] = Label => Feature => Distribution[_]#Probability
 
-  def apply[Feature, Label](
+  case class NaiveBayes[F, Label](
     labels: Data[Label],
     p: Prior[Label],
-    l: Likelihood[Feature, Label]
- ): DiscreteEstimator[Feature, Label] =
+    l: Likelihood[Feature.Vector[F], Label])
+
+  type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+
+  def apply[Feature, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
     DiscreteEstimator[Feature, Label] {
       (features: Feature.Vector[Feature]) =>
         DiscreteDistribution {
           val logPosteriors =
-            labels
+            nb.labels
               .map { label =>
-                val labelLikelihood = l(label)
-                (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+                val labelLikelihood = nb.l(label)
+                (label, math.log(nb.p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
               }
 
           val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
