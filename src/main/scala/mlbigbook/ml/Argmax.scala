@@ -8,8 +8,8 @@ import mlbigbook.data.Data
  */
 object Argmax {
 
-  type EmptyError = IllegalArgumentException
-  val error: EmptyError = new IllegalArgumentException("Cannot call argmax on empty elements.")
+  val emptyError =
+    new IllegalArgumentException("Cannot call `Argmax.apply` on empty elements.")
 
   /**
    * Finds the maximal argument of `elements` in linear time. Uses the `Val`
@@ -19,7 +19,7 @@ object Argmax {
    */
   def apply[B](elements: Data[B])(implicit ev: Val[B]): B =
     if (elements isEmpty)
-      throw error
+      throw emptyError
 
     else
       elements

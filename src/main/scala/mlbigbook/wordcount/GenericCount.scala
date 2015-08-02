@@ -56,6 +56,8 @@ object NumericMap {
   implicit val float: NumericMap[Float] = new NumericMap[Float] {}
   implicit val double: NumericMap[Double] = new NumericMap[Double] {}
 
+  def apply[N: Numeric] = new NumericMap[N] {}
+
   type WordCount = Map[String, Long]
   val emptyWC: WordCount = long.empty[String]
 

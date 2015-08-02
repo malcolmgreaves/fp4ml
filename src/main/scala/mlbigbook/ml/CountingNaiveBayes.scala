@@ -3,12 +3,25 @@ package mlbigbook.ml
 import mlbigbook.data._
 import mlbigbook.wordcount.NumericMap
 
-import scala.reflect.ClassTag
+object CountingNaiveBayes {
 
-class CountingNaiveBayes[@specialized(Byte, Int, Long, Float, Double) N: Numeric, F, L] extends NaiveBayesModule.Produce[F, L] {
+}
 
-  // nedd to implement `apply`
-  // Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+class CountingNaiveBayes[@specialized(Int, Long, Double) N: Numeric] {
+
+  import NaiveBayesModule._
+
+  implicit val nm = NumericMap[N]
+
+  def produce[F: Equiv, L: Equiv](data: Learning[Feature.Vector[F], L]#TrainingData): NaiveBayes[F, L] = {
+    val (labelMap, featureMap) = count(data)
+    val (prior, likelihood) = counts2priorandlikeihood((labelMap, featureMap))
+    NaiveBayes(
+      labelMap.keys.toSeq,
+      prior,
+      likelihood
+    )
+  }
 
   // count features
   // incorporate smoothing
@@ -28,7 +41,7 @@ class CountingNaiveBayes[@specialized(Byte, Int, Long, Float, Double) N: Numeric
   //      s += likelihood[c'][*f*]
   //    posterior[c'] + s
 
-  type LabelMap[L] = NumericMap[N]#M[L]
+  type LabelMap[Label] = NumericMap[N]#M[Label]
 
   type FeatureMap[Label, Feature] = Map[Label, NumericMap[N]#M[Feature]]
 
@@ -39,21 +52,22 @@ class CountingNaiveBayes[@specialized(Byte, Int, Long, Float, Double) N: Numeric
 
   type Counts[Label, Feature] = (LabelMap[Label], FeatureMap[Label, Feature])
 
-  def count[Label: Equiv, Feature: Equiv](data: DistData[(Label, Iterable[Feature])])(implicit nm: NumericMap[N]): Counts[Label, Feature] =
+  def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)])(implicit nm: NumericMap[N]): Counts[Label, F] =
     data
-      .aggregate((nm.empty[Label], FeatureMap.empty[Label, Feature]))(
+      .aggregate((nm.empty[Label], FeatureMap.empty[Label, F]))(
         {
-          case ((labelMap, featureMap), (label, features)) =>
+          case ((labelMap, featureMap), (features, label)) =>
 
             val updatedLabelMap = nm.increment(labelMap, label)
 
-            val existing = featureMap.getOrElse(label, nm.empty[Feature])
+            val existing = featureMap.getOrElse(label, nm.empty[F])
 
             val updatedFeatureMapForLabel =
               features
-                .foldLeft(existing) {
-                  case (fm, feature) => nm.increment(fm, feature)
-                }
+                .aggregate(existing)(
+                  { case (fm, feature) => nm.increment(fm, feature) },
+                  nm.combine
+                )
 
             (updatedLabelMap, featureMap + (label -> updatedFeatureMapForLabel))
         },
@@ -98,31 +112,6 @@ class CountingNaiveBayes[@specialized(Byte, Int, Long, Float, Double) N: Numeric
     }
 
     (prior, likelihood)
-  }
-
-  case class MapDist[T](m: Map[T, Double]) {
-    def probabilityOf(x: T) = m.get(x)
-    def unsafeProbabilityOf(x: T) = m(x)
-    def range = m.keys
-  }
-
-  def counts2nb[Feature, Label](c: Counts[Label, Feature]): NaiveBayes[Feature, Label] = {
-
-    val labels = c._1.keys.toSeq
-
-    val (prior, likelihood) = counts2priorandlikeihood(c)
-
-    (features: Iterable[Feature]) =>
-      ???
-    //      MapDist(
-    //        labels.map { label =>
-    //          (
-    //            label,
-    //            prior(label) + features.map(f => likelihood(label)(f)).sum
-    //            )
-    //        }
-    //          .toMap
-    //      )
   }
 
 }
