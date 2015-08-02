@@ -32,7 +32,7 @@ object CountingNaiveBayesTest {
 
   val training: Learning[Feature.Vector[String], String]#TrainingData = {
     val x = 10
-    if(x > 1) ???
+    if (x > 1) ???
     else ???
   }
 

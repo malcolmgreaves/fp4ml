@@ -32,29 +32,29 @@ class BoundedPriorityQueueTest extends FunSuite {
           case (pq, v) => pq |> BoundValuePQ.insert(v)
         })
 
-    @tailrec @inline def check(minSortedValues: List[Int], e: BoundValuePQ.T): Unit =
+      @tailrec @inline def check(minSortedValues: List[Int], e: BoundValuePQ.T): Unit =
 
-      BoundValuePQ.takeMin(e) match {
+        BoundValuePQ.takeMin(e) match {
 
-        case None =>
-          assert(minSortedValues.isEmpty, "heap empty, expecting value list to be as well")
+          case None =>
+            assert(minSortedValues.isEmpty, "heap empty, expecting value list to be as well")
 
-        case Some((min, restOfHeap)) =>
+          case Some((min, restOfHeap)) =>
 
-          minSortedValues match {
+            minSortedValues match {
 
-            case Nil =>
-              fail("unexpected: ran out of values but still more in heap")
+              case Nil =>
+                fail("unexpected: ran out of values but still more in heap")
 
-            case head :: tail =>
-              assert(
-                head == min,
-                s"expecting sorted values to match heap takeMin... have $min expecting $head"
-              )
-              check(tail, restOfHeap)
+              case head :: tail =>
+                assert(
+                  head == min,
+                  s"expecting sorted values to match heap takeMin... have $min expecting $head"
+                )
+                check(tail, restOfHeap)
 
-          }
-      }
+            }
+        }
 
     check(values.sorted.toList, result)
   }
