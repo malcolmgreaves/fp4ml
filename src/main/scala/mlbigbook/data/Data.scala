@@ -59,18 +59,23 @@ trait Data[A] {
   def isEmpty: Boolean
 
   def sum[N >: A](implicit num: Numeric[N]): N
+
+  //  def zip[A1 >: A, B](that: Data[B]): Data[(A1,B)]
+
 }
 
 object Data {
 
-  implicit def seq2travDD[A](s: Seq[A]): Data[A] =
+  implicit def seq2data[A](s: Seq[A]): Data[A] =
     s.toTraversable
 
-  implicit def indxSeq2travDD[A](s: IndexedSeq[A]): Data[A] =
+  implicit def indexedSeq2Data[A](s: IndexedSeq[A]): Data[A] =
     s.toTraversable
 
-  implicit def array2travDd[A](a: Array[A]): Data[A] =
+  implicit def array2Data[A](a: Array[A]): Data[A] =
     a.toTraversable
+
+  def traversable2data[A](t: Traversable[A]): Data[A] = t
 
   /** Wraps a Traversable as a Data. */
   implicit class TravData[A](val ls: Traversable[A]) extends Data[A] {
@@ -125,6 +130,10 @@ object Data {
 
     override def sum[N >: A](implicit num: Numeric[N]): N =
       ls.sum(num)
+
+    //    override def zip[A1 >: A, B](that: Data[B]): Data[(A1,B)] =
+    //      ls.toIterable.zip(that)
+
   }
 
   /** Wraps a Spark RDD as a Data. */
@@ -155,7 +164,8 @@ object Data {
     override def toSeq: Seq[A] = {
       // force evaluated type
       // ( don't want to invoke implicit conversion
-      //   from Array[A] -> Data[A] !! )
+      //   from Array[A] -> Data[A] !! )                                                                 Changes not staged for commit:
+
       val a: Array[A] = d.collect()
       a.toIndexedSeq
     }
@@ -186,6 +196,9 @@ object Data {
 
     override def sum[N >: A](implicit num: Numeric[N]): N =
       reduce[N] { case (a, b) => num.plus(a, b) }
+
+    //    override def zip[A1 >: A, B](that: Data[B]): Data[(A1, B)] =
+    //      d.zip(that)
   }
 }
 
