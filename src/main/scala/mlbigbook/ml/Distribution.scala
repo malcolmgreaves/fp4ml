@@ -1,84 +1,37 @@
 package mlbigbook.ml
 
-import mlbigbook.data._
+import mlbigbook.data.Data
 
-sealed trait Distribution {
+sealed abstract class Distribution[A] {
 
-  /**
-   * The `labels` contains descriptions for for each probability in the distribution.
-   * Align 1-to-1 with `values`.
-   */
-  def labels: Seq[Labeled]
+  type Item = A
+  type Probability = Double
+  type Density = Item => Probability
 
-  /**
-   * The probability values of this distribution. Align 1-to-1 with labels.
-   */
-  def values: Seq[Double]
+  def pdf: Density
 
-  /**
-   * The number of elements in the distribution.
-   *
-   * The evaluated result is equivalent to labels.size and values.size
-   */
-  def size: Int
+  def range: Option[Data[Item]]
 }
 
-object Distribution {
+case class DiscreteDistribution[A](m: Map[A, Distribution[_]#Probability]) extends Distribution[A] {
 
-  type Maker = Labels => Seq[Double] => Option[Distribution]
+  override val pdf: Density =
+    (x: Item) =>
+      if (m contains x)
+        m(x)
+      else
+        0.0
 
-  def make: Maker =
-    (ls: Labels) =>
-      ls match {
+  import Data._
 
-        case BinaryLabels(yes, no) =>
-          (p: Seq[Double]) =>
-            if (p.size == 2)
-              Some(BinaryDistribution(p.head, yes, no))
-            else
-              None
+  override def range: Option[Data[Item]] =
+    Some(m.keys)
 
-            case MultiLabels(mLabels) =>
-          (p: Seq[Double]) =>
-            if (p.size == mLabels.size)
-              Some(MultiDistribution(mLabels, p))
-            else
-              None
-      }
+  def toSeq: Seq[(A, Distribution[_]#Probability)] =
+    m.toSeq
 }
 
-case class BinaryDistribution(
-    yesProbability: Double,
-    yesLabel: Labeled,
-    noLabel: Labeled) extends Distribution {
-
-  val noProbability =
-    1.0 - yesProbability
-
-  override val values =
-    Seq(yesProbability, noProbability)
-
-  override val labels =
-    Seq(yesLabel, noLabel)
-
-  override val size =
-    2
-
-  override def toString =
-    s"[$yesLabel: $yesProbability , $noLabel : $noProbability]"
-}
-
-case class MultiDistribution(
-    override val labels: Seq[Labeled],
-    override val values: Seq[Double]) extends Distribution {
-
-  assert(labels.size == values.size)
-
-  override val size =
-    labels.size
-
-  override def toString =
-    labels.zip(values)
-      .map { case (l, v) => s"($l : $v)" }
-      .mkString("\n")
+case class ContinuousDistribution[A](pdf: Distribution[A]#Density) extends Distribution[A] {
+  override val range: Option[Data[Item]] =
+    None
 }

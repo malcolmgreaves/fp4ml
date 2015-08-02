@@ -8,13 +8,13 @@ sealed trait Labels {
 
 object Labels {
 
-  implicit def distributionIsLabeled(d: Distribution): Labels =
+  implicit def distributionIsLabeled(d: LabelDistribution): Labels =
     d match {
 
-      case BinaryDistribution(_, yes, no) =>
+      case BinaryLabelDistribution(_, yes, no) =>
         BinaryLabels(yes, no)
 
-      case MultiDistribution(labels, _) =>
+      case MultiLabelDistribution(labels, _) =>
         MultiLabels(labels)
     }
 }

@@ -14,7 +14,7 @@ object TextData {
   /** A sentence is a sequence of words. */
   case class Sentence(words: Traversable[Word]) {
     override def toString: String =
-      s"(${words.size})" + words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
+      s"(${words.size})"+words.take(15).mkString(",") + (if (words.size > 15) "..." else "")
   }
 
   /** A document is a sequence of sentences. */
@@ -27,7 +27,7 @@ object TextData {
               (i + 1, a :+ s"S$i:${sent.toString}")
           }
           ._2
-      s"(${strSent.size} sentences)" + strSent.take(5).mkString(";") + (if (strSent.size > 5) "..." else "")
+      s"(${strSent.size} sentences)"+strSent.take(5).mkString(";") + (if (strSent.size > 5) "..." else "")
     }
   }
 

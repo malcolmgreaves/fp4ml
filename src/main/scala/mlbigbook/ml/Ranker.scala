@@ -57,15 +57,15 @@ object Ranker {
 
     val BoundPq = BoundedPriorityQueue.create[(T, Vector)](Vector.rankFnOrdering[T](f))(limit)
 
-    @tailrec @inline def toTraversable(pq: BoundPq.T, existing: Seq[(T, Vector)]): Traversable[(T, Vector)] =
-      BoundPq.takeMin(pq) match {
+      @tailrec @inline def toTraversable(pq: BoundPq.T, existing: Seq[(T, Vector)]): Traversable[(T, Vector)] =
+        BoundPq.takeMin(pq) match {
 
-        case None =>
-          existing.toTraversable
+          case None =>
+            existing.toTraversable
 
-        case Some((min, rest)) =>
-          toTraversable(rest, existing :+ min)
-      }
+          case Some((min, rest)) =>
+            toTraversable(rest, existing :+ min)
+        }
 
     val resultingBpq =
       elements
