@@ -57,6 +57,8 @@ trait DistData[A] {
   def size: Long
 
   def isEmpty: Boolean
+
+  def sum[N >: A](implicit num: Numeric[N]): N
 }
 
 object DistData {
@@ -120,6 +122,9 @@ object DistData {
 
     override def isEmpty: Boolean =
       ls.isEmpty
+
+    override def sum[N >: A](implicit num: Numeric[N]): N =
+      ls.sum
   }
 
   /** Wraps a Spark RDD as a DistData. */
@@ -178,6 +183,9 @@ object DistData {
 
     override def isEmpty: Boolean =
       d.isEmpty()
+
+    override def sum[N >: A](implicit num: Numeric[N]): N =
+      d.reduce[N] { case (a, b) => num.plus(a, b) }
   }
 }
 

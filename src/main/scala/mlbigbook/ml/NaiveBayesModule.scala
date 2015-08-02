@@ -32,7 +32,6 @@ object NaiveBayesModule {
               labels
                 .map { label =>
                   val labelLikelihood = l(label)
-                  import NumericDistData.Implicits._
                   (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
                 }
 
