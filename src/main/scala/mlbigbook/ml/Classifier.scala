@@ -12,3 +12,32 @@ object Classifier {
   }
 
 }
+
+/*
+
+/**
+ * Module specifying types for machine learning algorithms.
+ *
+ * @tparam A The instance type.
+ * @tparam B The label type.
+ */
+trait Learning[A, B] {
+
+  type Instance = A
+
+  type Label = B
+
+  type Pair = (Instance, Label)
+
+  type TrainingData = Dat[Pair]
+
+  type Classifier = Instance => Label
+
+  type Estimator = Instance => DiscreteDistribution[Label]
+
+  type Learner = TrainingData => (Classifier, Estimator)
+}
+
+
+
+ */ 

@@ -53,6 +53,10 @@ trait DistData[A] {
   def reduce[A1 >: A](r: (A1, A1) => A1): A1
 
   def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U]
+
+  def size: Long
+
+  def isEmpty: Boolean
 }
 
 object DistData {
@@ -110,6 +114,12 @@ object DistData {
 
     override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =
       ls.toMap
+
+    override def size: Long =
+      ls.size
+
+    override def isEmpty: Boolean =
+      ls.isEmpty
   }
 
   /** Wraps a Spark RDD as a DistData. */
@@ -162,6 +172,12 @@ object DistData {
       d
         .mapPartitions(items => Iterator(items.toSeq.toMap(ev)))
         .reduce(_ ++ _)
+
+    override def size: Long =
+      d.count()
+
+    override def isEmpty: Boolean =
+      d.isEmpty()
   }
 }
 

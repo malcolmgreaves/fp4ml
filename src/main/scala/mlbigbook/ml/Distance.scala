@@ -129,15 +129,15 @@ case object MinkowskiMaker {
   def apply(p: Int): Distance =
     new Distance {
 
-      @inline private def raiseAbsDiffToP(v1: Double, v2: Double): Double =
+      private def raiseAbsDiffToP(v1: Double, v2: Double): Double =
         Math.pow(Math.abs(v1 - v2), p)
 
       private val pInv = 1.0 / p
 
-      @inline private def raiseTo1OverP(x: Double): Double =
+      private def raiseTo1OverP(x: Double): Double =
         Math.pow(x, pInv)
 
-      @inline override def apply(v1: Vector, v2: Vector): Double =
+      override def apply(v1: Vector, v2: Vector): Double =
         raiseTo1OverP(
           v1.zip(v2)
             .foldLeft(0.0)({

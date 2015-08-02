@@ -1,5 +1,7 @@
 package mlbigbook.ml
 
+import mlbigbook.data.DistData
+
 /**
  * Generic algorithm for finding the maximal argument. Uses the `Val`
  * typeclass as evidence of an argument's value.
@@ -15,23 +17,19 @@ object Argmax {
    *
    * throws IllegalArgumentException Iff `elements` is empty.
    */
-  def apply[B](elements: Traversable[B])(implicit ev: Val[B]): B =
+  def apply[B](elements: DistData[B])(implicit ev: Val[B]): B =
     if (elements isEmpty)
       throw error
 
-    else if (elements.size == 1)
-      elements.head
-
     else
-      elements.slice(1, elements.size)
-        .foldLeft(elements.head) {
-          case (max, next) =>
-            if (ev.valueOf(next) > ev.valueOf(max))
-              next
+      elements
+        .reduce[B] {
+          case (a, b) =>
+            if (ev.valueOf(a) > ev.valueOf(b))
+              a
             else
-              max
+              b
         }
-
 }
 
 /**

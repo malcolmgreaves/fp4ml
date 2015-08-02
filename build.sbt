@@ -15,6 +15,8 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.4.0",
+  "org.scalanlp" %% "breeze" % "0.11.2",
+  "org.scalanlp" %% "breeze-natives" % "0.11.2",
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 
@@ -29,7 +31,7 @@ lazy val jvm = "1.7"
 
 scalaVersion := "2.11.7"
 
-crossScalaVersions := Seq("2.11.7", "2.10.5")
+crossScalaVersions := Seq("2.10.5", "2.11.7")
 
 scalacOptions ++= Seq(
   "-optimise",
@@ -53,6 +55,7 @@ scalacOptions ++= Seq(
   "-Ywarn-infer-any",
   "-Yinline",
   "-Yinline-handlers",
+  "-Yopt-warnings",
   "-Yopt:_"
 )
 

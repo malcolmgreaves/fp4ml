@@ -9,38 +9,43 @@ object NaiveBayesModule {
 
   type FeatureVector[Feature] = DistData[Feature]
 
-  trait NaiveBayes[Feature, Label] {
-    def estimator: FeatureVector[Feature] => Dist[Label]
+  trait DiscreteEstimator[Feature, Label] {
+
+    def estimator: FeatureVector[Feature] => DiscreteDist[Label]
+
+    implicit val ev: Val[(Label, Dist[_]#Probability)] = TupleVal2[Label]
+
     val classifier: FeatureVector[Feature] => Label =
       (x: FeatureVector[Feature]) =>
-        Argmax(estimator(x))
+        Argmax(estimator(x) toSeq)(ev)._1
   }
 
   def apply[Feature, Label](
     labels: DistData[Label],
     p: Prior[Label],
-    l: Likelihood[Feature, Label]
- ): NaiveBayes[Feature, Label] =
-    (features: DistData[Feature]) =>
-      DiscreteDist {
-        val logPosteriors =
-          labels
-            .map { label =>
-              val labelLikelihood = l(label)
-              (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
-            }
+    l: Likelihood[Feature, Label]): DiscreteEstimator[Feature, Label] =
+    new DiscreteEstimator[Feature, Label] {
+      override val estimator =
+        (features: DistData[Feature]) =>
+          DiscreteDist {
+            val logPosteriors =
+              labels
+                .map { label =>
+                  val labelLikelihood = l(label)
+                  import NumericDistData.Implicits._
+                  (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+                }
 
-        val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
+            val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
 
-        logPosteriors
-          .map {
-            case (label, logP) => (label, logP / normalizationConstant)
+            logPosteriors
+              .map {
+                case (label, logP) => (label, logP / normalizationConstant)
+              }
+              .toMap
           }
-          .toMap
-      }
+    }
 
-
-  def apply(nb: NaiveBayes[Feature, Label]):
 }
 
 sealed abstract class Dist[A] {
@@ -65,8 +70,11 @@ case class DiscreteDist[A](m: Map[A, Dist[_]#Probability]) extends Dist[A] {
 
   import DistData._
 
-  override lazy val range: Option[DistData[Item]] =
+  override def range: Option[DistData[Item]] =
     Some(m.keys)
+
+  def toSeq: Seq[(A, Dist[_]#Probability)] =
+    m.toSeq
 }
 
 case class ContinuousDist[A](pdf: Dist[A]#Density) extends Dist[A] {
