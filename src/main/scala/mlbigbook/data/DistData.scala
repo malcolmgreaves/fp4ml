@@ -124,7 +124,7 @@ object DistData {
       ls.isEmpty
 
     override def sum[N >: A](implicit num: Numeric[N]): N =
-      ls.sum
+      ls.sum(num)
   }
 
   /** Wraps a Spark RDD as a DistData. */
@@ -185,7 +185,7 @@ object DistData {
       d.isEmpty()
 
     override def sum[N >: A](implicit num: Numeric[N]): N =
-      d.reduce[N] { case (a, b) => num.plus(a, b) }
+      reduce[N] { case (a, b) => num.plus(a, b) }
   }
 }
 
