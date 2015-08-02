@@ -15,7 +15,7 @@ object NaiveBayesModule {
     labels: Data[Label],
     p: Prior[Label],
     l: Likelihood[Feature, Label]
-  ): DiscreteEstimator[Feature, Label] =
+ ): DiscreteEstimator[Feature, Label] =
     DiscreteEstimator[Feature, Label] {
       (features: Feature.Vector[Feature]) =>
         DiscreteDistribution {

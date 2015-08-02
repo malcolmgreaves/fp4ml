@@ -23,7 +23,8 @@ trait Learning[A, B] {
 }
 
 case class DiscreteEstimator[F, Label](
-    estimate: Learning[Feature.Vector[F], Label]#Estimator) {
+    estimate: Learning[Feature.Vector[F], Label]#Estimator
+) {
 
   implicit val ev: Val[(Label, Distribution[_]#Probability)] =
     TupleVal2[Label]
