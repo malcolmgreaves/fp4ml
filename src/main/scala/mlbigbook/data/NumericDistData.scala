@@ -7,24 +7,25 @@
  */
 package mlbigbook.data
 
+trait NumericDistData[A] {
+  def sum[N >: A](implicit num: Numeric[N]): N
+  def product[N >: A](implicit num : Numeric[N]): N
+}
+
 object NumericDistData {
 
   object Implicits {
 
-    implicit class IsNumericDistData[N: Numeric](d: DistData[N]) extends NumericDistData[N] {
+    implicit class IsNumericDistData[A](d: DistData[A]) extends NumericDistData[A] {
 
-      override def sum()(implicit ev: N => Double) =
-        d.reduce[N] {
-          case (a, b) =>
-            implicitly[Numeric[N]].plus(a, b)
-        }
+      override def sum[N >: A](implicit num: Numeric[N]): N =
+        d.reduce[N] { case (a, b) => num.plus(a, b) }
+
+
+      override def product[N >: A](implicit num: Numeric[N]): N =
+        d.reduce[N]{ case (a,b) => num.times(a,b)}
     }
 
   }
 
 }
-
-trait NumericDistData[A] {
-  def sum()(implicit ev: A => Double): Double //N forSome { type N = Numeric[A] }
-}
-
