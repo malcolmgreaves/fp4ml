@@ -10,6 +10,7 @@ package mlbigbook.data
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.{ PairRDDFunctions, RDD }
 
+import scala.collection.immutable
 import scala.reflect.ClassTag
 
 /**
@@ -50,6 +51,8 @@ trait DistData[A] {
   def as: DistData[A] = this
 
   def reduce[A1 >: A](r: (A1, A1) => A1): A1
+
+  def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U]
 }
 
 object DistData {
@@ -104,6 +107,9 @@ object DistData {
 
     override def reduce[A1 >: A](r: (A1, A1) => A1): A1 =
       ls.reduce(r)
+
+    override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =
+      ls.toMap
   }
 
   /** Wraps a Spark RDD as a DistData. */
@@ -119,7 +125,7 @@ object DistData {
       d.foreach(f)
 
     override def foreachPartition(f: Iterator[A] => Any): Unit = {
-      val _ = d.foreachPartition(x => {val __ = f(x)})
+      val _ = d.foreachPartition(x => { val __ = f(x) })
     }
 
     override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
@@ -151,6 +157,11 @@ object DistData {
 
     override def reduce[A1 >: A](r: (A1, A1) => A1): A1 =
       d.reduce(r)
+
+    override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =
+      d
+        .mapPartitions(items => Iterator(items.toSeq.toMap(ev)))
+        .reduce(_ ++ _)
   }
 }
 

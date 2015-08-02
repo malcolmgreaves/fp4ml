@@ -1,62 +1,75 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.wordcount.NumericMap
 
-import scala.reflect.ClassTag
+object NaiveBayesModule {
 
-abstract class NaiveBayesModule {
+  type Prior[Label] = Label => Dist[_]#Probability
+  type Likelihood[Feature, Label] = Label => Feature => Dist[_]#Probability
 
-  type Probability = Double
+  type FeatureVector[Feature] = DistData[Feature]
 
-  type Prior[Label] = Label => Probability
-  type Likelihood[Feature, Label] = Label => Feature => Probability
+  trait NaiveBayes[Feature, Label] {
+    def estimator: FeatureVector[Feature] => Dist[Label]
+    val classifier: FeatureVector[Feature] => Label =
+      (x: FeatureVector[Feature]) =>
+        Argmax(estimator(x))
+  }
 
-  type NaiveBayes[Feature,Label] = Iterable[Feature] => Dist[Label]
+  def apply[Feature, Label](
+    labels: DistData[Label],
+    p: Prior[Label],
+    l: Likelihood[Feature, Label]
+ ): NaiveBayes[Feature, Label] =
+    (features: DistData[Feature]) =>
+      DiscreteDist {
+        val logPosteriors =
+          labels
+            .map { label =>
+              val labelLikelihood = l(label)
+              (label, math.log(p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+            }
+
+        val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
+
+        logPosteriors
+          .map {
+            case (label, logP) => (label, logP / normalizationConstant)
+          }
+          .toMap
+      }
+
+
+  def apply(nb: NaiveBayes[Feature, Label]):
 }
 
-trait Domain {
-  type Value <: Any
-  def range: Option[DistData[Value]]
-}
+sealed abstract class Dist[A] {
 
-sealed trait Dist[A] {
   type Item = A
   type Probability = Double
-  def domain: Domain
+  type Density = Item => Probability
 
-  def pdf(x: Item): Probability
+  def pdf: Density
+
+  def range: Option[DistData[Item]]
 }
 
-case class DiscreteDist[A](
-  m: Map[DiscreteDist[A]#Item, Dist[_]#Probability],
-  domain: Domain
-) extends Dist[A] {
+case class DiscreteDist[A](m: Map[A, Dist[_]#Probability]) extends Dist[A] {
 
-
-  override def pdf(x: Item): Probability =
-    if(m contains x)
-      m(x)
-    else
-      0.0
-}
-
-object DiscreteDist {
+  override val pdf: Density =
+    (x: Item) =>
+      if (m contains x)
+        m(x)
+      else
+        0.0
 
   import DistData._
 
-  type DiscreteMap[A] = Map[DiscreteDist[A]#Item, Dist[_]#Probability]
-
-  def discreteDomain[A](m: DiscreteMap[A]): Domain =
-    new Domain {
-      type Value = A
-      val range:Option[DistData[Value]] =
-        Some(m.keys)
-    }
-
-  def apply[A](m: DiscreteMap[A]): DiscreteDist[A] =
-    DiscreteDist(m, discreteDomain(m))
-
+  override lazy val range: Option[DistData[Item]] =
+    Some(m.keys)
 }
 
-case class ContinuousDist[A](pdf:A => Double)
+case class ContinuousDist[A](pdf: Dist[A]#Density) extends Dist[A] {
+  override val range: Option[DistData[Item]] =
+    None
+}

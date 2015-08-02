@@ -13,7 +13,7 @@ object MapOps {
    * Given two input maps of the same type, re-order them such that the first element of the
    * resulting tuple has more keys than the second element.
    */
-  def reoderLargeSmall[A,B](a: Map[A,B], b: Map[A,B]): (Map[A,B], Map[A,B]) =
+  def reoderLargeSmall[A, B](a: Map[A, B], b: Map[A, B]): (Map[A, B], Map[A, B]) =
     if (a.size < b.size)
       (a, b)
     else

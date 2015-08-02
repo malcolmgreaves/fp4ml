@@ -1,20 +1,16 @@
-name := "bigmlbook"
-
-version := "0.1.0"
-
 organization := "io.malcolmgreaves"
 
-scalaVersion := "2.11.6"
+name := "bigmlbook"
 
-val jvm = "1.7"
+version := "0.0.0"
 
-// code coverage plugins
+////////////////////////////////////////////
+//    dependencies and their resolvers    //
+////////////////////////////////////////////
 
 resolvers ++= Seq(
   "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
-  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
-  "Akka Repository" at "http://repo.akka.io/releases/",
-  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 )
 
 libraryDependencies ++= Seq(
@@ -22,27 +18,49 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+//    scala compilation and java runtime settings    //
+///////////////////////////////////////////////////////
+
+// as of 1.4.0, spark still requires jvm 1.7
+lazy val jvm = "1.7"
+
+scalaVersion := "2.11.7"
+
+crossScalaVersions := Seq("2.11.7", "2.10.5")
 
 scalacOptions ++= Seq(
-  //"-optimize",
+  "-optimise",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Xfuture",
   s"-target:jvm-$jvm",
   "-deprecation",
   "-encoding", "UTF-8",
   "-feature",
+  "-unchecked",
+  "-language:postfixOps",
   "-language:existentials",
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:experimental.macros",
-  "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
+  "-Ybackend:GenBCode",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
-  "-Xfuture",
-  "-Yinline-warnings"
+  "-Ywarn-infer-any",
+  "-Yinline",
+  "-Yinline-handlers",
+  "-Yopt:_"
 )
+
+///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////
+//    testing and code coverage settings    //
+//////////////////////////////////////////////
 
 instrumentSettings
 
@@ -52,3 +70,35 @@ fork in Test := true
 
 parallelExecution in Test := false
 
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+
+///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////
+//   Code formatting settings for scalariform   //
+//////////////////////////////////////////////////
+
+defaultScalariformSettings
+
+ScalariformKeys.preferences := {
+  import scalariform.formatter.preferences._
+  FormattingPreferences()
+    .setPreference(AlignParameters, true)
+    .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(CompactControlReadability, false)
+    .setPreference(CompactStringConcatenation, true)
+    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(FormatXml, true)
+    .setPreference(IndentLocalDefs, true)
+    .setPreference(IndentPackageBlocks, true)
+    .setPreference(IndentSpaces, 2)
+    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
+    .setPreference(PreserveDanglingCloseParenthesis, true)
+    .setPreference(PreserveSpaceBeforeArguments, false)
+    .setPreference(RewriteArrowSymbols, false)
+    .setPreference(SpaceBeforeColon, false)
+    .setPreference(SpaceInsideBrackets, false)
+    .setPreference(SpacesWithinPatternBinders, true)
+}
+
+///////////////////////////////////////////////////////////////////////////////
