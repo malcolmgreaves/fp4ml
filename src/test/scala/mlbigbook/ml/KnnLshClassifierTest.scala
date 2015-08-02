@@ -18,7 +18,7 @@ object KnnLshClassifierTest {
 
   import NearestNeighborsLSHTest._
 
-  def classificationTest[T](c: Classifier[T], input: T, expected: Labeled): Err = {
+  def classificationTest[T](c: Learning[T, Labeled]#Classifier, input: T, expected: Labeled): Err = {
     val actual = c(input)
     if (actual.label != expected.label)
       Some(s"Expected and actual labels dont match. Expecting: ${actual.label} . Actual: ${actual.label}")

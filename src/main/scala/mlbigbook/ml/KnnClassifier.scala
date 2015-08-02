@@ -6,17 +6,15 @@ import scala.reflect.ClassTag
 
 object KnnClassifier {
 
-  import Classifier._
-
   /**
    * Creates a k-Nearest Neighbors classifier.
    *
    * Uses NnRanker.apply underneath to perform the nearest neighbors search.
    */
-  def apply[T: ClassTag](n: NearNeighIn)(vdata: VectorDataIn[LabeledData[T]]): Classifier[T] =
+  def apply[T: ClassTag](n: NearNeighIn)(vdata: VectorDataIn[LabeledData[T]]): Learning[T, Labeled]#Classifier =
     apply(NnRanker(n)(vdata))
 
-  def apply[T: ClassTag](nearestNeighborsRanker: Ranker[LabeledData[T]]): Classifier[T] =
+  def apply[T: ClassTag](nearestNeighborsRanker: Ranker[LabeledData[T]]): Learning[T, Labeled]#Classifier  =
     (input: T) => {
       val neighborhood =
         nearestNeighborsRanker(UnlabeledData(input))

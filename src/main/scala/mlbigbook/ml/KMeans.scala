@@ -160,7 +160,7 @@ object KMeans {
    * Uses the Classifier to assign a label to each datapoint. When this Classifier is
    * a HardCluster, this is equivalent to assigning each datapoint to the nearest cluster.
    */
-  def assignment[T](c: Classifier[T])(data: Data[(T, Vector)]): Data[(Labeled, Vector)] =
+  def assignment[T](c: Learning[T, Labeled]#Classifier)(data: Data[(T, Vector)]): Data[(Labeled, Vector)] =
     data.map({ case (item, vector) => (c(item), vector) })
 
   /**

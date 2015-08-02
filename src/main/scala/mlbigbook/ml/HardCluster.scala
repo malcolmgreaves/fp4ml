@@ -11,7 +11,7 @@ object HardCluster {
    * The returned class is equal to the id of the cluster Center that the
    * input is closest to.
    */
-  def apply[T](d: Distance)(vcents: VectorizedCenters[T]): Classifier[T] =
+  def apply[T](d: Distance)(vcents: VectorizedCenters[T]): Learning[T, Labeled]#Classifier  =
 
     if (vcents.centers.isEmpty) {
 
