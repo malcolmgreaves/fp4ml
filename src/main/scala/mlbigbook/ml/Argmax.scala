@@ -2,6 +2,8 @@ package mlbigbook.ml
 
 import mlbigbook.data.Data
 
+import scala.reflect.ClassTag
+
 /**
  * Generic algorithm for finding the maximal argument. Uses the `Val`
  * typeclass as evidence of an argument's value.
@@ -17,7 +19,7 @@ object Argmax {
    *
    * throws IllegalArgumentException Iff `elements` is empty.
    */
-  def apply[B](elements: Data[B])(implicit ev: Val[B]): B =
+  def apply[B: ClassTag](elements: Data[B])(implicit ev: Val[B]): B =
     if (elements isEmpty)
       throw emptyError
 

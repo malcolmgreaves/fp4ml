@@ -2,6 +2,8 @@ package mlbigbook.ml
 
 import mlbigbook.data.Data
 
+import scala.reflect.ClassTag
+
 /**
  * Module specifying types for machine learning algorithms.
  *
@@ -22,12 +24,11 @@ trait Learning[A, B] {
   type Learner = TrainingData => (Classifier, Estimator)
 }
 
-case class DiscreteEstimator[F, Label](
-    estimate: Learning[Feature.Vector[F], Label]#Estimator) {
+case class DiscreteEstimator[F: ClassTag, Label](estimate: Learning[Feature.Vector[F], Label]#Estimator) {
 
   implicit val ev: Val[(Label, Distribution[_]#Probability)] =
     TupleVal2[Label]
 
   val classify: Learning[Feature.Vector[F], Label]#Classifier =
-    (x: Feature.Vector[F]) => Argmax(estimate(x) toSeq)(ev)._1
+    (x: Feature.Vector[F]) => Argmax(estimate(x) toSeq)._1
 }

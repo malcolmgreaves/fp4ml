@@ -2,6 +2,8 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+import scala.reflect.ClassTag
+
 object Feature {
   type Vector[F] = Data[F]
 }
@@ -18,7 +20,7 @@ object NaiveBayesModule {
 
   type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
 
-  def apply[Feature, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
+  def apply[Feature: ClassTag, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
     DiscreteEstimator[Feature, Label] {
       (features: Feature.Vector[Feature]) =>
         DiscreteDistribution {

@@ -31,55 +31,55 @@ trait Vector {
 
     val buf = mutable.UnrolledBuffer.empty[(Int, Double, Double)]
 
-    @tailrec def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
-      aNZ.headOption match {
+      @tailrec def zipper(aNZ: Traversable[(Int, Double)], bNZ: Traversable[(Int, Double)]): Unit =
+        aNZ.headOption match {
 
-        case Some((aIndex, aHead)) => bNZ.headOption match {
+          case Some((aIndex, aHead)) => bNZ.headOption match {
 
-          case Some((bIndex, bHead)) =>
-            if (aIndex < bIndex) {
+            case Some((bIndex, bHead)) =>
+              if (aIndex < bIndex) {
+                if (aIndex != 0.0)
+                  buf.append((aIndex, aHead, 0.0))
+                // else don't append because they're both zero!
+                zipper(aNZ.drop(1), bNZ)
+
+              } else if (bIndex < aIndex) {
+                if (bIndex != 0.0)
+                  buf.append((bIndex, 0.0, bHead))
+                // else don't append because they're both zero!
+                zipper(aNZ, bNZ.drop(1))
+
+              } else {
+
+                if (aIndex != 0.0 && bIndex != 0.0)
+                  buf.append((aIndex, aHead, bHead))
+                else if (aIndex != 0.0)
+                  buf.append((aIndex, aHead, 0.0))
+                else if (bIndex != 0.0)
+                  buf.append((aIndex, 0.0, bHead))
+                // else don't append because they're both zero!
+                zipper(aNZ.drop(1), bNZ.drop(1))
+              }
+
+            case None =>
               if (aIndex != 0.0)
                 buf.append((aIndex, aHead, 0.0))
               // else don't append because they're both zero!
               zipper(aNZ.drop(1), bNZ)
+          }
 
-            } else if (bIndex < aIndex) {
+          case None => bNZ.headOption match {
+
+            case Some((bIndex, bHead)) =>
               if (bIndex != 0.0)
                 buf.append((bIndex, 0.0, bHead))
               // else don't append because they're both zero!
               zipper(aNZ, bNZ.drop(1))
 
-            } else {
-
-              if (aIndex != 0.0 && bIndex != 0.0)
-                buf.append((aIndex, aHead, bHead))
-              else if (aIndex != 0.0)
-                buf.append((aIndex, aHead, 0.0))
-              else if (bIndex != 0.0)
-                buf.append((aIndex, 0.0, bHead))
-              // else don't append because they're both zero!
-              zipper(aNZ.drop(1), bNZ.drop(1))
-            }
-
-          case None =>
-            if (aIndex != 0.0)
-              buf.append((aIndex, aHead, 0.0))
-            // else don't append because they're both zero!
-            zipper(aNZ.drop(1), bNZ)
+            case None =>
+              () // no more elements left to process, we're done
+          }
         }
-
-        case None => bNZ.headOption match {
-
-          case Some((bIndex, bHead)) =>
-            if (bIndex != 0.0)
-              buf.append((bIndex, 0.0, bHead))
-            // else don't append because they're both zero!
-            zipper(aNZ, bNZ.drop(1))
-
-          case None =>
-            () // no more elements left to process, we're done
-        }
-      }
 
     zipper(nonZeros, v.nonZeros)
 
