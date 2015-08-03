@@ -8,6 +8,15 @@ class CountingNaiveBayesTest extends FunSuite {
 
   test("test using small vocabulary, words") {
 
+    val nb = NaiveBayesModule(CountingNaiveBayes.Int.produce(training))
+
+    smallVocabData
+      .map { x =>
+        println(x)
+        nb.estimate(x)
+      }
+      .foreach(println)
+
   }
 
 }
@@ -30,10 +39,7 @@ object CountingNaiveBayesTest {
       "negative"
     )
 
-  val training: Learning[Feature.Vector[String], String]#TrainingData = {
-    val x = 10
-    if (x > 1) ???
-    else ???
-  }
+  val training: Learning[Feature.Vector[String], String]#TrainingData =
+    smallVocabData.zip(smallVocabLabels)
 
 }
