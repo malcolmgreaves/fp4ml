@@ -6,17 +6,18 @@ class CountingNaiveBayesTest extends FunSuite {
 
   import CountingNaiveBayesTest._
 
-  test("test using small vocabulary, words") {
+  test("test using small vocabulary, bag-of-words (both Long and Int manifestations)") {
+    testSmallVocab(CountingNaiveBayes.Int)
+    testSmallVocab(CountingNaiveBayes.Long)
+  }
 
-    val nb = NaiveBayesModule(CountingNaiveBayes.Int.produce(training))
+  def testSmallVocab[N: Numeric](c: CountingNaiveBayes[N]): Unit = {
+    val nb = NaiveBayesModule(c.produce(training))
+    val estimated = smallVocabData.map(nb.estimate).toSeq
 
-    smallVocabData
-      .map { x =>
-        println(x)
-        nb.estimate(x)
-      }
-      .foreach(println)
-
+    assert(estimated.size == 2)
+    assert(estimated.head == estimated(1))
+    assert(estimated.head == expectedSmallVocabDistribution)
   }
 
 }
@@ -41,5 +42,8 @@ object CountingNaiveBayesTest {
 
   val training: Learning[Feature.Vector[String], String]#TrainingData =
     smallVocabData.zip(smallVocabLabels)
+
+  val expectedSmallVocabDistribution =
+    DiscreteDistribution(smallVocabLabels.map(x => (x, 0.5)).toMap)
 
 }

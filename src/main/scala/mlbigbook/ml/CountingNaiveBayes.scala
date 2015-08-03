@@ -20,9 +20,6 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
     data: Learning[Feature.Vector[F], L]#TrainingData,
     smooth: Smoothing = implicitly[Numeric[N]].one): NaiveBayes[F, L] = {
     val (labelMap, featureMap) = count(data)
-    println(s"label map:\n$labelMap\n")
-    println(s"feature map:\n$featureMap\n")
-
     val (prior, likelihood) = counts2priorandlikeihood((labelMap, featureMap), smooth)
     NaiveBayes(
       labelMap.keys.toSeq,
@@ -104,43 +101,63 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
 
     val prior = {
       val totalClassCount = num.toDouble(labelMap.map(_._2).sum)
-      labelMap.map {
-        case (label, count) =>
-          (label, math.log(num.toDouble(count) / totalClassCount))
-      }
+      val priormap =
+        labelMap.map {
+          case (label, count) =>
+            (label, num.toDouble(count) / totalClassCount)
+        }
+
+      (label: L) =>
+        if (priormap contains label)
+          priormap(label)
+        else
+          0.0
     }
 
     val likelihood = {
 
-      val totalSmoothPsuedocounts = {
-        // todo -- replace with bloom filter ! (and add 1 just to make sure that we get somethin'...)
-        val nDistinctFeatures =
-          featureMap
-            .map(_._2.keySet)
-            .reduce(_ ++ _)
-            .size
-            .toDouble
-        nDistinctFeatures * num.toDouble(smooth)
-      }
-
-      val totalFeatureClassCount =
+      val totalFeatureClassCount = {
+        val totalSmoothPsuedocounts = {
+          // todo -- replace with bloom filter ! (and add 1 just to make sure that we get somethin'...)
+          val nDistinctFeatures =
+            featureMap
+              .map(_._2.keySet)
+              .reduce(_ ++ _)
+              .size
+              .toDouble
+          nDistinctFeatures * num.toDouble(smooth)
+        }
         num.toDouble(featureMap.map(_._2.map(_._2).sum).sum) + totalSmoothPsuedocounts
-
-      val smoother = {
-        val s = num.toDouble(smooth)
-        (x: N) => num.toDouble(x) + s
       }
 
-      featureMap.map {
-        case (label, featMap) =>
-          (
-            label,
-            featMap.map {
-              case (feature, count) =>
-                (feature, math.log(smoother(count) / totalFeatureClassCount))
-            }
-          )
+      val s = num.toDouble(smooth)
+      val psuedoCount = s / totalFeatureClassCount
+
+      val likelihoodMap = {
+        val smoother = (x: N) => num.toDouble(x) + s
+        featureMap.map {
+          case (label, featMap) =>
+            (
+              label,
+              featMap.map {
+                case (feature, count) =>
+                  (feature, smoother(count) / totalFeatureClassCount)
+              }
+            )
+        }
       }
+
+      (label: L) =>
+        (feature: F) =>
+          if (likelihoodMap contains label) {
+            val fmap = likelihoodMap(label)
+            if (fmap contains feature)
+              fmap(feature)
+            else
+              psuedoCount
+          } else {
+            psuedoCount
+          }
     }
 
     (prior, likelihood)
