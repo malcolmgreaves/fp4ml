@@ -6,13 +6,12 @@ import mlbigbook.wordcount.NumericMap
 object CountingNaiveBayes {
   case object Int extends CountingNaiveBayes[Int] {}
   case object Long extends CountingNaiveBayes[Long] {}
+  case object Double extends CountingNaiveBayes[Double] {}
 }
 
-sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: Numeric]() {
+abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Double) N: Numeric]() {
 
   import NaiveBayesModule._
-
-  implicit val nm = NumericMap[N]
 
   type Smoothing = N
 
@@ -28,23 +27,7 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
     )
   }
 
-  // count features
-  // incorporate smoothing
-  // for each vector, v:
-  //    c = v.class()                                             assert(shouldBeNeg.)
-  //    for each feature, f:
-  //      if v(f) is nonzero:
-  //        featurevalu
-  // by class
-  //    classcount[c] += 1
-  //
-  // likelihood[c][f] = LOG ( featurevaluecount[c][f] / sum c' { featurevalucecount[c'][f] } )
-  // posterior[c] = LOG ( classcount[c] / sum c' { classcount[c'] } )
-  //
-  // for new one:
-  //    for each feature *f* in new one:
-  //      s += likelihood[c'][*f*]
-  //    posterior[c'] + s
+  implicit val nm = NumericMap[N]
 
   type LabelMap[Label] = NumericMap[N]#M[Label]
 
@@ -57,7 +40,7 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
 
   type Counts[Label, Feature] = (LabelMap[Label], FeatureMap[Label, Feature])
 
-  def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)])(implicit nm: NumericMap[N]): Counts[Label, F] =
+  final def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)])(implicit nm: NumericMap[N]): Counts[Label, F] =
     data
       .aggregate((nm.empty[Label], FeatureMap.empty[Label, F]))(
         {
@@ -92,7 +75,7 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
         }
       )
 
-  def counts2priorandlikeihood[F: Equiv, L](
+  final def counts2priorandlikeihood[F: Equiv, L](
     c: Counts[L, F],
     smooth: Smoothing = implicitly[Numeric[N]].one): (Prior[L], Likelihood[F, L]) = {
 
@@ -162,5 +145,4 @@ sealed abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long) N: 
 
     (prior, likelihood)
   }
-
 }
