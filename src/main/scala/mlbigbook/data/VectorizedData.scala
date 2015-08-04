@@ -19,8 +19,8 @@ case class VectorizedData(target: DenseVector[Double], features: DenseMatrix[Dou
   override def toString: String =
     s"""VectorizedData(
        |target = $target,
-                          |features = $features
-        |)
+       |features = $features
+       |)
        """.stripMargin
 }
 
