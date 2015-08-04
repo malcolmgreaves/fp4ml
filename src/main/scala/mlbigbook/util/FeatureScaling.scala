@@ -7,7 +7,6 @@ import mlbigbook.data.DistData
  */
 object FeatureScaling {
 
-  private[this] case class Product2(first: Double, second: Double)
   private[this] case class Product3(n: Int, mean: Double, m2: Double)
 
   def welfordsMethodVariance(elems: DistData[Double]): Double = {
