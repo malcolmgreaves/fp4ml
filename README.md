@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/malcolmgreaves/bigmlbook.png?label=ready&title=Ready)](https://waffle.io/malcolmgreaves/bigmlbook)
 [![Build Status](https://travis-ci.org/malcolmgreaves/bigmlbook.svg?branch=master)](https://travis-ci.org/malcolmgreaves/bigmlbook) [![Coverage Status](https://img.shields.io/coveralls/malcolmgreaves/bigmlbook.svg)](https://coveralls.io/r/malcolmgreaves/bigmlbook)
 ==========================================================================================
 Using sbt for building, tests, running programs, and interative shell.
