@@ -12,26 +12,26 @@ import mlbigbook.optimization.Types.CostFn
 object CostFunctions {
 
   val linearRegressionCost = CostFn(
-      (data: Data[VectorizedData], weights: DenseVector[Double]) => {
+    (data: Data[VectorizedData], weights: DenseVector[Double]) => {
 
-        val counts = data.map(_.target.activeSize).reduceLeft(_ + _)
+      val counts = data.map(_.target.activeSize).reduceLeft(_ + _)
 
-        val unscaledCost =
-          data
-            .aggregate(0.0)(
-          seqOp = {
+      val unscaledCost =
+        data
+          .aggregate(0.0)(
+            seqOp = {
             case (currCost, elem) =>
               currCost + (elem.features * weights :- elem.target)
                 .map(i => math.pow(i, 2))
                 .reduceLeft(_ + _)
           },
-          combOp = {
+            combOp = {
             case (a, b) => a + b
           }
-        )
+          )
 
-        unscaledCost / (2 * counts)
-      }
+      unscaledCost / (2 * counts)
+    }
   )
 
 }

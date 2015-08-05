@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{Datum, Data, VectorizedData}
+import mlbigbook.data.{ Datum, Data, VectorizedData }
 import mlbigbook.optimization.Optimizer.optimize
 import mlbigbook.optimization.Types.WeightUpdate
 import mlbigbook.optimization._
@@ -22,9 +22,9 @@ class LinearRegressionTest extends FunSpec with Matchers with LocalSparkContext 
     targets.
       zip(feature).
       map {
-      // merge target and feature, add intercept to feature vector
-      case (y, x) => Datum(y, DenseVector[Double](1.0D, x))
-    }
+        // merge target and feature, add intercept to feature vector
+        case (y, x) => Datum(y, DenseVector[Double](1.0D, x))
+      }
 
   // These lazy vals are important due to initialization issues (Spark needs to start up first)
   lazy val rdd: Data[VectorizedData] =
@@ -43,7 +43,6 @@ class LinearRegressionTest extends FunSpec with Matchers with LocalSparkContext 
     data = rdd
   )
 
-
   describe("linear regression") {
 
     val plusMinus = 0.01
@@ -52,19 +51,18 @@ class LinearRegressionTest extends FunSpec with Matchers with LocalSparkContext 
 
       val sgd = commonParams(OptimAlgos.sgd)
       val lastWeights = sgd.weights.last
-      lastWeights(0) should be (intercept +- plusMinus)
-      lastWeights(1) should be (slope +- plusMinus)
+      lastWeights(0) should be(intercept +- plusMinus)
+      lastWeights(1) should be(slope +- plusMinus)
     }
 
     it("should converge correctly using Adagrad") {
 
       val adaGrad = commonParams(OptimAlgos.adaGrad)
       val lastWeights = adaGrad.weights.last
-      lastWeights(0) should be (intercept +- plusMinus)
-      lastWeights(1) should be (slope +- plusMinus)
+      lastWeights(0) should be(intercept +- plusMinus)
+      lastWeights(1) should be(slope +- plusMinus)
     }
   }
 
 }
-
 

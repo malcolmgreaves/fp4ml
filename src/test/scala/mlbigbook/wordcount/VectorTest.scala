@@ -16,10 +16,12 @@ class VectorTest extends FunSuite {
     val vecSanta = doc2vec(docSanta)
     val vecBoth = doc2vec(docBoth)
 
-    assert(vecFox.cardinality == vecBoth.cardinality
+    assert(
+      vecFox.cardinality == vecBoth.cardinality
       && vecSanta.cardinality == vecFox.cardinality
       && vecFox.cardinality == knownCardinality,
-      s"cardinality is not the same for computed document vectors")
+      s"cardinality is not the same for computed document vectors"
+    )
 
     checkVec(nonzeroFox, vecFox)
     checkVec(nonzeroSanta, vecSanta)
@@ -36,10 +38,12 @@ class VectorTest extends FunSuite {
     val vecSanta = doc2vec(docSanta)
     val vecBoth = doc2vec(docBoth)
 
-    assert(vecFox.cardinality == vecBoth.cardinality
+    assert(
+      vecFox.cardinality == vecBoth.cardinality
       && vecSanta.cardinality == vecFox.cardinality
       && vecFox.cardinality == knownCardinality,
-      s"cardinality is not the same for computed document vectors")
+      s"cardinality is not the same for computed document vectors"
+    )
 
     // all values in TFIDF-vectorized vectors should have the same
     // nonzero indicies as their non-TFIDF ones

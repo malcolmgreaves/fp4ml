@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 import scala.util.Random
 
 /** Wraps a Spark RDD as a Data. */
-case class RddData[A:ClassTag](d: RDD[A]) extends Data[A] {
+case class RddData[A: ClassTag](d: RDD[A]) extends Data[A] {
 
   override def map[B: ClassTag](f: A => B): Data[B] =
     RddData(d.map(f))
@@ -64,7 +64,7 @@ case class RddData[A:ClassTag](d: RDD[A]) extends Data[A] {
       .map(_.asInstanceOf[A1])
       .reduce(r)
 
-  override def reduceLeft(r: (A,A) => A): A =
+  override def reduceLeft(r: (A, A) => A): A =
     d.reduce(r)
 
   override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =

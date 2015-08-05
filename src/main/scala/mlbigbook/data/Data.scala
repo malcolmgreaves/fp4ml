@@ -78,7 +78,7 @@ abstract class Data[A] {
 
 object Data {
 
-  implicit def rdd2data[A:ClassTag](d: RDD[A]): Data[A] =
+  implicit def rdd2data[A: ClassTag](d: RDD[A]): Data[A] =
     RddData(d)
 
   implicit def traversable2data[A](t: Traversable[A]): Data[A] =

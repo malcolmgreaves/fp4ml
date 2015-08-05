@@ -61,7 +61,7 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
   override def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1 =
     ls.reduce(r)
 
-  override def reduceLeft(r: (A,A) => A): A =
+  override def reduceLeft(r: (A, A) => A): A =
     ls.reduce(r)
 
   override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =

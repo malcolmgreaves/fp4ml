@@ -3,7 +3,7 @@ package mlbigbook.ml
 import mlbigbook.optimization.OptimAlgos
 import mlbigbook.util.FeatureScaling
 import mlbigbook.wordcount.LocalSparkContext
-import org.scalatest.{Matchers, FunSpec}
+import org.scalatest.{ Matchers, FunSpec }
 import scala.util.Random
 
 /**
@@ -23,15 +23,15 @@ class FeatureScalingTest extends FunSpec with Matchers with LocalSparkContext {
   describe("Welford's online variance calculation") {
 
     it("should get a correct variance estimate for Scala collections") {
-      localEst should be (expected +- tolerance)
+      localEst should be(expected +- tolerance)
     }
 
     it("should get a correct variance estimate for Spark RDDs") {
-      sparkEst should be (expected +- tolerance)
+      sparkEst should be(expected +- tolerance)
     }
 
     it("local Scala collections and Spark estimates should be close to each other") {
-      sparkEst should be (localEst +- tolerance)
+      sparkEst should be(localEst +- tolerance)
     }
 
   }
