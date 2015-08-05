@@ -48,15 +48,15 @@ scalacOptions ++= Seq(
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:experimental.macros",
-  "-Ybackend:GenBCode",
+  //"-Ybackend:GenBCode",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
   "-Ywarn-infer-any",
   "-Yinline",
   "-Yinline-handlers",
-  "-Yopt-warnings",
-  "-Yopt:_"
+  "-Yopt-warnings"//,
+  //"-Yopt:_"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ case class VectorizedCenters[T](cardinality: Int, v: Vectorizer[T], centers: Ind
  * The id value is helpful for naming clusters. The mean value is the vector
  * representation of the cluster's center.
  */
-case class Center(id: String, mean: Vector)
+case class Center(id: String, mean: OldVector)
 
 /** Contains methods for performing the k-means clustering algorithm. */
 object KMeans {
@@ -68,7 +68,7 @@ object KMeans {
    * short-circuit and evaluate to the initial clusters. Otherwise, it will proceed
    * with k-means.
    */
-  def apply[T](initial: VectorizedCenters[T])(k: KMeansIn)(vectorized: Data[(T, Vector)]): VectorizedCenters[T] =
+  def apply[T](initial: VectorizedCenters[T])(k: KMeansIn)(vectorized: Data[(T, OldVector)]): VectorizedCenters[T] =
     if (initial.cardinality > 0 && k.nClusters == initial.centers.size)
       apply_h(k, initial, 0.0, 0, vectorized)
     else
@@ -80,7 +80,7 @@ object KMeans {
     current: VectorizedCenters[T],
     currTol: Double,
     currIter: Int,
-    data: Data[(T, Vector)]): VectorizedCenters[T] =
+    data: Data[(T, OldVector)]): VectorizedCenters[T] =
 
     if (currIter >= k.maxIterations) {
       current
@@ -100,7 +100,7 @@ object KMeans {
   /** Performs a single assignment and update step of k-means. */
   def updateCenters[T](
     k: KMeansIn,
-    data: Data[(T, Vector)],
+    data: Data[(T, OldVector)],
     current: VectorizedCenters[T]): VectorizedCenters[T] = {
 
     // uses the current cluster centers to construct a classifier, which
@@ -160,7 +160,7 @@ object KMeans {
    * Uses the Classifier to assign a label to each datapoint. When this Classifier is
    * a HardCluster, this is equivalent to assigning each datapoint to the nearest cluster.
    */
-  def assignment[T](c: Learning[T, Labeled]#Classifier)(data: Data[(T, Vector)]): Data[(Labeled, Vector)] =
+  def assignment[T](c: Learning[T, Labeled]#Classifier)(data: Data[(T, OldVector)]): Data[(Labeled, OldVector)] =
     data.map({ case (item, vector) => (c(item), vector) })
 
   /**
@@ -184,7 +184,7 @@ object KMeans {
     prev.zip(curr)
       .foldLeft(0.0) {
         case (tol, (prevCenter, currCenter)) =>
-          tol + Vector.absElemDiff(prevCenter.mean, currCenter.mean)
+          tol + OldVector.absElemDiff(prevCenter.mean, currCenter.mean)
       }
 
 }

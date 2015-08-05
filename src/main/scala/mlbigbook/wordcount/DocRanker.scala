@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ VectorDataIn, Vector, TextData }
+import mlbigbook.data.{ VectorDataIn, OldVector, TextData }
 import mlbigbook.ml.{ Ranker, RankerIn }
 
 /** Produces a Ranker suitable for Data.Document instances. */
@@ -19,10 +19,10 @@ object DocRanker {
 
 object Similarity {
 
-  import Vector._
+  import OldVector._
 
   /** Computes the cosine similarity of two vectors: cos(angle between v1 and v2). */
-  def cosine(v1: Vector, v2: Vector): Double =
+  def cosine(v1: OldVector, v2: OldVector): Double =
     Math.abs(dotProduct(v1, v2)) / (absoluteValue(v1) * absoluteValue(v2))
 
 }

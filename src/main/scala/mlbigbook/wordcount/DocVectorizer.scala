@@ -44,7 +44,7 @@ object DocVectorizer {
 
           val countedD = docCounter(d)
 
-          new Vector {
+          new OldVector {
 
             override val cardinality =
               allCardinality

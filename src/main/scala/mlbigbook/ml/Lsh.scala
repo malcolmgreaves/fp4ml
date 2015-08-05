@@ -1,11 +1,11 @@
 package mlbigbook.ml
 
-import mlbigbook.data.{ Data, Vector }
+import mlbigbook.data.{ Data, OldVector }
 
 import scala.util.Random
 
 /** Type represetning a locality sensitive hash function. */
-trait Lsh extends (Vector => Int)
+trait Lsh extends (OldVector => Int)
 
 case class LshIn(cardinality: Int, nBins: Int)
 
@@ -34,7 +34,7 @@ object Lsh {
             selected
       )
 
-    (v: Vector) => {
+    (v: OldVector) => {
       val projectedSum = selectedDimensions.foldLeft(0.0)(
         (sum, dimension) => sum + v.valueAt(dimension)
       )
@@ -42,9 +42,9 @@ object Lsh {
     }
   }
 
-  @inline implicit def fn2lsh(f: Vector => Int): Lsh =
+  @inline implicit def fn2lsh(f: OldVector => Int): Lsh =
     new Lsh {
-      @inline override def apply(x: Vector): Int = f(x)
+      @inline override def apply(x: OldVector): Int = f(x)
     }
 
 }

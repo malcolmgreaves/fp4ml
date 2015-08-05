@@ -5,7 +5,7 @@
  */
 package mlbigbook.ml
 
-import mlbigbook.data.Vector
+import mlbigbook.data.OldVector
 import mlbigbook.wordcount.Similarity
 
 /**
@@ -18,19 +18,19 @@ import mlbigbook.wordcount.Similarity
  *   ** symmetry : \forall x,y d(x,y) = d(y,x)
  *   ** triangle inequality : \forall x,y,z d(x,y) <= d(x,z) + d(z,y)
  */
-trait Distance extends ((Vector, Vector) => Double)
+trait Distance extends ((OldVector, OldVector) => Double)
 
 object Distance {
 
-  @inline implicit def fn2distance(f: (Vector, Vector) => Double): Distance =
+  @inline implicit def fn2distance(f: (OldVector, OldVector) => Double): Distance =
     new Distance {
-      @inline override def apply(v1: Vector, v2: Vector): Double = f(v1, v2)
+      @inline override def apply(v1: OldVector, v2: OldVector): Double = f(v1, v2)
     }
 }
 
 case object Euclidian extends Distance {
 
-  @inline override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: OldVector, v2: OldVector): Double =
     Math.sqrt(
       v1.zip(v2)
         .foldLeft(0.0)({
@@ -43,7 +43,7 @@ case object Euclidian extends Distance {
 
 case object Manhattan extends Distance {
 
-  @inline override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: OldVector, v2: OldVector): Double =
     v1.zip(v2)
       .foldLeft(0.0)({
         case (d, (_, value1, value2)) =>
@@ -62,15 +62,15 @@ case object Manhattan extends Distance {
  */
 case object Cosine extends Distance {
 
-  import mlbigbook.data.Vector._
+  import mlbigbook.data.OldVector._
 
-  @inline override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: OldVector, v2: OldVector): Double =
     1.0 - Similarity.cosine(v1, v2)
 }
 
 case object Chebyshev extends Distance {
 
-  @inline override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: OldVector, v2: OldVector): Double =
     v1.zip(v2)
       .foldLeft(Option.empty[Double])({
         case (max, (_, value1, value2)) =>
@@ -99,7 +99,7 @@ case object Chebyshev extends Distance {
 
 case object BrayCurtis extends Distance {
 
-  @inline override def apply(v1: Vector, v2: Vector): Double = {
+  @inline override def apply(v1: OldVector, v2: OldVector): Double = {
 
     val (sumAbsPairwiseDiff, sumAbsPairwiseSum) =
       v1.zip(v2)
@@ -115,7 +115,7 @@ case object BrayCurtis extends Distance {
 
 case object Canberra extends Distance {
 
-  @inline override def apply(v1: Vector, v2: Vector): Double =
+  @inline override def apply(v1: OldVector, v2: OldVector): Double =
     v1.zip(v2)
       .foldLeft(0.0)({
         case (sum, (_, value1, value2)) =>
@@ -137,7 +137,7 @@ case object MinkowskiMaker {
       private def raiseTo1OverP(x: Double): Double =
         Math.pow(x, pInv)
 
-      override def apply(v1: Vector, v2: Vector): Double =
+      override def apply(v1: OldVector, v2: OldVector): Double =
         raiseTo1OverP(
           v1.zip(v2)
             .foldLeft(0.0)({

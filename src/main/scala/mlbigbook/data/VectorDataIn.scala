@@ -1,6 +1,6 @@
 package mlbigbook.data
 
-sealed trait VectorDataIn[T] extends (() => (Vectorizer[T], Data[(T, Vector)]))
+sealed trait VectorDataIn[T] extends (() => (Vectorizer[T], Data[(T, OldVector)]))
 
 case class NeedsApplicationVDIn[T](mkVec: VectorizerMaker[T], data: Data[T]) extends VectorDataIn[T] {
   override def apply() = {
@@ -9,7 +9,7 @@ case class NeedsApplicationVDIn[T](mkVec: VectorizerMaker[T], data: Data[T]) ext
   }
 }
 
-case class PreComputedVDIn[T](v: Vectorizer[T], data: Data[(T, Vector)]) extends VectorDataIn[T] {
+case class PreComputedVDIn[T](v: Vectorizer[T], data: Data[(T, OldVector)]) extends VectorDataIn[T] {
   override val apply = (v, data)
 }
 

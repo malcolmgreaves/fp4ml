@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.ml.NaiveBayesModule.NaiveBayes
+import mlbigbook.ml.NaiveBayesModule.{Likelihood, NaiveBayes}
 import mlbigbook.wordcount.NumericMap
 import breeze.linalg._
 import breeze.math._
@@ -20,9 +20,60 @@ abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.I
   import breeze.linalg.Vector
   type Vec = Vector[N]
 
-  final def produce[F: Equiv, L: Equiv](data: Learning[Vec, L]#TrainingData): NaiveBayes[Vec, L] = {
 
-    ???
+
+
+  final def produce[L: Equiv](data: Learning[Vec, L]#TrainingData): NaiveBayes[(N, Int), L] = {
+
+    val num = implicitly[Numeric[N]]
+
+    // make label map
+    val labelMap: Map[L, Long] = null
+    // make prior from label map
+    val prior = {
+      val totalClassCount = labelMap.map(_._2).sum.toDouble
+      val priormap =
+        labelMap.map {
+          case (label, count) =>
+            (label, count.toDouble / totalClassCount)
+        }
+
+      (label: L) =>
+        if (priormap contains label)
+          priormap(label)
+        else
+          0.0
+    }
+
+    // estimate means and variances of all features
+    // make likelihood according to these statistics + the
+    // probability density function of a Gaussian distribution
+    val likelihood: Likelihood[(N, Int), L] = {
+      null
+//      val gau = estimateGaussian(data)
+//      val maxIndex = g.mean.size
+//      // TODO
+//      // (1) need to estimate (mean, variance) on a PER-CLASS basis
+//      // (2) make types work out here
+//      // (3) make everything work out with vector
+//      // (4) if cannot obtain (3), then replace with DenseVector everywhere (reasonable assumption for continuous features...)
+//      (label: L) => {
+//        val g = gau(label)
+//        {
+//          case (value, index) =>
+//            if(index >= 0 && index < maxIndex)
+//              (1.0 / math.sqrt(2.0 * math.pi * g.variance(index))) * math.exp((-0.5) * math.pow(value - g.mean(index), 2.0)/ g.variance(index))
+//            else
+//              0.0
+//        }
+//      }
+    }
+
+    NaiveBayes(
+      labelMap.keySet.toSeq,
+      prior,
+      likelihood
+    )
   }
 
   case class Gaussian(mean: Vec, variance: Vec)

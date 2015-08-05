@@ -11,7 +11,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 /** Type defines operations on data that behaves as a dense numerical vector. */
-trait Vector {
+trait OldVector {
 
   /** The size of the feature space that this vector is based on. */
   val cardinality: Int
@@ -26,7 +26,7 @@ trait Vector {
    * along with their respective index. For each one of these triples, at least
    * one value is non-zero.
    */
-  final def zip(v: Vector): Traversable[(Int, Double, Double)] = {
+  final def zip(v: OldVector): Traversable[(Int, Double, Double)] = {
     assert(cardinality == v.cardinality)
 
     val buf = mutable.UnrolledBuffer.empty[(Int, Double, Double)]
@@ -91,14 +91,14 @@ trait Vector {
 }
 
 /** Collection of vector operations and type definitions. */
-object Vector {
+object OldVector {
 
   /**
    * Compute the dot-product of two vectors.
    *
    * Fails with assertion error if the vector cardinalities do not match up.
    */
-  def dotProduct(v1: Vector, v2: Vector): Double = {
+  def dotProduct(v1: OldVector, v2: OldVector): Double = {
     v1.zip(v2).foldLeft(0.0)({
       case (dpSum, (_, elementV1, elementV2)) =>
         dpSum + elementV1 * elementV2
@@ -108,19 +108,19 @@ object Vector {
   /**
    * Compute the sum of the absolute value of each element of the vector.
    */
-  def absoluteValue(v: Vector): Double = {
+  def absoluteValue(v: OldVector): Double = {
     (0 until v.cardinality).foldLeft(0.0)({
       case (absval, dimension) => absval + Math.abs(v.valueAt(dimension))
     })
   }
 
-  def absElemDiff(v1: Vector, v2: Vector): Double =
+  def absElemDiff(v1: OldVector, v2: OldVector): Double =
     v1.zip(v2).foldLeft(0.0)({
       case (sum, (_, value1, value2)) =>
         sum + Math.abs(value1 - value2)
     })
 
-  def rankFnOrdering[T](f: Vector => Double): ((T, Vector)) => Double =
-    (x: (T, Vector)) => f(x._2)
+  def rankFnOrdering[T](f: OldVector => Double): ((T, OldVector)) => Double =
+    (x: (T, OldVector)) => f(x._2)
 
 }

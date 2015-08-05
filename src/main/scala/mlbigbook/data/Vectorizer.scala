@@ -7,11 +7,11 @@
 package mlbigbook.data
 
 /** Type that represents something that can convert an arbitrary instance of T into a Vector. */
-trait Vectorizer[T] extends (T => Vector)
+trait Vectorizer[T] extends (T => OldVector)
 
 object Vectorizer {
 
-  implicit class Fn[T](val f: T => Vector) extends Vectorizer[T] {
+  implicit class Fn[T](val f: T => OldVector) extends Vectorizer[T] {
     override def apply(x: T) = f(x)
   }
 }
