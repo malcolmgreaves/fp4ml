@@ -7,12 +7,14 @@
  */
 package mlbigbook.data
 
+import mlbigbook.util.Sampling
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
+import scala.util.Random
 
 /** Wraps a Spark RDD as a Data. */
-case class RddData[A](d: RDD[A]) extends Data[A] {
+case class RddData[A:ClassTag](d: RDD[A]) extends Data[A] {
 
   override def map[B: ClassTag](f: A => B): Data[B] =
     RddData(d.map(f))
@@ -30,6 +32,9 @@ case class RddData[A](d: RDD[A]) extends Data[A] {
       val _ = f(a)
     }
 
+  override def filter(f: A => Boolean): Data[A] =
+    RddData(d.filter(f))
+
   override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
     d.aggregate(zero)(seqOp, combOp)
 
@@ -39,6 +44,12 @@ case class RddData[A](d: RDD[A]) extends Data[A] {
   override def take(k: Int): Traversable[A] =
     d.take(k)
 
+  override def headOption: Option[A] =
+    if (!d.isEmpty())
+      Some(d.first())
+    else
+      None
+
   override def toSeq: Seq[A] =
     d.collect().toIndexedSeq // toIndexedSeq makes a copy of the array, ensuring that it's immutable to the receiver
 
@@ -46,17 +57,15 @@ case class RddData[A](d: RDD[A]) extends Data[A] {
     RddData(d.flatMap(f))
 
   override def groupBy[B: ClassTag](f: A => B): Data[(B, Iterable[A])] =
-    ???
-  //new RDDData(
-  //  new PairRDDFunctions(d.groupBy(f))
-  //    .partitionBy(???)
-  //)
+    d.groupBy(f)
 
-  override def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1 = {
+  override def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1 =
     d
       .map(_.asInstanceOf[A1])
       .reduce(r)
-  }
+
+  override def reduceLeft(r: (A,A) => A): A =
+    d.reduce(r)
 
   override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =
     d
@@ -87,5 +96,23 @@ case class RddData[A](d: RDD[A]) extends Data[A] {
           .zip(d.map[A1](_.asInstanceOf[A1]))(implicitly[ClassTag[B]], implicitly[ClassTag[A1]])
           .map { case (b, a1) => (a1, b) }
     }
+
+  override def zipWithIndex: Data[(A, Long)] =
+    d.zipWithIndex()
+
+  override def sample(withReplacement: Boolean, fraction: Double, seed: Long = Random.nextLong()): Data[A] =
+    d.sample(withReplacement, fraction, seed)
+
+  override def exactSample(fraction: Double, seed: Long): Data[A] = {
+    val modulo = math.round(1.0 / fraction).toInt
+    val randNum = new Random(seed).nextInt(modulo)
+    RddData(
+      d.zipWithIndex()
+        .filter {
+          case (datum, idx) => (idx + randNum) % modulo == 0
+        }
+        .map(_._1)
+    )
+  }
 
 }

@@ -8,6 +8,7 @@
 package mlbigbook.data
 
 import org.apache.spark.rdd.RDD
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 /**
@@ -15,7 +16,7 @@ import scala.reflect.ClassTag
  * The implementation of Data is suitable for both large-scale, distributed data
  * or in-memory structures.
  */
-trait Data[A] {
+abstract class Data[A] {
 
   /** Transform a dataset by applying f to each element. */
   def map[B: ClassTag](f: A => B): Data[B]
@@ -26,6 +27,9 @@ trait Data[A] {
   def foreach(f: A => Any): Unit
 
   def foreachPartition(f: Iterator[A] => Any): Unit
+
+  def filter(f: A => Boolean): Data[A]
+
   /**
    * Starting from a defined zero value, perform an operation seqOp on each element
    * of a dataset. Combine results of seqOp using combOp for a final value.
@@ -38,6 +42,8 @@ trait Data[A] {
   /** Construct a traversable for the first k elements of a dataset. Will load into main mem. */
   def take(k: Int): Traversable[A]
 
+  def headOption: Option[A]
+
   /** Load all elements of the dataset into an array in main memory. */
   def toSeq: Seq[A]
   //    override def zip[A1 >: A, B
@@ -49,6 +55,9 @@ trait Data[A] {
 
   def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1
 
+  /** This has type A as opposed to B >: A due to the RDD limitations */
+  def reduceLeft(op: (A, A) => A): A
+
   def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U]
 
   def size: Long
@@ -59,11 +68,17 @@ trait Data[A] {
 
   def zip[A1 >: A: ClassTag, B: ClassTag](that: Data[B]): Data[(A1, B)]
 
+  def zipWithIndex: Data[(A, Long)]
+
+  def sample(withReplacement: Boolean, fraction: Double, seed: Long): Data[A]
+
+  def exactSample(fraction: Double, seed: Long): Data[A]
+
 }
 
 object Data {
 
-  implicit def rdd2data[A](d: RDD[A]): Data[A] =
+  implicit def rdd2data[A:ClassTag](d: RDD[A]): Data[A] =
     RddData(d)
 
   implicit def traversable2data[A](t: Traversable[A]): Data[A] =

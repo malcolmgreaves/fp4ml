@@ -7,6 +7,8 @@
  */
 package mlbigbook.data
 
+import mlbigbook.util.Sampling
+
 import scala.reflect.ClassTag
 
 /** Wraps a Traversable as a Data. */
@@ -25,6 +27,9 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
     val _ = f(ls.toIterator)
   }
 
+  override def filter(f: A => Boolean): Data[A] =
+    TravData(ls.filter(f))
+
   override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
     ls.aggregate(zero)(seqOp, combOp)
 
@@ -33,6 +38,9 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
 
   override def take(k: Int): Traversable[A] =
     ls.take(k)
+
+  override def headOption: Option[A] =
+    ls.headOption
 
   override def toSeq: Seq[A] =
     ls.toSeq
@@ -45,10 +53,15 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
       ls
         .groupBy(f)
         .toTraversable
-        .map { case (b, iter) => (b, iter.toIterable) }
+        .map {
+          case (b, iter) => (b, iter.toIterable)
+        }
     )
 
   override def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1 =
+    ls.reduce(r)
+
+  override def reduceLeft(r: (A,A) => A): A =
     ls.reduce(r)
 
   override def toMap[T, U](implicit ev: A <:< (T, U)): Map[T, U] =
@@ -78,5 +91,14 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
           .zip(ls.map(_.asInstanceOf[A1]))(implicitly[ClassTag[B]], implicitly[ClassTag[A1]])
           .map { case (b, a1) => (a1, b) }
     }
+
+  override def zipWithIndex: Data[(A, Long)] =
+    ls.toIndexedSeq.zipWithIndex.map(a => (a._1, a._2.toLong))
+
+  override def sample(withReplacement: Boolean, fraction: Double, seed: Long): Data[A] =
+    Sampling.sample(ls, math.round(fraction * ls.size).toInt, withReplacement, seed)
+
+  override def exactSample(fraction: Double, seed: Long): Data[A] =
+    sample(withReplacement = false, fraction = fraction, seed = seed)
 
 }
