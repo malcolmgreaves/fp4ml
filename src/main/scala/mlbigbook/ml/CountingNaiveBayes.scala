@@ -16,8 +16,9 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Doub
   type Smoothing = N
 
   def produce[F: Equiv, L: Equiv](
-    data: Learning[Feature.Vector[F], L]#TrainingData,
-    smooth: Smoothing = implicitly[Numeric[N]].one): NaiveBayes[F, L] = {
+    data:   Learning[Feature.Vector[F], L]#TrainingData,
+    smooth: Smoothing                                   = implicitly[Numeric[N]].one
+  ): NaiveBayes[F, L] = {
     val (labelMap, featureMap) = count(data)
     val (prior, likelihood) = counts2priorandlikeihood((labelMap, featureMap), smooth)
     NaiveBayes(
@@ -76,8 +77,9 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Doub
       )
 
   final def counts2priorandlikeihood[F: Equiv, L](
-    c: Counts[L, F],
-    smooth: Smoothing = implicitly[Numeric[N]].one): (Prior[L], Likelihood[F, L]) = {
+    c:      Counts[L, F],
+    smooth: Smoothing    = implicitly[Numeric[N]].one
+  ): (Prior[L], Likelihood[F, L]) = {
 
     val num = implicitly[Numeric[N]]
     val (labelMap, featureMap) = c

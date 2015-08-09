@@ -88,7 +88,9 @@ object Ranker {
    * returned Traversable has at most limit items.
    */
   def takeTopK[T, N](limit: Int, elements: Data[(T, N)])(
-    implicit n: Numeric[N], c: ClassTag[N]): Traversable[(T, N)] =
+    implicit
+    n: Numeric[N], c: ClassTag[N]
+  ): Traversable[(T, N)] =
     elements
       .sortBy(_._2)(c, n.reverse)
       .take(limit)

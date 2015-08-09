@@ -14,8 +14,10 @@ class TFIDFTest extends FunSuite {
 
   def assertCountsD(actual: Map[String, Double], counted: Map[String, Double]) = {
     counted.foreach({
-      case (word, count) => assert(actual(word) == count,
-        s"$word is unexpected (has count $count)")
+      case (word, count) => assert(
+        actual(word) == count,
+        s"$word is unexpected (has count $count)"
+      )
     })
 
     assert(counted.size == actual.size, s"${counted.size} found, expecting ${actual.size} entries")
@@ -48,11 +50,15 @@ class TFIDFTest extends FunSuite {
     val dfSum = observedDF.foldLeft(0L)({
       case (s, (word, df)) => {
         if (sentFoxSet(word)) {
-          assert(df == 2,
-            s"expecting DF of FOX sentence to be 2, actual $df")
+          assert(
+            df == 2,
+            s"expecting DF of FOX sentence to be 2, actual $df"
+          )
         } else {
-          assert(df == 2,
-            s"expecting DF of SANTA sentence to be 2, actual $df")
+          assert(
+            df == 2,
+            s"expecting DF of SANTA sentence to be 2, actual $df"
+          )
         }
         s + df
       }
@@ -62,8 +68,10 @@ class TFIDFTest extends FunSuite {
         sentSanta.words.size * 2 - // all words in SANTA sentence are in 2 documents
         2 // "the" is double counted, it only has {0,1} DF count per document!
     }
-    assert(dfSum == expectedDFSum,
-      s"expecting DF sum $expectedDFSum actual $dfSum")
+    assert(
+      dfSum == expectedDFSum,
+      s"expecting DF sum $expectedDFSum actual $dfSum"
+    )
   }
 
 }

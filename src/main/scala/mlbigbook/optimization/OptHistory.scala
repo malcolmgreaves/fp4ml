@@ -14,6 +14,7 @@ import breeze.linalg.DenseVector
  * @param grads
  */
 case class OptHistory(
-  cost: Seq[Double],
+  cost:    Seq[Double],
   weights: Seq[DenseVector[Double]],
-  grads: Seq[DenseVector[Double]])
+  grads:   Seq[DenseVector[Double]]
+)

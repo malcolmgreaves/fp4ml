@@ -17,7 +17,7 @@ object OnlineMeanVariance {
   /**
    * Uses Welford's Method to calculate variance.
    */
-  def apply[N : NumericConversion, V[_] <: Vector[_]](
+  def apply[N: NumericConversion, V[_] <: Vector[_]](
     elems: Data[V[N]]
   )(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
     elems.headOption match {

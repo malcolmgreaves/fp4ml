@@ -13,19 +13,19 @@ object Gradients {
 
   val linearRegressionGradient = GradFn(
     f =
-      (data: Data[VectorizedData], weights: DenseVector[Double]) => {
-        data.aggregate(DenseVector.zeros[Double](weights.iterableSize))(
-          seqOp = {
+    (data: Data[VectorizedData], weights: DenseVector[Double]) => {
+      data.aggregate(DenseVector.zeros[Double](weights.iterableSize))(
+        seqOp = {
 
-            case (partialGrad: DenseVector[Double], datum) =>
-              datum.features.t * (datum.features * weights :- datum.target)
-          },
-          combOp = {
+        case (partialGrad: DenseVector[Double], datum) =>
+          datum.features.t * (datum.features * weights :- datum.target)
+      },
+        combOp = {
 
-            case (partVec1, partVec2) => partVec1 :+ partVec2
-          }
-        )
+        case (partVec1, partVec2) => partVec1 :+ partVec2
       }
+      )
+    }
   )
 
 }

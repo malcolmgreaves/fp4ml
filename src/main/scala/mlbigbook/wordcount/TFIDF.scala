@@ -28,8 +28,7 @@ object TFIDF {
   def docfreqDocument(doc: TextData.Document): TextData.WordCount = {
     doc.sentences
       .map(_.words
-        .foldLeft(IndicatorMap.empty)(IndicatorMap.mark)
-      )
+        .foldLeft(IndicatorMap.empty)(IndicatorMap.mark))
       .aggregate(IndicatorMap.empty)(IndicatorMap.combine, IndicatorMap.combine)
   }
 

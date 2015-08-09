@@ -8,7 +8,9 @@ import scala.util.Random
 object LshRanker {
 
   def apply[T](nLshFuncs: Int, nBins: Int)(n: NearNeighIn)(vdata: VectorDataIn[T])(
-    implicit ddContext: DataContext, rand: Random): Ranker[T] = {
+    implicit
+    ddContext: DataContext, rand: Random
+  ): Ranker[T] = {
 
     val (vectorizer, vectorizedData) = vdata()
 
@@ -27,8 +29,7 @@ object LshRanker {
           (v: OldVector) => n.dist(vecInput, v),
           n.neighborhoodSize,
           ht
-        )
-    ).toIndexedSeq
+        )).toIndexedSeq
 
     (input: T) => {
 

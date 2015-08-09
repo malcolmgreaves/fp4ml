@@ -12,16 +12,17 @@ object Optimizer {
   @transient val log = Logger.getLogger(Optimizer.getClass)
 
   def optimize(
-    iter: Int,
-    seed: Long = 42L,
-    initAlpha: Double = 0.1,
-    momentum: Double = 0.0,
-    gradFn: GradFn,
-    costFn: CostFn,
-    updateFn: WeightUpdate,
+    iter:              Int,
+    seed:              Long                 = 42L,
+    initAlpha:         Double               = 0.1,
+    momentum:          Double               = 0.0,
+    gradFn:            GradFn,
+    costFn:            CostFn,
+    updateFn:          WeightUpdate,
     miniBatchFraction: Double,
     weightInitializer: WeightInit,
-    data: Data[VectorizedData]): OptHistory = {
+    data:              Data[VectorizedData]
+  ): OptHistory = {
 
     val count = data.size
     val dataSize = data.headOption match {

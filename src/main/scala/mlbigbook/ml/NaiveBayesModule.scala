@@ -15,8 +15,9 @@ object NaiveBayesModule {
 
   case class NaiveBayes[F, Label](
     labels: Data[Label],
-    p: Prior[Label],
-    l: Likelihood[F, Label])
+    p:      Prior[Label],
+    l:      Likelihood[F, Label]
+  )
 
   type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
 

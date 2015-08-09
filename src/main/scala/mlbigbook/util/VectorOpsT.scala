@@ -1,6 +1,6 @@
 package mlbigbook.util
 
-import breeze.linalg.{NumericOps, DenseVector, Vector}
+import breeze.linalg.{ NumericOps, DenseVector, Vector }
 import breeze.linalg.operators._
 import breeze.math.Semiring
 

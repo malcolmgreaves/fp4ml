@@ -53,8 +53,7 @@ object KMeans {
       cardinality,
       vectorizer,
       (0 until k.nClusters).map(id =>
-        Center(id.toString, DenseVector.mkRandom(cardinality))
-      )
+        Center(id.toString, DenseVector.mkRandom(cardinality)))
     )
 
     apply(initialCenters)(k)(vectorized)
@@ -76,11 +75,12 @@ object KMeans {
 
   /** Performs the iterative assignment and update steps of the k-means algorithm. */
   @tailrec @inline private def apply_h[T](
-    k: KMeansIn,
-    current: VectorizedCenters[T],
-    currTol: Double,
+    k:        KMeansIn,
+    current:  VectorizedCenters[T],
+    currTol:  Double,
     currIter: Int,
-    data: Data[(T, OldVector)]): VectorizedCenters[T] =
+    data:     Data[(T, OldVector)]
+  ): VectorizedCenters[T] =
 
     if (currIter >= k.maxIterations) {
       current
@@ -99,9 +99,10 @@ object KMeans {
 
   /** Performs a single assignment and update step of k-means. */
   def updateCenters[T](
-    k: KMeansIn,
-    data: Data[(T, OldVector)],
-    current: VectorizedCenters[T]): VectorizedCenters[T] = {
+    k:       KMeansIn,
+    data:    Data[(T, OldVector)],
+    current: VectorizedCenters[T]
+  ): VectorizedCenters[T] = {
 
     // uses the current cluster centers to construct a classifier, which
     // will assign a datapoint to the nearest cluster
@@ -135,7 +136,8 @@ object KMeans {
                 })
 
               (updatedCB, n1 + n2)
-          })
+          }
+        )
 
     val newCenters =
       newCenterBuilders.toIndexedSeq

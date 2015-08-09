@@ -22,15 +22,16 @@ object Types {
 
   case class WeightUpdate(f: (Data[VectorizedData], OptHistory, GradFn, CostFn, Double, Double, Double, Int, Long) => OptHistory) {
     def apply(
-      data: Data[VectorizedData],
-      history: OptHistory,
-      gradFn: GradFn,
-      costFn: CostFn,
-      initAlpha: Double,
-      momentum: Double,
+      data:              Data[VectorizedData],
+      history:           OptHistory,
+      gradFn:            GradFn,
+      costFn:            CostFn,
+      initAlpha:         Double,
+      momentum:          Double,
       miniBatchFraction: Double,
-      miniBatchIterNum: Int,
-      seed: Long): OptHistory =
+      miniBatchIterNum:  Int,
+      seed:              Long
+    ): OptHistory =
       f(
         data, history, gradFn, costFn, initAlpha,
         momentum, miniBatchFraction, miniBatchIterNum, seed
