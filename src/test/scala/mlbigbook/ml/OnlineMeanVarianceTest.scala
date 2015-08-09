@@ -39,21 +39,24 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
 
   import mlbigbook.util.NumericConversion.Implicits._
 
-  ignore("Welford's online variance calculation using generalized vectors") {
+  describe("Welford's online variance calculation using generalized vectors") {
 
     it("should work") {
 
       import mlbigbook.data.Data
       import Data._
 
-      //      val data: Data[DenseVector[Double]] = Seq(DenseVector(12.0), DenseVector(-1.0), DenseVector(55.0))
-      // mean:     20
-      // variance: 20
+      val data: Data[DenseVector[Double]] = Seq(DenseVector(12.0), DenseVector(-1.0), DenseVector(55.0))
+
+      val expectedStats =
+        OnlineMeanVariance.Stats(
+          count = 3l,
+          mean = DenseVector(22.0),
+          variance = DenseVector(859.0)
+        )
 
       lazy val rand = new Random(42L)
       lazy val numEl = 1e6.toInt
-      lazy val data: Data[DenseVector[Double]] = Seq.fill(numEl)(DenseVector(rand.nextDouble() + 1e9))
-      lazy val expected = 0.083382083
       lazy val tolerance = 1e-6
 
       import VectorOpsT._
@@ -61,12 +64,9 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
       OnlineMeanVariance(data) match {
         case s @ OnlineMeanVariance.Stats(count, mean, variance) =>
           println(s"STATS: $s")
-          assert(count == numEl)
-          variance(0) should be(expected +- tolerance)
-        //          assert(mean(0))
-        //          assert(count == 3l)
-        //          assert(mean(0) == 2.0)
-        //          assert(variance(0) == 2.0)
+          count should be(expectedStats.count)
+          mean(0) should be(expectedStats.mean(0) +- tolerance)
+          variance(0) should be(expectedStats.variance(0) +- tolerance)
       }
 
     }

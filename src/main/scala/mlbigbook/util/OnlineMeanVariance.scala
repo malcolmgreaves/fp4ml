@@ -32,15 +32,20 @@ object OnlineMeanVariance {
               {
                 case (State(n, mean, m2), current) =>
                   val newN = n + 1l
+                  // delta := current - mean
                   val delta = ops.subV(current, mean)
-                  val newMean = ops.addV(mean, ops.divS(delta, numConv.fromLong(n)))
+                  // newMean := mean + (delta / newN)
+                  val newMean = ops.addV(mean, ops.divS(delta, numConv.fromLong(newN)))
+                  // newM2 := m2 + (delta * (current - newMean))
                   val newM2 = ops.addV(m2, ops.mulV(delta, ops.subV(current, newMean)))
                   State(newN, newMean, newM2)
               },
               {
                 case (State(n1, mean1, m21), State(n2, mean2, m22)) =>
                   val newN = n1 + n2
+                  // delta := mean2 - mean1
                   val delta = ops.subV(mean2, mean1)
+                  // newMean := ...
                   val newMean =
                     if (n2 * 10l < n1)
                       //                      mean1 + (delta * n2) / (n1 + n2)
@@ -55,11 +60,14 @@ object OnlineMeanVariance {
                   //                  val newM = m21 + m22 + (math.pow(delta, 2) * n1 * n2) / (n1 + n2)
                   val newM = {
                     val deltaSquared = ops.mulV(delta, delta)
+                    // fraction := ((delta * delta) * n1 * n2) / (n1 + n2)
                     val fraction =
                       ops.divS(
                         ops.mulS(ops.mulS(deltaSquared, numConv.fromLong(n1)), numConv.fromLong(n2)),
                         numConv.fromLong(newN)
                       )
+
+                    // := m21 + m22 + ((delta * delta) * n1 * n2) / (n1 + n2)
                     ops.addV(ops.addV(m21, m22), fraction)
                   }
 
