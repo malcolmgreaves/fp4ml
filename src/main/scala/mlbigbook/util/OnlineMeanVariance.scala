@@ -1,7 +1,6 @@
 package mlbigbook.util
 
 import mlbigbook.data.Data
-import mlbigbook.ml.VectorOpsT
 
 import breeze.linalg.Vector
 
