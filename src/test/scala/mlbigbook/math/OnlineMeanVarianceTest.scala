@@ -1,9 +1,8 @@
-package mlbigbook.ml
+package mlbigbook.math
 
 import breeze.linalg.DenseVector
-import mlbigbook.util.{ VectorOpsT, OnlineMeanVariance, FeatureScaling }
-import mlbigbook.wordcount.LocalSparkContext
-import org.scalatest.{ FunSpec, Matchers }
+import mlbigbook.ml.Stats
+import org.scalatest.{FunSpec, Matchers}
 
 import scala.util.Random
 
@@ -49,7 +48,7 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
       val data: Data[DenseVector[Double]] = Seq(DenseVector(12.0), DenseVector(-1.0), DenseVector(55.0))
 
       val expectedStats =
-        OnlineMeanVariance.Stats(
+        Stats(
           count = 3l,
           mean = DenseVector(22.0),
           variance = DenseVector(859.0)
@@ -59,11 +58,8 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
       lazy val numEl = 1e6.toInt
       lazy val tolerance = 1e-6
 
-      import VectorOpsT._
-
-      OnlineMeanVariance(data) match {
-        case s @ OnlineMeanVariance.Stats(count, mean, variance) =>
-          println(s"STATS: $s")
+      OnlineMeanVariance.batch(data) match {
+        case s @ Stats(count, mean, variance) =>
           count should be(expectedStats.count)
           mean(0) should be(expectedStats.mean(0) +- tolerance)
           variance(0) should be(expectedStats.variance(0) +- tolerance)

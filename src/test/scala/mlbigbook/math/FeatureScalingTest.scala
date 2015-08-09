@@ -1,9 +1,9 @@
-package mlbigbook.ml
+package mlbigbook.math
 
 import mlbigbook.data.Data
-import mlbigbook.util.FeatureScaling
 import mlbigbook.wordcount.LocalSparkContext
-import org.scalatest.{ Matchers, FunSpec }
+import org.scalatest.{FunSpec, Matchers}
+
 import scala.util.Random
 
 /**

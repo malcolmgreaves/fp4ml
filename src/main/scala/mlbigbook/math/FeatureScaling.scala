@@ -1,4 +1,4 @@
-package mlbigbook.util
+package mlbigbook.math
 
 import mlbigbook.data.Data
 
