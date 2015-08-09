@@ -171,42 +171,42 @@ abstract class VectorOpsT[N: Numeric, V[_] <: Vector[_]] {
 
 object VectorOpsT {
 
-    implicit object DoubleDenseVectorOptsT extends VectorOpsT[Double, DenseVector] {
+  implicit object DoubleDenseVectorOptsT extends VectorOpsT[Double, DenseVector] {
 
-      override implicit def zeros(size: Int): DenseVector[Double] =
-        DenseVector.zeros(size)
+    override implicit def zeros(size: Int): DenseVector[Double] =
+      DenseVector.zeros(size)
 
-      override implicit def ones(size: Int): DenseVector[Double] =
-        DenseVector.ones(size)
+    override implicit def ones(size: Int): DenseVector[Double] =
+      DenseVector.ones(size)
 
-      override implicit val addV: OpAdd.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
-        DenseVector.dv_dv_Op_Double_OpAdd
+    override implicit val addV: OpAdd.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
+      DenseVector.dv_dv_Op_Double_OpAdd
 
-      override implicit val addS: OpAdd.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
-        DenseVector.dv_s_Op_Double_OpAdd
+    override implicit val addS: OpAdd.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
+      DenseVector.dv_s_Op_Double_OpAdd
 
-      implicit val subV: OpSub.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
-        DenseVector.dv_dv_Op_Double_OpSub
+    implicit val subV: OpSub.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
+      DenseVector.dv_dv_Op_Double_OpSub
 
-      implicit val subS: OpSub.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
-        DenseVector.dv_s_Op_Double_OpSub
+    implicit val subS: OpSub.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
+      DenseVector.dv_s_Op_Double_OpSub
 
-      override implicit val dot: OpMulInner.Impl2[DenseVector[Double], DenseVector[Double], Double] =
-        DenseVector.canDotD
+    override implicit val dot: OpMulInner.Impl2[DenseVector[Double], DenseVector[Double], Double] =
+      DenseVector.canDotD
 
-      override implicit val divS: OpDiv.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
-        DenseVector.dv_s_Op_Double_OpDiv
+    override implicit val divS: OpDiv.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
+      DenseVector.dv_s_Op_Double_OpDiv
 
-      override implicit val mulS: OpMulScalar.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
-        DenseVector.dv_s_Op_Double_OpMulScalar
+    override implicit val mulS: OpMulScalar.Impl2[DenseVector[Double], Double, DenseVector[Double]] =
+      DenseVector.dv_s_Op_Double_OpMulScalar
 
-      override implicit val divV: OpDiv.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
-        DenseVector.dv_dv_Op_Double_OpDiv
+    override implicit val divV: OpDiv.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
+      DenseVector.dv_dv_Op_Double_OpDiv
 
-      override implicit val mulV: OpMulScalar.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
-        DenseVector.dv_dv_Op_Double_OpMulScalar
+    override implicit val mulV: OpMulScalar.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
+      DenseVector.dv_dv_Op_Double_OpMulScalar
 
-    }
+  }
 
 }
 
