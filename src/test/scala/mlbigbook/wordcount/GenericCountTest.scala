@@ -15,7 +15,7 @@ class GenericCountTest extends FunSuite {
 
     val wcManual =
       words
-        .foldLeft(GenericCount.empty[String,Int]) {
+        .foldLeft(GenericCount.empty[String, Int]) {
           case (m, word) => GenericCount.increment(m, word)
         }
 
@@ -35,7 +35,7 @@ class GenericCountTest extends FunSuite {
     assert(wcManual == correct)
 
     import Data._
-    val wcIncrement = GenericCount.increment(GenericCount.empty[String,Int], implicitly[Data[String]](words))
+    val wcIncrement = GenericCount.increment(GenericCount.empty[String, Int], implicitly[Data[String]](words))
 
     assert(wcIncrement == correct)
   }
