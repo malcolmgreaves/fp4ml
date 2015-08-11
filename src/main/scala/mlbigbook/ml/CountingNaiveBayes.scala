@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.wordcount.NumericMap
+import mlbigbook.wordcount.GenericCount
 
 object CountingNaiveBayes {
   case object Int extends CountingNaiveBayes[Int] {}
@@ -28,34 +28,32 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Doub
     )
   }
 
-  implicit val nm = NumericMap[N]
+  type LabelMap[Label] = Map[Label, N]
 
-  type LabelMap[Label] = NumericMap[N]#M[Label]
-
-  type FeatureMap[Label, Feature] = Map[Label, NumericMap[N]#M[Feature]]
+  type FeatureMap[Label, Feature] = Map[Label, Map[Feature, N]]
 
   object FeatureMap {
     def empty[Label, Feature]: FeatureMap[Label, Feature] =
-      Map.empty[Label, NumericMap[N]#M[Feature]]
+      Map.empty[Label, Map[Feature, N]]
   }
 
   type Counts[Label, Feature] = (LabelMap[Label], FeatureMap[Label, Feature])
 
-  final def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)])(implicit nm: NumericMap[N]): Counts[Label, F] =
+  final def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)]): Counts[Label, F] =
     data
-      .aggregate((nm.empty[Label], FeatureMap.empty[Label, F]))(
+      .aggregate((GenericCount.empty[Label, N], FeatureMap.empty[Label, F]))(
         {
           case ((labelMap, featureMap), (features, label)) =>
 
-            val updatedLabelMap = nm.increment(labelMap, label)
+            val updatedLabelMap = GenericCount.increment(labelMap, label)
 
-            val existing = featureMap.getOrElse(label, nm.empty[F])
+            val existing = featureMap.getOrElse(label, GenericCount.empty[F, N])
 
             val updatedFeatureMapForLabel =
               features
                 .aggregate(existing)(
-                  { case (fm, feature) => nm.increment(fm, feature) },
-                  nm.combine
+                  { case (fm, feature) => GenericCount.increment(fm, feature) },
+                  GenericCount.combine[F, N]
                 )
 
             (updatedLabelMap, featureMap + (label -> updatedFeatureMapForLabel))
@@ -63,12 +61,12 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Doub
         {
           case ((lm1, fm1), (lm2, fm2)) =>
 
-            val combinedLabelMap = nm.combine(lm1, lm2)
+            val combinedLabelMap = GenericCount.combine(lm1, lm2)
 
             val combinedFeatureMap =
               combinedLabelMap.keys
                 .map { label =>
-                  (label, nm.combine(fm1(label), fm2(label)))
+                  (label, GenericCount.combine(fm1(label), fm2(label)))
                 }
                 .toMap
 

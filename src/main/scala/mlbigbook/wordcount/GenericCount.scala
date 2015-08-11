@@ -1,30 +1,22 @@
-/*
- * Contains methods for producing word count mappings from text data.
- *
- * @author Malcolm Greaves
- */
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ Data, AddMap, TextData }
+import mlbigbook.data.Data
 
-import scala.collection.Map
+object GenericCount {
 
-abstract class NumericMap[@specialized N: Numeric] {
+  def empty[T, N: Numeric]: Map[T, N] =
+    Map.empty[T, N]
 
-  type M[T] = Map[T, N]
-
-  def empty[T]: M[T] = Map.empty[T, N]
-
-  @inline final def increment[T](map: M[T], e: T): M[T] =
+  @inline final def increment[T, N: Numeric](map: Map[T, N], e: T): Map[T, N] =
     increment(map, e, implicitly[Numeric[N]].one)
 
-  final def increment[T](map: M[T], e: T, times: N): M[T] =
+  final def increment[T, N: Numeric](map: Map[T, N], e: T, times: N): Map[T, N] =
     if (map contains e)
       (map - e) + (e -> implicitly[Numeric[N]].plus(map(e), times))
     else
       map + (e -> times)
 
-  final def increment[T](map: M[T], es: Data[T]): M[T] =
+  final def increment[T, N: Numeric](map: Map[T, N], es: Data[T]): Map[T, N] =
     es.aggregate(map)(
       { case (m, e) => increment(m, e) },
       { case (m1, m2) => combine(m1, m2) }
@@ -34,7 +26,7 @@ abstract class NumericMap[@specialized N: Numeric] {
    * Combines two maps. If maps m1 and m2 both have key k, then the resulting
    * map will have m1(k) + m2(k) for the value of k.
    */
-  final def combine[T](m1: M[T], m2: M[T]): M[T] = {
+  final def combine[T, N: Numeric](m1: Map[T, N], m2: Map[T, N]): Map[T, N] = {
     val (smaller, larger) = if (m1.size < m2.size) (m1, m2) else (m2, m1)
     smaller.foldLeft(larger) {
       case (aggmap, (k, v)) =>
@@ -46,62 +38,5 @@ abstract class NumericMap[@specialized N: Numeric] {
         }
     }
   }
-
-}
-
-object NumericMap {
-
-  implicit val int: NumericMap[Int] = new NumericMap[Int] {}
-  implicit val long: NumericMap[Long] = new NumericMap[Long] {}
-  implicit val float: NumericMap[Float] = new NumericMap[Float] {}
-  implicit val double: NumericMap[Double] = new NumericMap[Double] {}
-
-  def apply[N: Numeric] = new NumericMap[N] {}
-
-  type WordCount = Map[String, Long]
-  val emptyWC: WordCount = long.empty[String]
-
-}
-
-/**
- * The Count object contains methods for computing the word count on a corpus, document,
- * and sentence level.
- */
-object GenericCount {
-
-  //
-  //  abstract class Counter[T, @specialized N: Numeric] {
-  //
-  //    type Element = T
-  //
-  //    type Number = N
-  //
-  //    type State = Map[Element, Number]
-  //
-  //    val state: State
-  //
-  //    /*
-  //
-  //    final def count[T, N : Numeric](s: State, e: Element): State =
-  //      count(s, e, 1)
-  //
-  //    final def count(s: State, e: Element, times: N): State =
-  //      if(s contains e)
-  //        (s - e) + (s -> (s(e) + times))
-  //      else
-  //        s + (e -> 1)
-  //
-  //    final def count(s: State, es: Data[T]): State = {
-  //
-  //    }
-  //
-  //    final def count(s: State, es: Data[T]): State = {
-  //      es
-  //        .aggregate(s)
-  //    }
-  //
-  //     */
-  //
-  //  }
 
 }
