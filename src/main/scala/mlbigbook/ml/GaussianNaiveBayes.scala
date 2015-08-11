@@ -1,14 +1,10 @@
 package mlbigbook.ml
 
-import breeze.linalg.operators._
 import mlbigbook.data._
 import mlbigbook.ml.NaiveBayesModule.{ Likelihood, NaiveBayes }
-import mlbigbook.wordcount.NumericMap
-import breeze.linalg._
 import breeze.math._
-import breeze.numerics._
 
-import scala.language.implicitConversions
+import scala.language.{ higherKinds, implicitConversions }
 import scala.reflect.ClassTag
 
 object GaussianNaiveBayes {

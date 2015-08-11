@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ Data, AddMap }
+import mlbigbook.data.Data
 import org.scalatest.FunSuite
 
 import scala.collection.Map
@@ -9,16 +9,14 @@ class GenericCountTest extends FunSuite {
 
   test("word count") {
 
-    import NumericMap._
-
     val words =
       "hello world how are you today hello hello I I say goodbye I say hello"
         .split(" ")
 
     val wcManual =
       words
-        .foldLeft(emptyWC) {
-          case (m, word) => long.increment(m, word)
+        .foldLeft(GenericCount.empty[String,Int]) {
+          case (m, word) => GenericCount.increment(m, word)
         }
 
     val correct =
@@ -37,7 +35,7 @@ class GenericCountTest extends FunSuite {
     assert(wcManual == correct)
 
     import Data._
-    val wcIncrement = long.increment(emptyWC, implicitly[Data[String]](words))
+    val wcIncrement = GenericCount.increment(GenericCount.empty[String,Int], implicitly[Data[String]](words))
 
     assert(wcIncrement == correct)
   }
