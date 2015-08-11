@@ -2,7 +2,7 @@ package mlbigbook.math
 
 import mlbigbook.data.Data
 import mlbigbook.wordcount.LocalSparkContext
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{ FunSpec, Matchers }
 
 import scala.util.Random
 

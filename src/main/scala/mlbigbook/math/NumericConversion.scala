@@ -1,4 +1,4 @@
-package mlbigbook.util
+package mlbigbook.math
 
 /**
  * Typeclass supporting conversions between primitive types, with the

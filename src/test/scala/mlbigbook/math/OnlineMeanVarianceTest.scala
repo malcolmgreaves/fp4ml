@@ -1,8 +1,9 @@
 package mlbigbook.math
 
 import breeze.linalg.DenseVector
+import org.scalatest.{ FunSpec, Matchers }
+
 import mlbigbook.ml.Stats
-import org.scalatest.{FunSpec, Matchers}
 
 import scala.util.Random
 
@@ -36,8 +37,6 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
   //    }
   //  }
 
-  import mlbigbook.util.NumericConversion.Implicits._
-
   describe("Welford's online variance calculation using generalized vectors") {
 
     it("should work") {
@@ -57,6 +56,8 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
       lazy val rand = new Random(42L)
       lazy val numEl = 1e6.toInt
       lazy val tolerance = 1e-6
+
+      import NumericConversion.Implicits._
 
       OnlineMeanVariance.batch(data) match {
         case s @ Stats(count, mean, variance) =>

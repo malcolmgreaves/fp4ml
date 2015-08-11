@@ -1,8 +1,8 @@
-package mlbigbook.ml
+package mlbigbook.math
 
 import breeze.linalg.Vector
 import mlbigbook.data.Data
-import mlbigbook.util.{ VectorOpsT, NumericConversion }
+import mlbigbook.ml.Stats
 
 /**
  * An online, streaming algorithm for calculating mean and variance.

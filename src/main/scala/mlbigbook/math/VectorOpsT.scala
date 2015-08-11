@@ -1,4 +1,4 @@
-package mlbigbook.util
+package mlbigbook.math
 
 import breeze.linalg.{ NumericOps, DenseVector, Vector }
 import breeze.linalg.operators._
