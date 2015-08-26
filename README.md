@@ -2,6 +2,8 @@
 
 
 ### ALPHA NOTICE
+
+[![Join the chat at https://gitter.im/malcolmgreaves/bigmlbook](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/malcolmgreaves/bigmlbook?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 This work is ongoing. This codebase is continually evolving; APIs break constantly. It should not be relied upon (yet!).
 
 ==========================================================================================
