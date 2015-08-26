@@ -10,9 +10,9 @@ import breeze.numerics._
 import scala.reflect.ClassTag
 
 object GaussianNaiveBayes {
-  case object Double extends GaussianNaiveBayes[Double] {}
-  case object Int extends GaussianNaiveBayes[Int] {}
-  case object Long extends GaussianNaiveBayes[Long] {}
+  case object Double extends GaussianNaiveBayes[Double]
+  case object Int extends GaussianNaiveBayes[Int]
+  case object Long extends GaussianNaiveBayes[Long]
 }
 
 abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N: Numeric]() {
