@@ -10,28 +10,58 @@ object Feature {
 
 object NaiveBayesModule {
 
-  type Prior[Label] = Label => Distribution[_]#Probability
-  type Likelihood[Feature, Label] = Label => Feature => Distribution[_]#Probability
+  /**
+   * This module uses a Distribtuion's notion of probability.
+   */
+  type Probability = Distribution[_]#Probability
 
+  /**
+   * A prior function. The estimated probability of a label.
+   */
+  type Prior[Label] = Label => Probability
+
+  /**
+   * A likelihood function. Conditioned on a label, produces an
+   * estimated probability for a feature.
+   */
+  type Likelihood[Feature, Label] = Label => Feature => Probability
+
+  /**
+   * An instance of naive Bayes, parametrized by a label set,
+   * prior, and likelihood functions.
+   */
   case class NaiveBayes[F, Label](
     labels: Data[Label],
     p:      Prior[Label],
     l:      Likelihood[F, Label]
   )
 
-  type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+  /**
+   * The type for producing a NaiveBayes instance from a labeled data set.
+   */
+  type Produce[F, Label] =
+    Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
 
+  /**
+   * Produces a discrete estimator from a learned NaiveBayes instance.
+   */
   def apply[Feature: ClassTag, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
     DiscreteEstimator[Feature, Label] {
       (features: Feature.Vector[Feature]) =>
         DiscreteDistribution {
+          // calculate log-posterior distribution (across labels)
           val logPosteriors =
             nb.labels
               .map { label =>
-                val labelLikelihood = nb.l(label)
-                (label, math.log(nb.p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+                val logPrior = math.log(nb.p(label))
+                val logLikelihood = {
+                  val labelLogLikelihood = nb.l(label)
+                  features.map(x => math.log(labelLogLikelihood(x))).sum
+                }
+                (label, logPrior + logLikelihood)
               }
 
+          // to produce valid probabilities, we normalize each log-posterior
           val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
 
           logPosteriors
