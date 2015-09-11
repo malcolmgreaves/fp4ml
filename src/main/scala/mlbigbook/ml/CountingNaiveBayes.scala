@@ -177,15 +177,15 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    */
   final def mkPrior[L](lm: LabelMap[L]): Prior[L] = {
     val totalClassCount = num.toDouble(lm.values.sum)
-    val priormap =
+    val priorMap =
       lm.map {
         case (label, count) =>
           (label, num.toDouble(count) / totalClassCount)
       }
 
     (label: L) =>
-      if (priormap contains label)
-        priormap(label)
+      if (priorMap contains label)
+        priorMap(label)
       else
         0.0
   }
