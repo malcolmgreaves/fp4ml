@@ -12,7 +12,7 @@ class CountingNaiveBayesTest extends FunSuite {
   }
 
   def testSmallVocab[N: Numeric](c: CountingNaiveBayes[N]): Unit = {
-    val nb = NaiveBayesModule(c.produce(training))
+    val nb = NaiveBayesModule(c.train(training))
     val estimated = smallVocabData.map(nb.estimate).toSeq
 
     assert(estimated.size == 2)

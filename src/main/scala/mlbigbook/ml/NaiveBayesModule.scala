@@ -36,10 +36,12 @@ object NaiveBayesModule {
     l:      Likelihood[F, Label]
   )
 
+  type TrainingData[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData
+
   /**
-   * The type for producing a NaiveBayes instance from a labeled data set.
+   * The type for producing a NaiveBayes instance from a labeled data set (aka training).
    */
-  type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+  type Train[F, Label] = TrainingData[F, Label] => NaiveBayes[F, Label]
 
   /**
    * Produces a discrete estimator from a learned NaiveBayes instance.
@@ -48,20 +50,26 @@ object NaiveBayesModule {
     DiscreteEstimator[Feature, Label] {
       (features: Feature.Vector[Feature]) =>
         DiscreteDistribution {
+
           // calculate log-posterior distribution (across labels)
-          val logPosteriors =
+          val logPosteriors: Data[(Label, Probability)] =
             nb.labels
               .map { label =>
                 val logPrior = math.log(nb.p(label))
                 val logLikelihood = {
                   val labelLogLikelihood = nb.l(label)
-                  features.map(x => math.log(labelLogLikelihood(x))).sum
+                  features
+                    .map(x => math.log(labelLogLikelihood(x)))
+                    .sum
                 }
                 (label, logPrior + logLikelihood)
               }
 
           // to produce valid probabilities, we normalize each log-posterior
-          val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
+          val normalizationConstant =
+            logPosteriors
+              .map(_._2)
+              .reduce(_ + _)
 
           logPosteriors
             .map {
