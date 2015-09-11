@@ -36,6 +36,15 @@ object NaiveBayesModule {
     l:      Likelihood[F, Label]
   )
 
+  // TODO -- Investigate this type class idea for NB. Good or bad idea?
+  /*
+  trait NaiveBayesTypeclass[NB, Feature, Label] {
+    def labels(nb:NB):Data[Label]
+    def prior(nb:NB):Prior[Label]
+    def likelihood(nb:NB):Likelihood[Feature,Label]
+  }
+   */
+
   type TrainingData[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData
 
   /**

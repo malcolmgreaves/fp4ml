@@ -2,6 +2,10 @@ package mlbigbook.ml
 
 import mlbigbook.wordcount.GenericCount
 
+/**
+ * Implementations of counting naive bayes for Int, Long, Float, and Double
+ * numeric types.
+ */
 object CountingNaiveBayes {
   case object Int extends CountingNaiveBayes[Int]
   case object Long extends CountingNaiveBayes[Long]
@@ -9,6 +13,9 @@ object CountingNaiveBayes {
   case object Double extends CountingNaiveBayes[Double]
 }
 
+/**
+ * Implementation of naive Bayes for discrete, event-based features.
+ */
 abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.Double) N: Numeric] {
 
   import NaiveBayesModule._
@@ -17,49 +24,98 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   // Type Definitions
   //
 
+  /**
+   * Type representing a smoothing value. It is a number.
+   */
   type Smoothing = N
 
+  /**
+   * Type representing a training function that uses the given smoothing value
+   * for "hallucinating" counts during training. This technique produces a more
+   * robust naive Bayes model that is able to operate with events that it has
+   * never encountered before.
+   */
   type SmoothedTrain[Feature, Label] = Smoothing => Train[Feature, Label]
 
+  /**
+   * Helper object that allows one to construct an instance of
+   * CountingNaiveBayes.SmoothedTrain using the smoothedTrain method defined
+   * within the CountingNaiveBayes class.
+   */
   object SmoothedTrain {
     def apply[F: Equiv, L: Equiv]: SmoothedTrain[F, L] =
       s => td =>
         smoothedTrain[F, L](s)(td)(implicitly[Equiv[F]], implicitly[Equiv[L]])
   }
 
+  /**
+   * Helper object that allows one to construct an instance of
+   * NaiveBayesModule.Train using the train method defined within the
+   * CountingNaiveBayes class.
+   */
   object Train {
     def apply[F: Equiv, L: Equiv]: Train[F, L] =
       td =>
         train[F, L](td)(implicitly[Equiv[F]], implicitly[Equiv[L]])
   }
 
+  /**
+   * Type representing the mapping between labels and the number of times each
+   * label was encountered in a training data set.
+   */
   type LabelMap[Label] = Map[Label, N]
 
+  /**
+   * Type representing the mapping between features and the number of times
+   * each one was encountered during training. Each one of these maps is
+   * partitioned by the label that was associated with the particular
+   * observed feature-count co-occurrence.
+   */
   type FeatureMap[Label, Feature] = Map[Label, Map[Feature, N]]
 
   object FeatureMap {
+    /**
+     * An empty feature map instance.
+     */
     def empty[Label, Feature]: FeatureMap[Label, Feature] =
       Map.empty[Label, Map[Feature, N]]
   }
 
+  /**
+   * Type containing the raw count information produced during training.
+   * The associated label sequence serve as the keys of the included label and
+   * feature maps. In addition, this sequence provides a single ordering for
+   * the labels. Note that this ordering is arbitrary, but fixed.
+   */
   type Counts[Label, Feature] = (Seq[Label], LabelMap[Label], FeatureMap[Label, Feature])
 
   //
-  // Implementation
+  // Implementations
   //
 
+  /**
+   * The numeric instance associated with this class's generic number parameter.
+   */
   final val num: Numeric[N] = implicitly[Numeric[N]]
 
-  //  def smoothedTrain[F:Equiv, L:Equiv](smooth: Smoothing): Train[F,L] =
-  //    (data: Learning[Feature.Vector[F], L]#TrainingData) => {
+  /**
+   * Produces a naive Bayes model from the input data. Uses no count smoothing.
+   */
+  final def train[F: Equiv, L: Equiv](data: TrainingData[F, L]): NaiveBayes[F, L] =
+    smoothedTrain[F, L](num.zero)(data)
+
+  /**
+   * Produces a naive Bayes model from the input data using the given count
+   * smoothing value.
+   */
   final def smoothedTrain[F: Equiv, L: Equiv](
     smooth: Smoothing
   )(
     data: TrainingData[F, L]
   ): NaiveBayes[F, L] = {
-    val counts = count(data)
-    val (labels, _, _) = counts
-    val (prior, likelihood) = countsToPriorAndLikelihood(smooth, counts)
+    val cs = count(data)
+    val (labels, _, _) = cs
+    val (prior, likelihood) = countsToPriorAndLikelihood(smooth, cs)
     NaiveBayes(
       labels,
       prior,
@@ -67,11 +123,11 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
     )
   }
 
-  final def train[F: Equiv, L: Equiv](data: TrainingData[F, L]): NaiveBayes[F, L] =
-    smoothedTrain[F, L](num.zero)(data)
-
+  /**
+   * Collects co-occurrence counts across the input training data.
+   */
   final def count[Label: Equiv, F: Equiv](data: TrainingData[F, Label]): Counts[Label, F] = {
-    val (lm, fm) =
+    val (finalLabelMap, finalFeatureMap) =
       data
         .aggregate((GenericCount.empty[Label, N], FeatureMap.empty[Label, F]))(
           {
@@ -105,9 +161,15 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
               (combinedLabelMap, combinedFeatureMap)
           }
         )
-    (lm.keys.toSeq, lm, fm)
+    (finalLabelMap.keys.toSeq, finalLabelMap, finalFeatureMap)
   }
 
+  /**
+   * Using the input smoothing value and counts generated from training data,
+   * this method produces appropriate prior and likelihood functions.
+   *
+   * Uses the `mkPrior` and `mkLikelihood` methods.
+   */
   final def countsToPriorAndLikelihood[F: Equiv, L](
     smooth: Smoothing,
     c:      Counts[L, F]
@@ -116,6 +178,9 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
     (mkPrior(labelMap), mkLikelihood(smooth, featureMap))
   }
 
+  /**
+   * Produces a prior function from a label mapping.
+   */
   final def mkPrior[L: Equiv](lm: LabelMap[L]): Prior[L] = {
     val totalClassCount = num.toDouble(lm.values.sum)
     val priormap =
@@ -131,6 +196,15 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
         0.0
   }
 
+  /**
+   * Produces a likelihood function from a feature mapping. Every feature-label
+   * co-occurrence count has an added "hallucinated" count, which is equal to
+   * input the smooth parameter's value. These modified co-occurrence counts
+   * are used to estimate probabilities as well as come up with a pseudo count.
+   * When applying the resulting Likelihood function to a feature and label
+   * combination that was not observed during training, the function will
+   * evaluate to this pseudo count (instead of zero).
+   */
   final def mkLikelihood[L: Equiv, F: Equiv](
     smooth:     Smoothing,
     featureMap: FeatureMap[L, F]
@@ -138,7 +212,6 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
 
     val totalFeatureClassCount: Double = {
       val totalSmoothPsuedocounts = {
-        // TODO -- replace with bloom filter ! (and add 1 just to make sure that we get somethin'...)
         val nDistinctFeatures =
           featureMap
             .map(_._2.keySet)
