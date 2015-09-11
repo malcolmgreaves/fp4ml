@@ -204,30 +204,50 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
     featureMap: FeatureMap[L, F]
   ): Likelihood[F, L] = {
 
-    val totalFeatureClassCount: Double = {
-      val totalSmoothPseudoCounts = {
-        val nDistinctFeatures =
-          featureMap
-            .map(_._2.keySet)
-            .reduce(_ ++ _)
-            .size
-            .toDouble
-        nDistinctFeatures * num.toDouble(smooth)
-      }
-      num.toDouble(featureMap.map(_._2.values.sum).sum) + totalSmoothPseudoCounts
-    }
-
     val s = num.toDouble(smooth)
-    val pseudoCount = s / totalFeatureClassCount
+
+    val pseudoCount = {
+
+      // TODO -- Investigate this normalization computation !!!
+
+      val totalFeatureClassCount = {
+
+        val totalSmoothPseudoCounts = {
+
+          val nDistinctFeatures =
+            featureMap
+              .map(_._2.keySet)
+              .reduce(_ ++ _)
+              .size
+              .toDouble
+
+          nDistinctFeatures * num.toDouble(smooth)
+        }
+
+        val totalLabelFeatureCoOccurCount =
+          num.toDouble(featureMap.map(_._2.values.sum).sum)
+
+        totalLabelFeatureCoOccurCount + totalSmoothPseudoCounts
+      }
+
+      s / totalFeatureClassCount
+    }
 
     val likelihoodMap =
       featureMap.map {
         case (label, featMap) =>
+
+          val perLabelTotalFeatureCount = {
+            val total = featMap.values.sum
+            val nDistinctFeats = featMap.keySet.size
+            num.toDouble(total) + (nDistinctFeats * s)
+          }
+
           (
             label,
             featMap.map {
               case (feature, count) =>
-                (feature, (num.toDouble(count) + s) / totalFeatureClassCount)
+                (feature, (num.toDouble(count) + s) / perLabelTotalFeatureCount)
             }
           )
       }
