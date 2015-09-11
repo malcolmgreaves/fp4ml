@@ -205,7 +205,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   ): Likelihood[F, L] = {
 
     val totalFeatureClassCount: Double = {
-      val totalSmoothPsuedocounts = {
+      val totalSmoothPseudoCounts = {
         val nDistinctFeatures =
           featureMap
             .map(_._2.keySet)
@@ -214,7 +214,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
             .toDouble
         nDistinctFeatures * num.toDouble(smooth)
       }
-      num.toDouble(featureMap.map(_._2.values.sum).sum) + totalSmoothPsuedocounts
+      num.toDouble(featureMap.map(_._2.values.sum).sum) + totalSmoothPseudoCounts
     }
 
     val s = num.toDouble(smooth)
@@ -235,15 +235,10 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
     // likelihood function signature & implementation (finally!)
     (label: L) =>
       (feature: F) =>
-        if (likelihoodMap contains label) {
-          val fmap = likelihoodMap(label)
-          if (fmap contains feature)
-            fmap(feature)
-          else
-            pseudoCount
-        } else {
+        if (likelihoodMap contains label)
+          likelihoodMap(label).getOrElse(feature, pseudoCount)
+        else
           pseudoCount
-        }
   }
 
 }
