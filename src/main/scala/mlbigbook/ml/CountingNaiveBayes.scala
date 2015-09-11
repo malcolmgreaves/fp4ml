@@ -44,8 +44,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    */
   object SmoothedTrain {
     def apply[F: Equiv, L: Equiv]: SmoothedTrain[F, L] =
-      s => td =>
-        smoothedTrain[F, L](s)(td)(implicitly[Equiv[F]], implicitly[Equiv[L]])
+      smoothedTrain[F, L]
   }
 
   /**
@@ -55,8 +54,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    */
   object Train {
     def apply[F: Equiv, L: Equiv]: Train[F, L] =
-      td =>
-        train[F, L](td)(implicitly[Equiv[F]], implicitly[Equiv[L]])
+      train[F, L]
   }
 
   /**
@@ -101,18 +99,14 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   /**
    * Produces a naive Bayes model from the input data. Uses no count smoothing.
    */
-  final def train[F: Equiv, L: Equiv](data: TrainingData[F, L]): NaiveBayes[F, L] =
+  final def train[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] =
     smoothedTrain[F, L](num.zero)(data)
 
   /**
    * Produces a naive Bayes model from the input data using the given count
    * smoothing value.
    */
-  final def smoothedTrain[F: Equiv, L: Equiv](
-    smooth: Smoothing
-  )(
-    data: TrainingData[F, L]
-  ): NaiveBayes[F, L] = {
+  final def smoothedTrain[F, L](smooth: Smoothing)(data: TrainingData[F, L]): NaiveBayes[F, L] = {
     val cs = count(data)
     val (labels, _, _) = cs
     val (prior, likelihood) = countsToPriorAndLikelihood(smooth, cs)
@@ -126,7 +120,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   /**
    * Collects co-occurrence counts across the input training data.
    */
-  final def count[Label: Equiv, F: Equiv](data: TrainingData[F, Label]): Counts[Label, F] = {
+  final def count[Label, F](data: TrainingData[F, Label]): Counts[Label, F] = {
     val (finalLabelMap, finalFeatureMap) =
       data
         .aggregate((GenericCount.empty[Label, N], FeatureMap.empty[Label, F]))(
@@ -170,7 +164,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    *
    * Uses the `mkPrior` and `mkLikelihood` methods.
    */
-  final def countsToPriorAndLikelihood[F: Equiv, L](
+  final def countsToPriorAndLikelihood[F, L](
     smooth: Smoothing,
     c:      Counts[L, F]
   ): (Prior[L], Likelihood[F, L]) = {
@@ -181,7 +175,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   /**
    * Produces a prior function from a label mapping.
    */
-  final def mkPrior[L: Equiv](lm: LabelMap[L]): Prior[L] = {
+  final def mkPrior[L](lm: LabelMap[L]): Prior[L] = {
     val totalClassCount = num.toDouble(lm.values.sum)
     val priormap =
       lm.map {
@@ -205,7 +199,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    * combination that was not observed during training, the function will
    * evaluate to this pseudo count (instead of zero).
    */
-  final def mkLikelihood[L: Equiv, F: Equiv](
+  final def mkLikelihood[L, F](
     smooth:     Smoothing,
     featureMap: FeatureMap[L, F]
   ): Likelihood[F, L] = {
