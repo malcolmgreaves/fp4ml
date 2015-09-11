@@ -81,7 +81,7 @@ abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.I
     val empty = Gaussian(Vector.zeros[N](0), Vector.zeros[N](0))
   }
 
-  import mlbigbook.util.XXX
+  import mlbigbook.math.XXX
 
   final def estimateGaussian[V[_] <: Vector[_]](data: Data[V[N]])(implicit sr: Semiring[V[N]], ct: ClassTag[V[N]]): Gaussian =
     data.take(1).headOption match {

@@ -13,7 +13,7 @@ object NaiveBayesModule {
   /**
    * This module uses a Distribtuion's notion of probability.
    */
-  type Probability = Distribution[_]#Probability
+  type Probability = Distribution.Probability
 
   /**
    * A prior function. The estimated probability of a label.
@@ -39,8 +39,7 @@ object NaiveBayesModule {
   /**
    * The type for producing a NaiveBayes instance from a labeled data set.
    */
-  type Produce[F, Label] =
-    Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+  type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
 
   /**
    * Produces a discrete estimator from a learned NaiveBayes instance.

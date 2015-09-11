@@ -2,6 +2,7 @@ package mlbigbook.ml
 
 import mlbigbook.data.Data
 
+import scala.language.postfixOps
 import scala.reflect.ClassTag
 
 /**
@@ -26,7 +27,7 @@ trait Learning[A, B] {
 
 case class DiscreteEstimator[F: ClassTag, Label](estimate: Learning[Feature.Vector[F], Label]#Estimator) {
 
-  implicit val ev: Val[(Label, Distribution[_]#Probability)] =
+  implicit val ev: Val[(Label, Distribution.Probability)] =
     TupleVal2[Label]
 
   val classify: Learning[Feature.Vector[F], Label]#Classifier =

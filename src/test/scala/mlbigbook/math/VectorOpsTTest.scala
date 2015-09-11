@@ -1,4 +1,4 @@
-package mlbigbook.util
+package mlbigbook.math
 
 import breeze.linalg.DenseVector
 import org.scalatest.{ FunSpec, Matchers }
