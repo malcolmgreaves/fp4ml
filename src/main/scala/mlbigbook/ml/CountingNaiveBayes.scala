@@ -1,5 +1,6 @@
 package mlbigbook.ml
 
+import mlbigbook.ml.Equiv.Implicits.OverrideEqualsHashCode
 import mlbigbook.wordcount.GenericCount
 
 /**
@@ -63,7 +64,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    * Type representing the mapping between labels and the number of times each
    * label was encountered in a training data set.
    */
-  type LabelMap[Label] = Map[Label, N]
+  type LabelMap[Label] = Map[OverrideEqualsHashCode[Label], N]
 
   /**
    * Type representing the mapping between features and the number of times
@@ -71,14 +72,14 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    * partitioned by the label that was associated with the particular
    * observed feature-count co-occurrence.
    */
-  type FeatureMap[Label, Feature] = Map[Label, Map[Feature, N]]
+  type FeatureMap[Label, Feature] = Map[OverrideEqualsHashCode[Label], Map[OverrideEqualsHashCode[Feature], N]]
 
   object FeatureMap {
     /**
      * An empty feature map instance.
      */
     def empty[Label, Feature]: FeatureMap[Label, Feature] =
-      Map.empty[Label, Map[Feature, N]]
+      Map.empty[OverrideEqualsHashCode[Label], Map[OverrideEqualsHashCode[Feature], N]]
   }
 
   /**
@@ -127,24 +128,32 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    * Collects co-occurrence counts across the input training data.
    */
   final def count[Label: Equiv, F: Equiv](data: TrainingData[F, Label]): Counts[Label, F] = {
+
+    import Equiv.Implicits._
+
     val (finalLabelMap, finalFeatureMap) =
       data
-        .aggregate((GenericCount.empty[Label, N], FeatureMap.empty[Label, F]))(
+        .aggregate((GenericCount.empty[OverrideEqualsHashCode[Label], N], FeatureMap.empty[Label, F]))(
           {
             case ((labelMap, featureMap), (features, label)) =>
 
-              val updatedLabelMap = GenericCount.increment(labelMap, label)
+              val l: OverrideEqualsHashCode[Label] = label
+              val updatedLabelMap = GenericCount.increment(labelMap, l)
 
-              val existing = featureMap.getOrElse(label, GenericCount.empty[F, N])
+              val existing = featureMap.getOrElse(label, GenericCount.empty[OverrideEqualsHashCode[F], N])
 
               val updatedFeatureMapForLabel =
                 features
                   .aggregate(existing)(
-                    { case (fm, feature) => GenericCount.increment(fm, feature) },
-                    GenericCount.combine[F, N]
+                    {
+                      case (fm, feature) =>
+                        val f: OverrideEqualsHashCode[F] = feature
+                        GenericCount.increment(fm, f)
+                    },
+                    GenericCount.combine[OverrideEqualsHashCode[F], N]
                   )
 
-              (updatedLabelMap, featureMap + (label -> updatedFeatureMapForLabel))
+              (updatedLabelMap, featureMap + (l -> updatedFeatureMapForLabel))
           },
           {
             case ((lm1, fm1), (lm2, fm2)) =>
@@ -161,7 +170,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
               (combinedLabelMap, combinedFeatureMap)
           }
         )
-    (finalLabelMap.keys.toSeq, finalLabelMap, finalFeatureMap)
+    (finalLabelMap.keys.map(_.instance).toSeq, finalLabelMap, finalFeatureMap)
   }
 
   /**
@@ -170,7 +179,7 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    *
    * Uses the `mkPrior` and `mkLikelihood` methods.
    */
-  final def countsToPriorAndLikelihood[F: Equiv, L](
+  final def countsToPriorAndLikelihood[F: Equiv, L: Equiv](
     smooth: Smoothing,
     c:      Counts[L, F]
   ): (Prior[L], Likelihood[F, L]) = {

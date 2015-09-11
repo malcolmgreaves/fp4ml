@@ -16,17 +16,17 @@ trait Equiv[A] {
 
 object Equiv {
 
-  def apply[A:Equiv]: Equiv[A] =
+  def apply[A: Equiv]: Equiv[A] =
     implicitly[Equiv[A]]
 
   object Implicits {
 
-    implicit final class OverrideEqualsHashCode[A:Equiv](instance: A) {
+    implicit final class OverrideEqualsHashCode[A: Equiv](val instance: A) {
 
       private[this] val e = Equiv[A]
 
       override def equals(anything: Any): Boolean =
-        if(instance == null)
+        if (instance == null)
           anything == null
         else
           try {
