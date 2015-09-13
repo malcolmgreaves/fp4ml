@@ -206,48 +206,62 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
 
     val s = num.toDouble(smooth)
 
-    val pseudoCount = {
+    val finalPseudoCount = {
 
       // TODO -- Investigate this normalization computation !!!
 
-      val totalFeatureClassCount = {
+      val pseudoLabelFeatureCocurCount = {
 
-        val totalSmoothPseudoCounts = {
+        val pseudoVocabularySize = {
 
-          val nDistinctFeatures =
+          // TODO -- Optimize w/ bloom filter.
+          // We only need to get the # of features. We should be able to,
+          // within a trivially small false-positive probability, correctly
+          // estimate the # of distinct features with a bloom filter.
+          val vocabularySize =
             featureMap
-              .map(_._2.keySet)
-              .reduce(_ ++ _)
+              .map {
+                case (_, featureValues) => featureValues.keySet
+              }
+              .reduce { _ ++ _ }
               .size
               .toDouble
 
-          nDistinctFeatures * num.toDouble(smooth)
+          // For each feature in our vocabulary, we hallucinate a count for it.
+          // This hallucinated count is also known as a pseudo count.
+          vocabularySize * s
         }
 
-        val totalLabelFeatureCoOccurCount =
-          num.toDouble(featureMap.map(_._2.values.sum).sum)
+        val labelFeatureCocurCount =
+          num.toDouble {
+            featureMap
+              .map {
+                case (_, featureValues) => featureValues.values.sum
+              }
+              .sum
+          }
 
-        totalLabelFeatureCoOccurCount + totalSmoothPseudoCounts
+        labelFeatureCocurCount + pseudoVocabularySize
       }
 
-      s / totalFeatureClassCount
+      s / pseudoLabelFeatureCocurCount
     }
 
     val likelihoodMap =
       featureMap.map {
-        case (label, featMap) =>
+        case (label, featureValues) =>
 
-          val perLabelTotalFeatureCount = {
-            val total = featMap.values.sum
-            val nDistinctFeats = featMap.keySet.size
+          val pseudoPerLabelTotalFeatureCount = {
+            val total = featureValues.values.sum
+            val nDistinctFeats = featureValues.keySet.size
             num.toDouble(total) + (nDistinctFeats * s)
           }
 
           (
             label,
-            featMap.map {
+            featureValues.map {
               case (feature, count) =>
-                (feature, (num.toDouble(count) + s) / perLabelTotalFeatureCount)
+                (feature, (num.toDouble(count) + s) / pseudoPerLabelTotalFeatureCount)
             }
           )
       }
@@ -256,9 +270,9 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
     (label: L) =>
       (feature: F) =>
         if (likelihoodMap contains label)
-          likelihoodMap(label).getOrElse(feature, pseudoCount)
+          likelihoodMap(label).getOrElse(feature, finalPseudoCount)
         else
-          pseudoCount
+          finalPseudoCount
   }
 
 }
