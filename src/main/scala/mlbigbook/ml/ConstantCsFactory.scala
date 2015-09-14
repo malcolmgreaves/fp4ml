@@ -32,7 +32,7 @@ trait ConstantCsFactory[N] extends CountSmoothFactory[N] { factory =>
     }
 }
 
-object ConstantSmoothFac {
+object ConstantCsFactory {
 
   def apply[N: Numeric](pseudoCount: N): ConstantCsFactory[N] = {
     val p = pseudoCount
@@ -46,7 +46,7 @@ object ConstantSmoothFac {
   object Laplacian {
 
     def apply[N: Numeric]: ConstantCsFactory[N] =
-      ConstantSmoothFac[N](implicitly[Numeric[N]].one)
+      ConstantCsFactory[N](implicitly[Numeric[N]].one)
 
     object Implicits {
 
@@ -59,5 +59,4 @@ object ConstantSmoothFac {
       implicit val intCsf = Laplacian[Int]
     }
   }
-
 }

@@ -28,15 +28,14 @@ object CountingNaiveBayes {
 
   object Laplacian {
 
-    val Double = CountingNaiveBayes[Double](ConstantSmoothFac.Laplacian.Implicits.doubleCsf)
+    val Double = CountingNaiveBayes[Double](ConstantCsFactory.Laplacian.Implicits.doubleCsf)
 
-    val Float = CountingNaiveBayes[Float](ConstantSmoothFac.Laplacian.Implicits.floatCsf)
+    val Float = CountingNaiveBayes[Float](ConstantCsFactory.Laplacian.Implicits.floatCsf)
 
-    val Long = CountingNaiveBayes[Long](ConstantSmoothFac.Laplacian.Implicits.longCsf)
+    val Long = CountingNaiveBayes[Long](ConstantCsFactory.Laplacian.Implicits.longCsf)
 
-    val Int = CountingNaiveBayes[Int](ConstantSmoothFac.Laplacian.Implicits.intCsf)
+    val Int = CountingNaiveBayes[Int](ConstantCsFactory.Laplacian.Implicits.intCsf)
   }
-
 }
 
 /**
