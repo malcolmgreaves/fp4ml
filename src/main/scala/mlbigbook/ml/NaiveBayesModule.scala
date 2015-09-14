@@ -10,6 +10,9 @@ object Feature {
 
 object NaiveBayesModule {
 
+  /**
+   * This module uses a log probabilities instead of probabilities.
+   */
   type LogProbability = Double
 
   /**
