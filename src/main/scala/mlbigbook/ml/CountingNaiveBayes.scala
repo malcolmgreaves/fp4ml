@@ -110,7 +110,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   final def train[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] = {
     val cs = count(data)
     val (labels, _, _) = cs
-    val (prior, likelihood) = countsToPriorAndLikelihood(cs)
+    val (prior, likelihood) = countsToFuncs(cs)
     NaiveBayes(
       labels,
       prior,
@@ -165,7 +165,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
    *
    * Uses the `mkPrior` and `mkLikelihood` methods.
    */
-  final def countsToPriorAndLikelihood[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L]) = {
+  final def countsToFuncs[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L]) = {
     val (_, labelMap, featureMap) = c
     (mkPrior(labelMap), mkLikelihood(featureMap))
   }
