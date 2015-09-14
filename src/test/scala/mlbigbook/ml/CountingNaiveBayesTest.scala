@@ -6,9 +6,18 @@ class CountingNaiveBayesTest extends FunSuite {
 
   import CountingNaiveBayesTest._
 
-  test("test using small vocabulary, bag-of-words (both Long and Int manifestations)") {
-    testSmallVocab(CountingNaiveBayes.Int)
-    testSmallVocab(CountingNaiveBayes.Long)
+  test("[No Pseudo Counts] test using small vocabulary, bag-of-words (Long, Int, Double, and Float manifestations)") {
+    testSmallVocab(CountingNaiveBayes.ZeroCount.Int)
+    testSmallVocab(CountingNaiveBayes.ZeroCount.Long)
+    testSmallVocab(CountingNaiveBayes.ZeroCount.Double)
+    testSmallVocab(CountingNaiveBayes.ZeroCount.Float)
+  }
+
+  test("[Pseudo Count = 1] test using small vocabulary, bag-of-words (Long, Int, Double, and Float manifestations)") {
+    testSmallVocab(CountingNaiveBayes.Laplacian.Int)
+    testSmallVocab(CountingNaiveBayes.Laplacian.Long)
+    testSmallVocab(CountingNaiveBayes.Laplacian.Double)
+    testSmallVocab(CountingNaiveBayes.Laplacian.Float)
   }
 
   def testSmallVocab[N: Numeric](c: CountingNaiveBayes[N]): Unit = {

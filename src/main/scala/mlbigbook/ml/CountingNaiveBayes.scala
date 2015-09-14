@@ -7,45 +7,58 @@ import mlbigbook.wordcount.GenericCount
  * numeric types.
  */
 object CountingNaiveBayes {
-  case object Int extends CountingNaiveBayes[Int]
-  case object Long extends CountingNaiveBayes[Long]
-  case object Float extends CountingNaiveBayes[Float]
-  case object Double extends CountingNaiveBayes[Double]
+
+  def apply[N: CountSmoothFactory]: CountingNaiveBayes[N] = {
+    val sf = implicitly[CountSmoothFactory[N]]
+    new CountingNaiveBayes[N] {
+      override implicit val smoothFac = sf
+    }
+  }
+
+  object ZeroCount {
+
+    val Double = CountingNaiveBayes[Double](ZeroCsFactory.Implicits.doubleZsf)
+
+    val Float = CountingNaiveBayes[Float](ZeroCsFactory.Implicits.floatZsf)
+
+    val Long = CountingNaiveBayes[Long](ZeroCsFactory.Implicits.longZsf)
+
+    val Int = CountingNaiveBayes[Int](ZeroCsFactory.Implicits.intZsf)
+  }
+
+  object Laplacian {
+
+    val Double = CountingNaiveBayes[Double](ConstantSmoothFac.Laplacian.Implicits.doubleCsf)
+
+    val Float = CountingNaiveBayes[Float](ConstantSmoothFac.Laplacian.Implicits.floatCsf)
+
+    val Long = CountingNaiveBayes[Long](ConstantSmoothFac.Laplacian.Implicits.longCsf)
+
+    val Int = CountingNaiveBayes[Int](ConstantSmoothFac.Laplacian.Implicits.intCsf)
+  }
+
 }
 
 /**
  * Implementation of naive Bayes for discrete, event-based features.
  */
-abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.Double) N: Numeric] {
+trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.Double) N] {
 
   import NaiveBayesModule._
+
+  /**
+   * The factory that produces a count smoothing instance for the numeric type N.
+   */
+  implicit def smoothFac: CountSmoothFactory[N]
+
+  /**
+   * The numeric instance associated with this class's generic number parameter.
+   */
+  implicit final lazy val num: Numeric[N] = smoothFac.num
 
   //
   // Type Definitions
   //
-
-  /**
-   * Type representing a smoothing value. It is a number.
-   */
-  type Smoothing = N
-
-  /**
-   * Type representing a training function that uses the given smoothing value
-   * for "hallucinating" counts during training. This technique produces a more
-   * robust naive Bayes model that is able to operate with events that it has
-   * never encountered before.
-   */
-  type SmoothedTrain[Feature, Label] = Smoothing => Train[Feature, Label]
-
-  /**
-   * Helper object that allows one to construct an instance of
-   * CountingNaiveBayes.SmoothedTrain using the smoothedTrain method defined
-   * within the CountingNaiveBayes class.
-   */
-  object SmoothedTrain {
-    def apply[F: Equiv, L: Equiv]: SmoothedTrain[F, L] =
-      smoothedTrain[F, L]
-  }
 
   /**
    * Helper object that allows one to construct an instance of
@@ -92,24 +105,12 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
   //
 
   /**
-   * The numeric instance associated with this class's generic number parameter.
-   */
-  final val num: Numeric[N] = implicitly[Numeric[N]]
-
-  /**
    * Produces a naive Bayes model from the input data. Uses no count smoothing.
    */
-  final def train[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] =
-    smoothedTrain[F, L](num.zero)(data)
-
-  /**
-   * Produces a naive Bayes model from the input data using the given count
-   * smoothing value.
-   */
-  final def smoothedTrain[F, L](smooth: Smoothing)(data: TrainingData[F, L]): NaiveBayes[F, L] = {
+  final def train[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] = {
     val cs = count(data)
     val (labels, _, _) = cs
-    val (prior, likelihood) = countsToPriorAndLikelihood(smooth, cs)
+    val (prior, likelihood) = countsToPriorAndLikelihood(cs)
     NaiveBayes(
       labels,
       prior,
@@ -164,12 +165,9 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    *
    * Uses the `mkPrior` and `mkLikelihood` methods.
    */
-  final def countsToPriorAndLikelihood[F, L](
-    smooth: Smoothing,
-    c:      Counts[L, F]
-  ): (Prior[L], Likelihood[F, L]) = {
+  final def countsToPriorAndLikelihood[F, L](c: Counts[L, F]): (Prior[L], Likelihood[F, L]) = {
     val (_, labelMap, featureMap) = c
-    (mkPrior(labelMap), mkLikelihood(smooth, featureMap))
+    (mkPrior(labelMap), mkLikelihood(featureMap))
   }
 
   /**
@@ -199,80 +197,41 @@ abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Floa
    * combination that was not observed during training, the function will
    * evaluate to this pseudo count (instead of zero).
    */
-  final def mkLikelihood[L, F](
-    smooth:     Smoothing,
-    featureMap: FeatureMap[L, F]
-  ): Likelihood[F, L] = {
+  final def mkLikelihood[L, F](featureMap: FeatureMap[L, F]): Likelihood[F, L] = {
 
-    val s = num.toDouble(smooth)
+    val smoother = smoothFac(featureMap)
 
-    val finalPseudoCount = {
+    val pseudoCount = num.toDouble(smoother.sCount)
 
-      // TODO -- Investigate this normalization computation !!!
+    val notPresent = pseudoCount / num.toDouble(smoother.sAggregateTotal)
 
-      val pseudoLabelFeatureCocurCount = {
-
-        val pseudoVocabularySize = {
-
-          // TODO -- Optimize w/ bloom filter.
-          // We only need to get the # of features. We should be able to,
-          // within a trivially small false-positive probability, correctly
-          // estimate the # of distinct features with a bloom filter.
-          val vocabularySize =
-            featureMap
-              .map {
-                case (_, featureValues) => featureValues.keySet
-              }
-              .reduce { _ ++ _ }
-              .size
-              .toDouble
-
-          // For each feature in our vocabulary, we hallucinate a count for it.
-          // This hallucinated count is also known as a pseudo count.
-          vocabularySize * s
-        }
-
-        val labelFeatureCocurCount =
-          num.toDouble {
-            featureMap
-              .map {
-                case (_, featureValues) => featureValues.values.sum
-              }
-              .sum
-          }
-
-        labelFeatureCocurCount + pseudoVocabularySize
-      }
-
-      s / pseudoLabelFeatureCocurCount
-    }
-
-    val likelihoodMap =
+    // calculate likelihood for each (label,feature) pair
+    val likelihoodMap = {
       featureMap.map {
         case (label, featureValues) =>
 
-          val pseudoPerLabelTotalFeatureCount = {
-            val total = featureValues.values.sum
-            val nDistinctFeats = featureValues.keySet.size
-            num.toDouble(total) + (nDistinctFeats * s)
-          }
-
+          val sTotalForLabel = num.toDouble(smoother.sAggregateLabel(label))
           (
             label,
             featureValues.map {
               case (feature, count) =>
-                (feature, (num.toDouble(count) + s) / pseudoPerLabelTotalFeatureCount)
+                val dCount = num.toDouble(count)
+                (
+                  feature,
+                  (dCount + pseudoCount) / sTotalForLabel
+                )
             }
           )
       }
+    }
 
-    // likelihood function signature & implementation (finally!)
+    // likelihood function
     (label: L) =>
       (feature: F) =>
         if (likelihoodMap contains label)
-          likelihoodMap(label).getOrElse(feature, finalPseudoCount)
+          likelihoodMap(label).getOrElse(feature, notPresent)
         else
-          finalPseudoCount
+          notPresent
   }
 
 }
