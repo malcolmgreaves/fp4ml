@@ -78,7 +78,7 @@ object NaiveBayesModule {
           val normalizationConstant =
             logPosteriors
               .map {
-                case (_, logPosteriorForLabel) => logPosteriorForLabel
+                case (_, logP) => logP
               }
               .reduce(_ + _)
 
