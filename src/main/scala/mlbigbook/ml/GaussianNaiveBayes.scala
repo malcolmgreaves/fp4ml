@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data._
-import mlbigbook.ml.NaiveBayesModule.{ Likelihood, NaiveBayes }
+import mlbigbook.ml.NaiveBayesModule.{ LogLikelihood, NaiveBayes }
 import breeze.math._
 
 import scala.language.{ higherKinds, implicitConversions }
@@ -43,7 +43,7 @@ abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.I
     // estimate means and variances of all features
     // make likelihood according to these statistics + the
     // probability density function of a Gaussian distribution
-    val likelihood: Likelihood[(N, Int), L] = {
+    val likelihood: LogLikelihood[(N, Int), L] = {
       null
       //      val gau = estimateGaussian(data)
       //      val maxIndex = g.mean.size

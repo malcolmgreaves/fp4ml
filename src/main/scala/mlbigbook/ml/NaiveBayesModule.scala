@@ -10,21 +10,18 @@ object Feature {
 
 object NaiveBayesModule {
 
-  /**
-   * This module uses a Distribtuion's notion of probability.
-   */
-  type Probability = Distribution.Probability
+  type LogProbability = Double
 
   /**
    * A prior function. The estimated probability of a label.
    */
-  type Prior[Label] = Label => Probability
+  type LogPrior[Label] = Label => LogProbability
 
   /**
    * A likelihood function. Conditioned on a label, produces an
    * estimated probability for a feature.
    */
-  type Likelihood[Feature, Label] = Label => Feature => Probability
+  type LogLikelihood[Feature, Label] = Label => Feature => LogProbability
 
   /**
    * An instance of naive Bayes, parametrized by a label set,
@@ -32,8 +29,8 @@ object NaiveBayesModule {
    */
   case class NaiveBayes[F, Label](
     labels: Data[Label],
-    p:      Prior[Label],
-    l:      Likelihood[F, Label]
+    p:      LogPrior[Label],
+    l:      LogLikelihood[F, Label]
   )
 
   // TODO -- Investigate this type class idea for NB. Good or bad idea?
@@ -61,14 +58,14 @@ object NaiveBayesModule {
         DiscreteDistribution {
 
           // calculate log-posterior distribution (across labels)
-          val logPosteriors: Data[(Label, Probability)] =
+          val logPosteriors: Data[(Label, LogProbability)] =
             nb.labels
               .map { label =>
-                val logPrior = math.log(nb.p(label))
+                val logPrior = nb.p(label)
                 val logLikelihood = {
                   val labelLogLikelihood = nb.l(label)
                   features
-                    .map(x => math.log(labelLogLikelihood(x)))
+                    .map(x => labelLogLikelihood(x))
                     .sum
                 }
                 (label, logPrior + logLikelihood)
@@ -77,7 +74,9 @@ object NaiveBayesModule {
           // to produce valid probabilities, we normalize each log-posterior
           val normalizationConstant =
             logPosteriors
-              .map(_._2)
+              .map {
+                case (_, logPosteriorForLabel) => logPosteriorForLabel
+              }
               .reduce(_ + _)
 
           logPosteriors
