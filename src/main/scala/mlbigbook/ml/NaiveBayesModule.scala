@@ -65,7 +65,7 @@ object NaiveBayesModule {
                 val logLikelihood = {
                   val labelLogLikelihood = nb.l(label)
                   features
-                    .map(x => labelLogLikelihood(x))
+                    .map(labelLogLikelihood)
                     .sum
                 }
                 (label, logPrior + logLikelihood)
