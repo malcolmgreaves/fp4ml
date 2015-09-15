@@ -31,7 +31,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
 
   implicit def num: Numeric[N]
 
-  def labelCount[L](data: TrainingData[_, L]): Map[L, Long] =
+  def labelCount[L](data: TrainingData[_, L, N]): Map[L, Long] =
     data
       .aggregate(GenericCount.empty[L, Long])(
         {
@@ -44,7 +44,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
         }
       )
 
-  final def produce[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] = {
+  final def produce[F, L](data: TrainingData[F, L, N]): NaiveBayes[F, L, N] = {
 
     // count the occurrence of every label in the training data
     val labelMap = labelCount(data)
@@ -65,68 +65,68 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
     )
   }
 
-  def mkLikelihood[F, L](labelMap: LabelMap[L], data: TrainingData[F,L]): LogLikelihood[F, L] = {
+  def mkLikelihood[F, L](labelMap: LabelMap[L], data: TrainingData[F, L, N]): LogLikelihood[F, L, N] = {
     ???
-//    // estimate means and variances of all features
-//    // make likelihood according to these statistics + the
-//    // probability density function of a Gaussian distribution
-//      //      val gau = estimateGaussian(data)
-//      //      val maxIndex = g.mean.size
-//      //      // TODO
-//      //      // (1) need to estimate (mean, variance) on a PER-CLASS basis
-//      //      // (2) make types work out here
-//      //      // (3) make everything work out with vector
-//      //      // (4) if cannot obtain (3), then replace with DenseVector everywhere (reasonable assumption for continuous features...)
-//      //      (label: L) => {
-//      //        val g = gau(label)
-//      //        {
-//      //          case (value, index) =>
-//      //            if(index >= 0 && index < maxIndex)
-//      //              (1.0 / math.sqrt(2.0 * math.pi * g.variance(index))) * math.exp((-0.5) * math.pow(value - g.mean(index), 2.0)/ g.variance(index))
-//      //            else
-//      //              0.0
-//      //        }
-//      //      }
-//
-//
-//    val m1 =
-//      labelMap
-//        .map {
-//          case (estimatingForLabel, _) =>
-//
-//            val vectorsWithLabel: Data[Vec] =
-//              data
-//                .filter {
-//                  case (_, label) => estimatingForLabel == label
-//                }
-//                .map {
-//                  case (instance, _) => instance
-//                }
-//
-//            val gaussianForLabel = estimateGaussian(vectorsWithLabel)
-//
-//            (estimatingForLabel, gaussianForLabel)
-//        }
-//
-//    val defaultGau = estimateGaussian(data.map(_._1))
-//
-//
-//    (label: L) =>
-//      (feature: Vec) => {
-//
-//        val resultingVec =
-//          if(m1 contains label)
-//            Gaussian.logProbability(m1(label))(feature)
-//          else
-//            Gaussian.logProbability(defaultGau)(feature)
-//
-//          resultingVec
-//            .map(num.toDouble)
-//            .foldLeft(0.0) {
-//              case (accum, value) =>
-//                accum + value
-//            }
-//      }
+    //    // estimate means and variances of all features
+    //    // make likelihood according to these statistics + the
+    //    // probability density function of a Gaussian distribution
+    //      //      val gau = estimateGaussian(data)
+    //      //      val maxIndex = g.mean.size
+    //      //      // TODO
+    //      //      // (1) need to estimate (mean, variance) on a PER-CLASS basis
+    //      //      // (2) make types work out here
+    //      //      // (3) make everything work out with vector
+    //      //      // (4) if cannot obtain (3), then replace with DenseVector everywhere (reasonable assumption for continuous features...)
+    //      //      (label: L) => {
+    //      //        val g = gau(label)
+    //      //        {
+    //      //          case (value, index) =>
+    //      //            if(index >= 0 && index < maxIndex)
+    //      //              (1.0 / math.sqrt(2.0 * math.pi * g.variance(index))) * math.exp((-0.5) * math.pow(value - g.mean(index), 2.0)/ g.variance(index))
+    //      //            else
+    //      //              0.0
+    //      //        }
+    //      //      }
+    //
+    //
+    //    val m1 =
+    //      labelMap
+    //        .map {
+    //          case (estimatingForLabel, _) =>
+    //
+    //            val vectorsWithLabel: Data[Vec] =
+    //              data
+    //                .filter {
+    //                  case (_, label) => estimatingForLabel == label
+    //                }
+    //                .map {
+    //                  case (instance, _) => instance
+    //                }
+    //
+    //            val gaussianForLabel = estimateGaussian(vectorsWithLabel)
+    //
+    //            (estimatingForLabel, gaussianForLabel)
+    //        }
+    //
+    //    val defaultGau = estimateGaussian(data.map(_._1))
+    //
+    //
+    //    (label: L) =>
+    //      (feature: Vec) => {
+    //
+    //        val resultingVec =
+    //          if(m1 contains label)
+    //            Gaussian.logProbability(m1(label))(feature)
+    //          else
+    //            Gaussian.logProbability(defaultGau)(feature)
+    //
+    //          resultingVec
+    //            .map(num.toDouble)
+    //            .foldLeft(0.0) {
+    //              case (accum, value) =>
+    //                accum + value
+    //            }
+    //      }
   }
 
   /*
