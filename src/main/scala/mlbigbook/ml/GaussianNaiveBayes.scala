@@ -3,43 +3,69 @@ package mlbigbook.ml
 import mlbigbook.data._
 import mlbigbook.ml.NaiveBayesModule.{ LogLikelihood, NaiveBayes }
 import breeze.math._
+import mlbigbook.wordcount.GenericCount
 
 import scala.language.{ higherKinds, implicitConversions }
 import scala.reflect.ClassTag
 
 object GaussianNaiveBayes {
-  case object Double extends GaussianNaiveBayes[Double] {}
-  case object Int extends GaussianNaiveBayes[Int] {}
-  case object Long extends GaussianNaiveBayes[Long] {}
+
+  def apply[N: Numeric]: GaussianNaiveBayes[N] = {
+    val n = implicitly[Numeric[N]]
+    new GaussianNaiveBayes[N] {
+      override implicit def num: Numeric[N] = n
+    }
+  }
+
+  object Instances {
+    val Double = GaussianNaiveBayes[Double]
+    val Float = GaussianNaiveBayes[Float]
+    val Long = GaussianNaiveBayes[Long]
+    val Int = GaussianNaiveBayes[Int]
+  }
 }
 
-abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N: Numeric]() {
+trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
+
+  import NaiveBayesModule._
+
+  implicit def num: Numeric[N]
 
   import breeze.linalg.Vector
   type Vec = Vector[N]
 
-  final def produce[L: Equiv](data: Learning[Vec, L]#TrainingData): NaiveBayes[(N, Int), L] = {
-
-    val num = implicitly[Numeric[N]]
-
-    // make label map
-    val labelMap: Map[L, Long] = null
-    // make prior from label map
-    val prior = {
-      val totalClassCount = labelMap.map(_._2).sum.toDouble
-      val priormap =
-        labelMap.map {
-          case (label, count) =>
-            (label, count.toDouble / totalClassCount)
+  def labelCount[L](data: TrainingData[_, L]): Map[L, Long] =
+    data
+      .aggregate(GenericCount.empty[L, Long])(
+        {
+          case (labelMap, (_, label)) =>
+            GenericCount.increment(labelMap, label)
+        },
+        {
+          case (lm1, lm2) =>
+            GenericCount.combine(lm1, lm2)
         }
+      )
 
-      (label: L) =>
-        if (priormap contains label)
-          priormap(label)
-        else
-          0.0
-    }
+  final def produce[L](data: TrainingData[Vec, L]): NaiveBayes[Vec, L] = {
 
+    // count the occurrence of every label in the training data
+    val labelMap = labelCount(data)
+
+    // The arbitrary, but fixed, sequential ordering of the labels.
+    val labels = labelMap.keys.toSeq
+
+    // construct the prior
+    val logPrior = mkPrior(labelMap)
+
+    NaiveBayes(
+      labels,
+      logPrior,
+      logLikelihood
+    )
+  }
+
+  def mkLikelihood[L](data: TrainingData[Vec, L]): LogLikelihood[Vec, L] = {
     // estimate means and variances of all features
     // make likelihood according to these statistics + the
     // probability density function of a Gaussian distribution
@@ -63,12 +89,7 @@ abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.I
       //        }
       //      }
     }
-
-    NaiveBayes(
-      labelMap.keySet.toSeq,
-      prior,
-      likelihood
-    )
+    ???
   }
 
   case class Gaussian(mean: Vec, variance: Vec)

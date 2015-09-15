@@ -36,6 +36,12 @@ object NaiveBayesModule {
     l:      LogLikelihood[F, Label]
   )
 
+  /**
+   * Type representing the mapping between labels and the number of times each
+   * label was encountered in a training data set.
+   */
+  type LabelMap[Label] = Map[Label, Long]
+
   // TODO -- Investigate this type class idea for NB. Good or bad idea?
   /*
   trait NaiveBayesTypeclass[NB, Feature, Label] {
@@ -89,5 +95,23 @@ object NaiveBayesModule {
             .toMap
         }
     }
+
+  /**
+   * Produces a prior function from a label mapping.
+   */
+  final def mkPrior[L](lm: LabelMap[L]): LogPrior[L] = {
+    val totalLabelCount = lm.values.sum.toDouble
+    val logPriorMap =
+      lm.map {
+        case (label, count) =>
+          (
+            label,
+            math.log { count.toDouble / totalLabelCount }
+          )
+      }
+
+    (label: L) =>
+      logPriorMap.getOrElse(label, 0.0)
+  }
 
 }

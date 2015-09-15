@@ -70,12 +70,6 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   }
 
   /**
-   * Type representing the mapping between labels and the number of times each
-   * label was encountered in a training data set.
-   */
-  type LabelMap[Label] = Map[Label, N]
-
-  /**
    * Type representing the mapping between features and the number of times
    * each one was encountered during training. Each one of these maps is
    * partitioned by the label that was associated with the particular
@@ -123,7 +117,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   final def count[Label, F](data: TrainingData[F, Label]): Counts[Label, F] = {
     val (finalLabelMap, finalFeatureMap) =
       data
-        .aggregate((GenericCount.empty[Label, N], FeatureMap.empty[Label, F]))(
+        .aggregate((GenericCount.empty[Label, Long], FeatureMap.empty[Label, F]))(
           {
             case ((labelMap, featureMap), (features, label)) =>
 
@@ -167,27 +161,6 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   final def countsToFuncs[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L]) = {
     val (_, labelMap, featureMap) = c
     (mkPrior(labelMap), mkLikelihood(featureMap))
-  }
-
-  /**
-   * Produces a prior function from a label mapping.
-   */
-  final def mkPrior[L](lm: LabelMap[L]): LogPrior[L] = {
-    val totalClassCount = num.toDouble(lm.values.sum)
-    val logPriorMap =
-      lm.map {
-        case (label, count) =>
-          (
-            label,
-            math.log { num.toDouble(count) / totalClassCount }
-          )
-      }
-
-    (label: L) =>
-      if (logPriorMap contains label)
-        logPriorMap(label)
-      else
-        0.0
   }
 
   /**
