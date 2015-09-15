@@ -2,6 +2,7 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object Feature {
@@ -9,6 +10,21 @@ object Feature {
     implicit def num: Numeric[N]
     def data: Data[(F, N)]
   }
+
+  object Vector {
+
+    object Implicits {
+
+      implicit def from[F, N:Numeric](d: Data[(F,N)]): Vector[F,N] =  {
+        val n = implicitly[Numeric[N]]
+        new Vector[F,N] {
+          override final lazy val num = n
+          override final val data = d
+        }
+      }
+    }
+  }
+
 }
 
 object NaiveBayesModule {
