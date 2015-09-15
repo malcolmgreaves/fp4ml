@@ -42,21 +42,30 @@ object NaiveBayesModule {
    */
   type LabelMap[Label] = Map[Label, Long]
 
-  // TODO -- Investigate this type class idea for NB. Good or bad idea?
-  /*
-  trait NaiveBayesTypeclass[NB, Feature, Label] {
-    def labels(nb:NB):Data[Label]
-    def prior(nb:NB):Prior[Label]
-    def likelihood(nb:NB):Likelihood[Feature,Label]
-  }
-   */
-
   type TrainingData[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData
 
   /**
    * The type for producing a NaiveBayes instance from a labeled data set (aka training).
    */
   type Train[F, Label] = TrainingData[F, Label] => NaiveBayes[F, Label]
+
+  /**
+   * Produces a prior function from a label mapping.
+   */
+  final def mkPrior[L](lm: LabelMap[L]): LogPrior[L] = {
+    val totalLabelCount = lm.values.sum.toDouble
+    val logPriorMap =
+      lm.map {
+        case (label, count) =>
+          (
+            label,
+            math.log { count.toDouble / totalLabelCount }
+            )
+      }
+
+    (label: L) =>
+      logPriorMap.getOrElse(label, 0.0)
+  }
 
   /**
    * Produces a discrete estimator from a learned NaiveBayes instance.
@@ -95,23 +104,5 @@ object NaiveBayesModule {
             .toMap
         }
     }
-
-  /**
-   * Produces a prior function from a label mapping.
-   */
-  final def mkPrior[L](lm: LabelMap[L]): LogPrior[L] = {
-    val totalLabelCount = lm.values.sum.toDouble
-    val logPriorMap =
-      lm.map {
-        case (label, count) =>
-          (
-            label,
-            math.log { count.toDouble / totalLabelCount }
-          )
-      }
-
-    (label: L) =>
-      logPriorMap.getOrElse(label, 0.0)
-  }
 
 }

@@ -47,7 +47,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
         }
       )
 
-  final def produce[L](data: TrainingData[Vec, L]): NaiveBayes[Vec, L] = {
+  final def produce[L](data: TrainingData[Vec, L])(implicit sr: Semiring[Vec]): NaiveBayes[Vec, L] = {
 
     // count the occurrence of every label in the training data
     val labelMap = labelCount(data)
@@ -55,8 +55,11 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
     // The arbitrary, but fixed, sequential ordering of the labels.
     val labels = labelMap.keys.toSeq
 
-    // construct the prior
+    // construct the prior function
     val logPrior = mkPrior(labelMap)
+
+    // construct the likelihood function
+    val logLikelihood = mkLikelihood(labelMap, fixDataType(data))
 
     NaiveBayes(
       labels,
@@ -65,12 +68,13 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
     )
   }
 
-  def mkLikelihood[L](data: TrainingData[Vec, L]): LogLikelihood[Vec, L] = {
+  private[this] def fixDataType[L](d: TrainingData[Vec, L]): Data[(Vec, L)] =
+    ???
+
+  def mkLikelihood[L](labelMap: LabelMap[L], data: Data[(Vec, L)])(implicit sr: Semiring[Vec]): LogLikelihood[Vec, L] = {
     // estimate means and variances of all features
     // make likelihood according to these statistics + the
     // probability density function of a Gaussian distribution
-    val likelihood: LogLikelihood[(N, Int), L] = {
-      null
       //      val gau = estimateGaussian(data)
       //      val maxIndex = g.mean.size
       //      // TODO
@@ -88,18 +92,130 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
       //              0.0
       //        }
       //      }
-    }
-    ???
+
+
+    val m1 =
+      labelMap
+        .map {
+          case (estimatingForLabel, _) =>
+
+            val vectorsWithLabel: Data[Vec] =
+              data
+                .filter {
+                  case (_, label) => estimatingForLabel == label
+                }
+                .map {
+                  case (instance, _) => instance
+                }
+
+            val gaussianForLabel = estimateGaussian(vectorsWithLabel)
+
+            (estimatingForLabel, gaussianForLabel)
+        }
+
+    val defaultGau = estimateGaussian(data.map(_._1))
+
+
+    (label: L) =>
+      (feature: Vec) => {
+
+        val resultingVec =
+          if(m1 contains label)
+            Gaussian.logProbability(m1(label))(feature)
+          else
+            Gaussian.logProbability(defaultGau)(feature)
+
+          resultingVec
+            .map(num.toDouble)
+            .foldLeft(0.0) {
+              case (accum, value) =>
+                accum + value
+            }
+      }
   }
+
+  /*
+
+  trait GaussianFactory[N] { factory =>
+
+    implicit def num: Numeric[N]
+
+    def dimensionality: Int
+
+    type Vec <: Vector[N]
+
+    lazy val pi = Vec.fill(dimensionality)(math.Pi)
+
+    lazy val ones = Vec.ones(dimensionality)
+
+    lazy val twos = Vec.fill(dimensionality)(2.0)
+
+    lazy val negOneHalf = Vec.fill(dimensionality)(-0.5)
+
+    def apply[Label](d: Data[(Vec, Label)]): Gaussian
+
+    case class Gaussian(
+      mean: Vec,
+      variance: Vec,
+      stddev: Vec
+    ){
+      implicit final val num   = factory.num
+      final val dimensionality = factory.dimensionality
+    }
+
+    /*** [BEGIN] MATH OPS ***/
+
+    def sqrt(v: Vec): Vec = ???
+
+    def e(v: Vec): Vec = ???
+
+    def pow(base: Vec, exponent: Vec): Vec = ???
+
+    /*** [END] MATH OPS ***/
+
+    def probabilityOf(gau: Gaussian)(value: Vec): Vec = {
+     // (1 / ( sqrt ( 2 * pi * stddev^2 ) ) ^ ( e^ (  -(1/2) * (  ( VALUE - mean )  /  stddev  ) )^2  )
+
+     val base =
+      ( ones / sqrt(twos * pi * gau.variance) )
+
+      val exponent = {
+        val eExponent = {
+
+          val rightPart =
+            pow(( (value - gau.mean) / gau.stddev ), twos)
+
+          negOneHalf * rightPart
+        }
+
+        e(eExponent)
+      }
+
+      pow(base, exponent)
+   }
+
+   def logProbabilityOf(gau: Gaussian)(value: Vec) =
+    probabilityOf(gau)(value)
+      .map(math.log)
+
+  }
+
+
+ */
 
   case class Gaussian(mean: Vec, variance: Vec)
   object Gaussian {
-    implicit val ctN = ClassTag[N](implicitly[Numeric[N]].zero.getClass)
+
+    implicit val ctN = ClassTag[N](num.zero.getClass)
+
     implicit val storageN =
       new breeze.storage.Zero[N] {
-        override def zero: N = implicitly[Numeric[N]].zero
+        override def zero: N = num.zero
       }
+
     val empty = Gaussian(Vector.zeros[N](0), Vector.zeros[N](0))
+
+    def logProbability(g: Gaussian)(v: Vec): Vec = ???
   }
 
   import mlbigbook.math.XXX
@@ -154,6 +270,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
 
         val m: Vec = mean_final.asInstanceOf[Vec]
         val v: Vec = XXX.elemDivide(variance_final, implicitly[Numeric[N]].fromInt(n_final - 1)).asInstanceOf[Vec]
+
         Gaussian(m, v)
 
       case None =>

@@ -4,7 +4,7 @@ import breeze.linalg.{ NumericOps, DenseVector, Vector }
 import breeze.linalg.operators._
 import breeze.math.Semiring
 
-import scala.language.implicitConversions
+import scala.language.{higherKinds, implicitConversions}
 
 abstract class VectorOpsT[N: Numeric, V[_] <: Vector[_]] {
 
