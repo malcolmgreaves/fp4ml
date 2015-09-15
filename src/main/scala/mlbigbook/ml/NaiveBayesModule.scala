@@ -42,6 +42,9 @@ object NaiveBayesModule {
    */
   type LabelMap[Label] = Map[Label, Long]
 
+  /**
+   * Type representing training data that naive bayes implementations use.
+   */
   type TrainingData[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData
 
   /**
