@@ -205,14 +205,8 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
 
     val pseudoCount = num.toDouble(smoother.sCount)
 
-    val notPresent =
-      if (num.compare(smoother.sCount, num.zero) == 0)
-        0.0
-      else
-        math.log(pseudoCount / num.toDouble(smoother.sAggregateTotal))
-
     // calculate likelihood for each (label,feature) pair
-    val logLikelihoodMap = {
+    val logLikelihoodMap =
       featureMap.map {
         case (label, featureValues) =>
 
@@ -229,15 +223,36 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
             }
           )
       }
-    }
+
+    val pCountIsZero = num.compare(smoother.sCount, num.zero) == 0
+
+    val labelNotPresent =
+      if (pCountIsZero)
+        0.0
+      else
+        math.log(pseudoCount / num.toDouble(smoother.sAggregateTotal))
+
+    val perLabelNotPresent =
+      if (pCountIsZero)
+        logLikelihoodMap
+          .map {
+            case (label, _) => (label, 0.0)
+          }
+      else
+        logLikelihoodMap
+          .map {
+            case (label, _) =>
+              val sTotalForLabel = num.toDouble(smoother.sAggregateLabel(label))
+              (label, math.log { pseudoCount / sTotalForLabel })
+          }
 
     // likelihood function
     (label: L) =>
       (feature: F) =>
         if (logLikelihoodMap contains label)
-          logLikelihoodMap(label).getOrElse(feature, notPresent)
+          logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
         else
-          notPresent
+          labelNotPresent
   }
 
 }
