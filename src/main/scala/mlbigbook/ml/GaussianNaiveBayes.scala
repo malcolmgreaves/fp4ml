@@ -1,27 +1,22 @@
 package mlbigbook.ml
 
-import mlbigbook.data._
-import mlbigbook.ml.NaiveBayesModule.{ LogLikelihood, NaiveBayes }
-import breeze.math._
 import mlbigbook.wordcount.GenericCount
 
-import scala.language.{ higherKinds, implicitConversions }
-import scala.reflect.ClassTag
+import scala.language.implicitConversions
 
 object GaussianNaiveBayes {
 
-  def apply[N: Numeric]: GaussianNaiveBayes[N] = {
-    val n = implicitly[Numeric[N]]
+  def apply[N: GaussianFactory]: GaussianNaiveBayes[N] = {
+    val g = implicitly[GaussianFactory[N]]
     new GaussianNaiveBayes[N] {
-      override implicit def num: Numeric[N] = n
+      override implicit val gauFac = g
     }
   }
 
   object Instances {
+    import GaussianFactory.Implicits._
     val Double = GaussianNaiveBayes[Double]
     val Float = GaussianNaiveBayes[Float]
-    val Long = GaussianNaiveBayes[Long]
-    val Int = GaussianNaiveBayes[Int]
   }
 }
 
@@ -29,7 +24,9 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
 
   import NaiveBayesModule._
 
-  implicit def num: Numeric[N]
+  implicit val gauFac: GaussianFactory[N]
+
+  implicit lazy val num = gauFac.num
 
   def labelCount[L](data: TrainingData[_, L, N]): Map[L, Long] =
     data
@@ -66,67 +63,87 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
   }
 
   def mkLikelihood[F, L](labelMap: LabelMap[L], data: TrainingData[F, L, N]): LogLikelihood[F, L, N] = {
-    ???
-    //    // estimate means and variances of all features
-    //    // make likelihood according to these statistics + the
-    //    // probability density function of a Gaussian distribution
-    //      //      val gau = estimateGaussian(data)
-    //      //      val maxIndex = g.mean.size
-    //      //      // TODO
-    //      //      // (1) need to estimate (mean, variance) on a PER-CLASS basis
-    //      //      // (2) make types work out here
-    //      //      // (3) make everything work out with vector
-    //      //      // (4) if cannot obtain (3), then replace with DenseVector everywhere (reasonable assumption for continuous features...)
-    //      //      (label: L) => {
-    //      //        val g = gau(label)
-    //      //        {
-    //      //          case (value, index) =>
-    //      //            if(index >= 0 && index < maxIndex)
-    //      //              (1.0 / math.sqrt(2.0 * math.pi * g.variance(index))) * math.exp((-0.5) * math.pow(value - g.mean(index), 2.0)/ g.variance(index))
-    //      //            else
-    //      //              0.0
-    //      //        }
-    //      //      }
-    //
-    //
-    //    val m1 =
-    //      labelMap
-    //        .map {
-    //          case (estimatingForLabel, _) =>
-    //
-    //            val vectorsWithLabel: Data[Vec] =
-    //              data
-    //                .filter {
-    //                  case (_, label) => estimatingForLabel == label
-    //                }
-    //                .map {
-    //                  case (instance, _) => instance
-    //                }
-    //
-    //            val gaussianForLabel = estimateGaussian(vectorsWithLabel)
-    //
-    //            (estimatingForLabel, gaussianForLabel)
-    //        }
-    //
-    //    val defaultGau = estimateGaussian(data.map(_._1))
-    //
-    //
-    //    (label: L) =>
-    //      (feature: Vec) => {
-    //
-    //        val resultingVec =
-    //          if(m1 contains label)
-    //            Gaussian.logProbability(m1(label))(feature)
-    //          else
-    //            Gaussian.logProbability(defaultGau)(feature)
-    //
-    //          resultingVec
-    //            .map(num.toDouble)
-    //            .foldLeft(0.0) {
-    //              case (accum, value) =>
-    //                accum + value
-    //            }
-    //      }
+
+    val cardinality =
+      data
+        .aggregate(0l)(
+          {
+            case (maxSize, (instance, _)) =>
+              math.max(maxSize, instance.data.size)
+          },
+          math.max
+        )
+        .toInt
+
+    val estGauByLabel =
+      labelMap
+        .map {
+          case (label, _) =>
+            val onlyWithLabel =
+              data
+                .filter {
+                  case (_, instanceLabel) => label == instanceLabel
+                }
+                .map {
+                  case (instance, _) => instance
+                }
+
+            (
+              label,
+              gauFac(cardinality, onlyWithLabel)
+            )
+        }
+
+    val defaultGauByLabel =
+      estGauByLabel
+        .map {
+          case (label, fgMap) =>
+            (
+              label,
+              gauFac.Gaussian(
+                mean = fgMap.map(_._2.mean).sum,
+                variance = fgMap.map(_._2.variance).sum,
+                stddev = fgMap.map(_._2.stddev).sum
+              )
+            )
+        }
+
+    val defaultGauAcrossLabel = {
+      val (fMean, fVariance, fStddev) =
+        estGauByLabel
+          .foldLeft((num.zero, num.zero, num.zero)) {
+            case ((mean, variance, stddev), (_, fgMap)) =>
+              (
+                num.plus(mean, fgMap.map(_._2.mean).sum),
+                num.plus(variance, fgMap.map(_._2.variance).sum),
+                num.plus(stddev, fgMap.map(_._2.stddev).sum)
+              )
+          }
+      new gauFac.Gaussian(
+        mean = fMean,
+        variance = fVariance,
+        stddev = fStddev
+      )
+    }
+
+    (label: L) =>
+      (feature: F, value: N) =>
+        num.toDouble {
+          if (estGauByLabel contains label) {
+            val labelGau = estGauByLabel(label)
+
+            val featGau =
+              if (labelGau contains feature)
+                labelGau(feature)
+              else
+                defaultGauByLabel(label)
+
+            gauFac.logProbabilityOf(featGau)(value)
+
+          } else
+            gauFac.logProbabilityOf(defaultGauAcrossLabel)(value)
+        }
+
   }
 
   /*

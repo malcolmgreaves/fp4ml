@@ -4,7 +4,6 @@ import mlbigbook.data._
 
 import scala.language.{ higherKinds, implicitConversions }
 
-
 object GaussianFactory {
 
   def apply[N: Fractional: MathOps]: GaussianFactory[N] = {
@@ -21,7 +20,7 @@ object GaussianFactory {
     import MathOps.Implicits._
 
     implicit val DoubleGf = GaussianFactory[Double]
-    implicit val FloatFg =  GaussianFactory[Float]
+    implicit val FloatFg = GaussianFactory[Float]
   }
 }
 
@@ -36,7 +35,7 @@ trait GaussianFactory[@specialized(Float, Double) N] { factory =>
 
   def apply[Label, Feature](
     cardinality: Int,
-    data:        Data[(Feature, Label)]
+    data:        Data[Feature.Vector[Feature, N]]
   ): Map[Feature, Gaussian] = ???
 
   case class Gaussian(
