@@ -62,7 +62,10 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
     )
   }
 
-  def mkLikelihood[F, L](labelMap: LabelMap[L], data: TrainingData[F, L, N]): LogLikelihood[F, L, N] = {
+  def mkLikelihood[F, L](
+    labelMap: LabelMap[L],
+    data:     TrainingData[F, L, N]
+  ): LogLikelihood[F, L, N] = {
 
     val cardinality =
       data
@@ -75,6 +78,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
         )
         .toInt
 
+    // Gaussian distributions, partitioned
     val estGauByLabel =
       labelMap
         .map {
@@ -94,6 +98,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
             )
         }
 
+    // A gaussian distribution averaged over all features on a per-label basis.
     val defaultGauByLabel =
       estGauByLabel
         .map {
@@ -108,6 +113,7 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
             )
         }
 
+    // A gaussian distribution averaged over all features and all labels.
     val defaultGauAcrossLabel = {
       val (fMean, fVariance, fStddev) =
         estGauByLabel
@@ -119,13 +125,14 @@ trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
                 num.plus(stddev, fgMap.map(_._2.stddev).sum)
               )
           }
-      new gauFac.Gaussian(
+      gauFac.Gaussian(
         mean = fMean,
         variance = fVariance,
         stddev = fStddev
       )
     }
 
+    // Finally, our Gaussian-powered likelihood function.
     (label: L) =>
       (feature: F, value: N) =>
         num.toDouble {

@@ -38,11 +38,7 @@ trait GaussianFactory[@specialized(Float, Double) N] { factory =>
     data:        Data[Feature.Vector[Feature, N]]
   ): Map[Feature, Gaussian] = ???
 
-  case class Gaussian(
-    mean:     N,
-    variance: N,
-    stddev:   N
-  )
+  case class Gaussian(mean: N, variance: N, stddev: N)
 
   def probabilityOf(gau: Gaussian)(value: N): N = {
     // (1 / ( sqrt ( 2 * pi * stddev^2 ) ) ^ ( e^ (  -(1/2) * (  ( VALUE - mean )  /  stddev  ) )^2  )
@@ -54,7 +50,7 @@ trait GaussianFactory[@specialized(Float, Double) N] { factory =>
       )
     )
 
-    val exponent = {
+    val ePart = {
       val rightPart =
         mops.pow(
           mops.div(
@@ -68,7 +64,7 @@ trait GaussianFactory[@specialized(Float, Double) N] { factory =>
       )
     }
 
-    mops.pow(base, exponent)
+    num.times(base, ePart)
   }
 
   def logProbabilityOf(gau: Gaussian)(value: N): N =
