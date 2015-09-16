@@ -9,13 +9,14 @@ trait MathOps[N] {
   def eTo(v: N): N
   def pow(base: N, exponent: N): N
   def log(v: N): N
+  def div(a: N, b: N): N
 }
 
 object MathOps {
 
   object Implicits {
 
-    implicit val Double = new MathOps[Double] {
+    implicit val DoubleMo = new MathOps[Double] {
 
       override def sqrt(v: Double): Double =
         math.sqrt(v)
@@ -34,9 +35,12 @@ object MathOps {
 
       override def eTo(v: Double): Double =
         math.exp(v)
+
+      override def div(a: Double, b: Double): Double =
+        a / b
     }
 
-    implicit val Float = new MathOps[Float] {
+    implicit val FloatMo = new MathOps[Float] {
 
       override def sqrt(v: Float): Float =
         math.sqrt(v.toDouble).toFloat
@@ -55,6 +59,9 @@ object MathOps {
 
       override def eTo(v: Float): Float =
         math.exp(v.toDouble).toFloat
+
+      override def div(a: Float, b: Float): Float =
+        a / b
     }
   }
 
