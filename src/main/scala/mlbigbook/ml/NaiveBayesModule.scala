@@ -15,9 +15,9 @@ object Feature {
 
     object Implicits {
 
-      implicit def from[F, N:Numeric](d: Data[(F,N)]): Vector[F,N] =  {
+      implicit def from[F, N: Numeric](d: Data[(F, N)]): Vector[F, N] = {
         val n = implicitly[Numeric[N]]
-        new Vector[F,N] {
+        new Vector[F, N] {
           override final lazy val num = n
           override final val data = d
         }

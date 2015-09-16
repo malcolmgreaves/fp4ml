@@ -226,8 +226,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
     (label: L) =>
       (feature: F, count: N) =>
         if (logLikelihoodMap contains label)
-          num.toDouble(count) *
-            logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
+          num.toDouble(count) * logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
         else
           labelNotPresent
   }
