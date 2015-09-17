@@ -65,7 +65,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
    * CountingNaiveBayes class.
    */
   object Train {
-    def apply[F: Equiv, L: Equiv]: Train[F, L] =
+    def apply[F: Equiv, L: Equiv]: Train[F, L, N] =
       train[F, L]
   }
 
@@ -100,7 +100,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   /**
    * Produces a naive Bayes model from the input data. Uses no count smoothing.
    */
-  final def train[F, L](data: TrainingData[F, L]): NaiveBayes[F, L] = {
+  final def train[F, L](data: TrainingData[F, L, N]): NaiveBayes[F, L, N] = {
     val cs = count(data)
     val (labels, _, _) = cs
     val (prior, likelihood) = countsToFuncs(cs)
@@ -114,7 +114,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
   /**
    * Collects co-occurrence counts across the input training data.
    */
-  final def count[Label, F](data: TrainingData[F, Label]): Counts[Label, F] = {
+  final def count[Label, F](data: TrainingData[F, Label, N]): Counts[Label, F] = {
     val (finalLabelMap, finalFeatureMap) =
       data
         .aggregate((GenericCount.empty[Label, Long], FeatureMap.empty[Label, F]))(
@@ -126,9 +126,12 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
               val existing = featureMap.getOrElse(label, GenericCount.empty[F, N])
 
               val updatedFeatureMapForLabel =
-                features
+                features.data
                   .aggregate(existing)(
-                    { case (fm, feature) => GenericCount.increment(fm, feature) },
+                    {
+                      case (fm, (feature, count)) =>
+                        GenericCount.increment(fm, feature, count)
+                    },
                     GenericCount.combine[F, N]
                   )
 
@@ -158,7 +161,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
    *
    * Uses the `mkPrior` and `mkLikelihood` methods.
    */
-  final def countsToFuncs[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L]) = {
+  final def countsToFuncs[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L, N]) = {
     val (_, labelMap, featureMap) = c
     (mkPrior(labelMap), mkLikelihood(featureMap))
   }
@@ -172,7 +175,7 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
    * combination that was not observed during training, the function will
    * evaluate to this pseudo count (instead of zero).
    */
-  final def mkLikelihood[L, F](featureMap: FeatureMap[L, F]): LogLikelihood[F, L] = {
+  final def mkLikelihood[L, F](featureMap: FeatureMap[L, F]): LogLikelihood[F, L, N] = {
 
     val smoother = smoothFac(featureMap)
 
@@ -221,9 +224,9 @@ trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.
 
     // likelihood function
     (label: L) =>
-      (feature: F) =>
+      (feature: F, count: N) =>
         if (logLikelihoodMap contains label)
-          logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
+          num.toDouble(count) * logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
         else
           labelNotPresent
   }

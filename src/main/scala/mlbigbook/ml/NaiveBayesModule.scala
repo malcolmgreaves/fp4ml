@@ -2,10 +2,29 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object Feature {
-  type Vector[F] = Data[F]
+  trait Vector[F, N] {
+    implicit def num: Numeric[N]
+    def data: Data[(F, N)]
+  }
+
+  object Vector {
+
+    object Implicits {
+
+      implicit def from[F, N: Numeric](d: Data[(F, N)]): Vector[F, N] = {
+        val n = implicitly[Numeric[N]]
+        new Vector[F, N] {
+          override final lazy val num = n
+          override final val data = d
+        }
+      }
+    }
+  }
+
 }
 
 object NaiveBayesModule {
@@ -24,16 +43,16 @@ object NaiveBayesModule {
    * A likelihood function. Conditioned on a label, produces an
    * estimated probability for a feature.
    */
-  type LogLikelihood[Feature, Label] = Label => Feature => LogProbability
+  type LogLikelihood[Feature, Label, N] = Label => (Feature, N) => LogProbability
 
   /**
    * An instance of naive Bayes, parametrized by a label set,
    * prior, and likelihood functions.
    */
-  case class NaiveBayes[F, Label](
+  case class NaiveBayes[F, Label, N](
     labels: Data[Label],
     p:      LogPrior[Label],
-    l:      LogLikelihood[F, Label]
+    l:      LogLikelihood[F, Label, N]
   )
 
   /**
@@ -42,12 +61,15 @@ object NaiveBayesModule {
    */
   type LabelMap[Label] = Map[Label, Long]
 
-  type TrainingData[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData
+  /**
+   * Type representing training data that naive bayes implementations use.
+   */
+  type TrainingData[F, Label, N] = Learning[Feature.Vector[F, N], Label]#TrainingData
 
   /**
    * The type for producing a NaiveBayes instance from a labeled data set (aka training).
    */
-  type Train[F, Label] = TrainingData[F, Label] => NaiveBayes[F, Label]
+  type Train[F, Label, N] = TrainingData[F, Label, N] => NaiveBayes[F, Label, N]
 
   /**
    * Produces a prior function from a label mapping.
@@ -60,7 +82,7 @@ object NaiveBayesModule {
           (
             label,
             math.log { count.toDouble / totalLabelCount }
-            )
+          )
       }
 
     (label: L) =>
@@ -70,9 +92,11 @@ object NaiveBayesModule {
   /**
    * Produces a discrete estimator from a learned NaiveBayes instance.
    */
-  def apply[Feature: ClassTag, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
-    DiscreteEstimator[Feature, Label] {
-      (features: Feature.Vector[Feature]) =>
+  def apply[Feature: ClassTag, Label, N: Numeric](
+    nb: NaiveBayes[Feature, Label, N]
+  ) =
+    DiscreteEstimator[Feature, Label, N] {
+      (features: Feature.Vector[Feature, N]) =>
         DiscreteDistribution {
 
           // calculate log-posterior distribution (across labels)
@@ -82,8 +106,8 @@ object NaiveBayesModule {
                 val logPrior = nb.p(label)
                 val logLikelihood = {
                   val labelLogLikelihood = nb.l(label)
-                  features
-                    .map(labelLogLikelihood)
+                  features.data
+                    .map(labelLogLikelihood.tupled)
                     .sum
                 }
                 (label, logPrior + logLikelihood)

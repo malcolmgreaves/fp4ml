@@ -25,11 +25,13 @@ trait Learning[A, B] {
   type Learner = TrainingData => (Classifier, Estimator)
 }
 
-case class DiscreteEstimator[F: ClassTag, Label](estimate: Learning[Feature.Vector[F], Label]#Estimator) {
+case class DiscreteEstimator[F: ClassTag, Label, N: Numeric](
+    estimate: Learning[Feature.Vector[F, N], Label]#Estimator
+) {
 
   implicit val ev: Val[(Label, Distribution.Probability)] =
     TupleVal2[Label]
 
-  val classify: Learning[Feature.Vector[F], Label]#Classifier =
-    (x: Feature.Vector[F]) => Argmax(estimate(x) toSeq)._1
+  val classify: Learning[Feature.Vector[F, N], Label]#Classifier =
+    (x: Feature.Vector[F, N]) => Argmax(estimate(x) toSeq)._1
 }

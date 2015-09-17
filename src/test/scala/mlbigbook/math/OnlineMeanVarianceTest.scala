@@ -57,6 +57,7 @@ class OnlineMeanVarianceTest extends FunSpec with Matchers {
       lazy val numEl = 1e6.toInt
       lazy val tolerance = 1e-6
 
+      import VectorOpsT.Implicits._
       import NumericConversion.Implicits._
 
       OnlineMeanVariance.batch(data) match {

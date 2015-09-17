@@ -119,7 +119,7 @@ class VectorOpsTTest extends FunSpec with Matchers {
 
 object VectorOpsTTest {
 
-  import VectorOpsT._
+  import VectorOpsT.Implicits._
   val dd = implicitly[VectorOpsT[Double, DenseVector]]
 
   val tolerance = 1e-6

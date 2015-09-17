@@ -4,11 +4,13 @@ import breeze.linalg.Vector
 import mlbigbook.data.Data
 import mlbigbook.ml.Stats
 
+import scala.language.higherKinds
+
 /**
  * An online, streaming algorithm for calculating mean and variance.
  *
- * @author Malcolm Greaves
  * @author Marek Kolodziej
+ * @author Malcolm Greaves
  */
 object OnlineMeanVariance {
 
@@ -34,6 +36,9 @@ object OnlineMeanVariance {
       )
   }
 
+  /**
+   * Adds a vector to the existing state, producing updated state.
+   */
   def update[N: NumericConversion, V[_] <: Vector[_]](
     existing: State[N, V],
     current:  V[N]
@@ -49,11 +54,7 @@ object OnlineMeanVariance {
     // newM2 := m2 + (delta * (current - newMean))
     val newM2 = ops.addV(existing.m2, ops.mulV(delta, ops.subV(current, newMean)))
 
-    State[N, V](
-      count = newN,
-      mean = newMean,
-      m2 = newM2
-    )
+    State[N, V](count = newN, mean = newMean, m2 = newM2)
   }
 
   /**
