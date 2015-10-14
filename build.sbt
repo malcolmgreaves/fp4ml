@@ -16,7 +16,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.4.0",
   "org.scalanlp" %% "breeze" % "0.11.2",
-  "org.scalanlp" %% "breeze-natives" % "0.11.2",
+  "com.quantifind" %% "wisp" % "0.0.4",
   "org.scalatest" %% "scalatest" % "2.2.4" % Test
 )
 

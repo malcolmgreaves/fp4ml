@@ -18,9 +18,12 @@ object DocVectorizer {
    * computations and for the resulting document vectorizer.
    */
   def apply[N](
-    corpCount: CorpusCounter[N],
-    mkDocCount: TextData.Corpus => DocCounter[N])(
-      implicit n: Numeric[N]): VectorizerMaker[TextData.Document] =
+    corpCount:  CorpusCounter[N],
+    mkDocCount: TextData.Corpus => DocCounter[N]
+  )(
+    implicit
+    n: Numeric[N]
+  ): VectorizerMaker[TextData.Document] =
 
     (documents: Data[TextData.Document]) => {
 

@@ -94,8 +94,10 @@ object WordcountTest {
 
   def assertCountsL(actual: Map[String, Long], counted: Map[String, Long]) = {
     counted.foreach({
-      case (word, count) => assert(actual(word) == count,
-        s"""\"$word\" is unexpected (has count $count)""")
+      case (word, count) => assert(
+        actual(word) == count,
+        s"""\"$word\" is unexpected (has count $count)"""
+      )
     })
 
     assert(counted.size == actual.size, s"${counted.size} found, expecting ${actual.size} entries")

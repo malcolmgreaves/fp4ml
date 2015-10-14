@@ -107,7 +107,8 @@ object TwentyNewsgroupsExperimentTestIgnore {
     "talk.politics.guns",
     "talk.politics.mideast",
     "talk.politics.misc",
-    "talk.religion.misc")
+    "talk.religion.misc"
+  )
 
   def mkDoc(d: Data[String]) = TextData.Document({
     var ab = ArrayBuffer.empty[TextData.Sentence]

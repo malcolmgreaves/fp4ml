@@ -38,7 +38,7 @@ object LabelDistribution {
             else
               None
 
-            case MultiLabels(mLabels) =>
+        case MultiLabels(mLabels) =>
           (p: Seq[Double]) =>
             if (p.size == mLabels.size)
               Some(MultiLabelDistribution(mLabels, p))
@@ -49,8 +49,9 @@ object LabelDistribution {
 
 case class BinaryLabelDistribution(
     yesProbability: Double,
-    yesLabel: Labeled,
-    noLabel: Labeled) extends LabelDistribution {
+    yesLabel:       Labeled,
+    noLabel:        Labeled
+) extends LabelDistribution {
 
   val noProbability =
     1.0 - yesProbability
@@ -70,7 +71,8 @@ case class BinaryLabelDistribution(
 
 case class MultiLabelDistribution(
     override val labels: Seq[Labeled],
-    override val values: Seq[Double]) extends LabelDistribution {
+    override val values: Seq[Double]
+) extends LabelDistribution {
 
   assert(labels.size == values.size)
 

@@ -78,9 +78,11 @@ object Sampling {
    * @param currSeed
    * @return
    */
-  def sampleMiniBatch(data: Data[VectorizedData],
-                      miniBatchFraction: Double,
-                      currSeed: Long): Data[VectorizedData] = {
+  def sampleMiniBatch(
+    data:              Data[VectorizedData],
+    miniBatchFraction: Double,
+    currSeed:          Long
+  ): Data[VectorizedData] = {
 
     val collCount = data.size
 

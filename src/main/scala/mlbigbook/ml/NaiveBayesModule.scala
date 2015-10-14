@@ -2,36 +2,124 @@ package mlbigbook.ml
 
 import mlbigbook.data._
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object Feature {
-  type Vector[F] = Data[F]
+  trait Vector[F, N] {
+    implicit def num: Numeric[N]
+    def data: Data[(F, N)]
+  }
+
+  object Vector {
+
+    object Implicits {
+
+      implicit def from[F, N: Numeric](d: Data[(F, N)]): Vector[F, N] = {
+        val n = implicitly[Numeric[N]]
+        new Vector[F, N] {
+          override final lazy val num = n
+          override final val data = d
+        }
+      }
+    }
+  }
+
 }
 
 object NaiveBayesModule {
 
-  type Prior[Label] = Label => Distribution[_]#Probability
-  type Likelihood[Feature, Label] = Label => Feature => Distribution[_]#Probability
+  /**
+   * This module uses a log probabilities instead of probabilities.
+   */
+  type LogProbability = Double
 
-  case class NaiveBayes[F, Label](
+  /**
+   * A prior function. The estimated probability of a label.
+   */
+  type LogPrior[Label] = Label => LogProbability
+
+  /**
+   * A likelihood function. Conditioned on a label, produces an
+   * estimated probability for a feature.
+   */
+  type LogLikelihood[Feature, Label, N] = Label => (Feature, N) => LogProbability
+
+  /**
+   * An instance of naive Bayes, parametrized by a label set,
+   * prior, and likelihood functions.
+   */
+  case class NaiveBayes[F, Label, N](
     labels: Data[Label],
-    p: Prior[Label],
-    l: Likelihood[F, Label])
+    p:      LogPrior[Label],
+    l:      LogLikelihood[F, Label, N]
+  )
 
-  type Produce[F, Label] = Learning[Feature.Vector[F], Label]#TrainingData => NaiveBayes[F, Label]
+  /**
+   * Type representing the mapping between labels and the number of times each
+   * label was encountered in a training data set.
+   */
+  type LabelMap[Label] = Map[Label, Long]
 
-  def apply[Feature: ClassTag, Label](nb: NaiveBayes[Feature, Label]): DiscreteEstimator[Feature, Label] =
-    DiscreteEstimator[Feature, Label] {
-      (features: Feature.Vector[Feature]) =>
+  /**
+   * Type representing training data that naive bayes implementations use.
+   */
+  type TrainingData[F, Label, N] = Learning[Feature.Vector[F, N], Label]#TrainingData
+
+  /**
+   * The type for producing a NaiveBayes instance from a labeled data set (aka training).
+   */
+  type Train[F, Label, N] = TrainingData[F, Label, N] => NaiveBayes[F, Label, N]
+
+  /**
+   * Produces a prior function from a label mapping.
+   */
+  final def mkPrior[L](lm: LabelMap[L]): LogPrior[L] = {
+    val totalLabelCount = lm.values.sum.toDouble
+    val logPriorMap =
+      lm.map {
+        case (label, count) =>
+          (
+            label,
+            math.log { count.toDouble / totalLabelCount }
+          )
+      }
+
+    (label: L) =>
+      logPriorMap.getOrElse(label, 0.0)
+  }
+
+  /**
+   * Produces a discrete estimator from a learned NaiveBayes instance.
+   */
+  def apply[Feature: ClassTag, Label, N: Numeric](
+    nb: NaiveBayes[Feature, Label, N]
+  ) =
+    DiscreteEstimator[Feature, Label, N] {
+      (features: Feature.Vector[Feature, N]) =>
         DiscreteDistribution {
-          val logPosteriors =
+
+          // calculate log-posterior distribution (across labels)
+          val logPosteriors: Data[(Label, LogProbability)] =
             nb.labels
               .map { label =>
-                val labelLikelihood = nb.l(label)
-                (label, math.log(nb.p(label)) + features.map(x => math.log(labelLikelihood(x))).sum)
+                val logPrior = nb.p(label)
+                val logLikelihood = {
+                  val labelLogLikelihood = nb.l(label)
+                  features.data
+                    .map(labelLogLikelihood.tupled)
+                    .sum
+                }
+                (label, logPrior + logLikelihood)
               }
 
-          val normalizationConstant = logPosteriors.map(_._2).reduce(_ + _)
+          // to produce valid probabilities, we normalize each log-posterior
+          val normalizationConstant =
+            logPosteriors
+              .map {
+                case (_, logP) => logP
+              }
+              .reduce(_ + _)
 
           logPosteriors
             .map {

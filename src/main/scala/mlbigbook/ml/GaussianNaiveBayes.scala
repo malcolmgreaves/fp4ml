@@ -1,183 +1,156 @@
 package mlbigbook.ml
 
-import mlbigbook.data._
-import mlbigbook.ml.NaiveBayesModule.{ Likelihood, NaiveBayes }
-import mlbigbook.wordcount.NumericMap
-import breeze.linalg._
-import breeze.math._
-import breeze.numerics._
+import mlbigbook.wordcount.GenericCount
 
-import scala.reflect.ClassTag
+import scala.language.implicitConversions
 
 object GaussianNaiveBayes {
-  case object Double extends GaussianNaiveBayes[Double]
-  case object Int extends GaussianNaiveBayes[Int]
-  case object Long extends GaussianNaiveBayes[Long]
+
+  def apply[N: GaussianFactory]: GaussianNaiveBayes[N] = {
+    val g = implicitly[GaussianFactory[N]]
+    new GaussianNaiveBayes[N] {
+      override implicit val gauFac = g
+    }
+  }
+
+  object Instances {
+    import GaussianFactory.Implicits._
+    val Double = GaussianNaiveBayes[Double]
+    val Float = GaussianNaiveBayes[Float]
+  }
 }
 
-abstract class GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N: Numeric]() {
+trait GaussianNaiveBayes[@specialized(scala.Double, scala.Long, scala.Int) N] {
 
-  import breeze.linalg.Vector
-  type Vec = Vector[N]
+  import NaiveBayesModule._
 
-  final def produce[L: Equiv](data: Learning[Vec, L]#TrainingData): NaiveBayes[(N, Int), L] = {
+  implicit val gauFac: GaussianFactory[N]
 
-    val num = implicitly[Numeric[N]]
+  implicit lazy val num = gauFac.num
 
-    // make label map
-    val labelMap: Map[L, Long] = null
-    // make prior from label map
-    val prior = {
-      val totalClassCount = labelMap.map(_._2).sum.toDouble
-      val priormap =
-        labelMap.map {
-          case (label, count) =>
-            (label, count.toDouble / totalClassCount)
+  def labelCount[L](data: TrainingData[_, L, N]): Map[L, Long] =
+    data
+      .aggregate(GenericCount.empty[L, Long])(
+        {
+          case (labelMap, (_, label)) =>
+            GenericCount.increment(labelMap, label)
+        },
+        {
+          case (lm1, lm2) =>
+            GenericCount.combine(lm1, lm2)
         }
+      )
 
-      (label: L) =>
-        if (priormap contains label)
-          priormap(label)
-        else
-          0.0
-    }
+  final def produce[F, L](data: TrainingData[F, L, N]): NaiveBayes[F, L, N] = {
 
-    // estimate means and variances of all features
-    // make likelihood according to these statistics + the
-    // probability density function of a Gaussian distribution
-    val likelihood: Likelihood[(N, Int), L] = {
-      null
-      //      val gau = estimateGaussian(data)
-      //      val maxIndex = g.mean.size
-      //      // TODO
-      //      // (1) need to estimate (mean, variance) on a PER-CLASS basis
-      //      // (2) make types work out here
-      //      // (3) make everything work out with vector
-      //      // (4) if cannot obtain (3), then replace with DenseVector everywhere (reasonable assumption for continuous features...)
-      //      (label: L) => {
-      //        val g = gau(label)
-      //        {
-      //          case (value, index) =>
-      //            if(index >= 0 && index < maxIndex)
-      //              (1.0 / math.sqrt(2.0 * math.pi * g.variance(index))) * math.exp((-0.5) * math.pow(value - g.mean(index), 2.0)/ g.variance(index))
-      //            else
-      //              0.0
-      //        }
-      //      }
-    }
+    // count the occurrence of every label in the training data
+    val labelMap = labelCount(data)
 
-    import Data._
+    // The arbitrary, but fixed, sequential ordering of the labels.
+    val labels = labelMap.keys.toSeq
+
+    // construct the prior function
+    val logPrior = mkPrior(labelMap)
+
+    // construct the likelihood function
+    val logLikelihood = mkLikelihood(labelMap, data)
 
     NaiveBayes(
-      labelMap.keySet.toSeq,
-      prior,
-      likelihood
+      labels,
+      logPrior,
+      logLikelihood
     )
   }
 
-  case class Gaussian(mean: Vec, variance: Vec)
-  object Gaussian {
-    implicit val ctN = ClassTag[N](implicitly[Numeric[N]].zero.getClass)
-    implicit val storageN =
-      new breeze.storage.Zero[N] {
-        override def zero: N = implicitly[Numeric[N]].zero
-      }
-    val empty = Gaussian(Vector.zeros[N](0), Vector.zeros[N](0))
-  }
+  def mkLikelihood[F, L](
+    labelMap: LabelMap[L],
+    data:     TrainingData[F, L, N]
+  ): LogLikelihood[F, L, N] = {
 
-  final def estimateGaussian[V[_] <: Vector[_]](data: Data[V[N]])(implicit sr: Semiring[V[N]], ct: ClassTag[V[N]]): Gaussian =
-    data.take(1).headOption match {
+    val cardinality =
+      data
+        .aggregate(0l)(
+          {
+            case (maxSize, (instance, _)) =>
+              math.max(maxSize, instance.data.size)
+          },
+          math.max
+        )
+        .toInt
 
-      case Some(v) =>
-        //        val nDimensions = v.size.toDouble
-        //        val mean = {
-        //          val s = data.reduce[V[N]] { case (a, b) => sr.+(a, b) }
-        //          s.map(_ / nDimensions)
-        //        }
-        //        val variance = {
-        //          ???
-        //        }
+    // Gaussian distributions, partitioned
+    val estGauByLabel =
+      labelMap
+        .map {
+          case (label, _) =>
+            val onlyWithLabel =
+              data
+                .filter {
+                  case (_, instanceLabel) => label == instanceLabel
+                }
+                .map {
+                  case (instance, _) => instance
+                }
 
-        val (n_final, diff_ignored, mean_final, variance_final) =
-          data
-            .aggregate((0, sr.zero, sr.zero, sr.zero))(
-              {
-                case ((n, diff, mean, m2), next) =>
-                  val newN = n + 1
-                  //                    val delta: V[N] = sr.-(next, mean)
-                  //                    val newMean: V[N] = sr.+(mean, delta.map( _ / newN))
-                  val delta = XXX.add(next, mean)
-                  val newMean = {
-                    val newDelta = delta
-                    XXX.add(mean, newDelta)
-                  }
-                  val newM2: V[N] = {
-                    //                      val a: V[N] = next.-(mean)//sr.-(next, mean)
-                    //                      val b: V[N] = sr.*(delta, a)
-                    //                      val c: V[N] = sr.+(m2, b)
-                    val a = XXX.subtract(next, mean)
-                    val b = XXX.multiply(delta, a)
-                    val c = XXX.add(m2, b)
-                    c
-                  }
-                  (newN, delta, newMean, newM2)
-              },
-              {
-                case ((n1, diff1, mean1, m2_1), (n2, diff2, mean2, m2_2)) =>
-                  (
-                    n1 + n2,
-                    sr.+(diff1, diff2),
-                    sr.+(mean1, mean2),
-                    sr.+(m2_1, m2_2)
-                  )
-              }
+            (
+              label,
+              gauFac(cardinality, onlyWithLabel)
             )
+        }
 
-        val m: Vec = mean_final.asInstanceOf[Vec]
-        val v: Vec = XXX.elemDivide(variance_final, implicitly[Numeric[N]].fromInt(n_final - 1)).asInstanceOf[Vec]
-        Gaussian(m, v)
+    // A gaussian distribution averaged over all features on a per-label basis.
+    val defaultGauByLabel =
+      estGauByLabel
+        .map {
+          case (label, fgMap) =>
+            (
+              label,
+              gauFac.Gaussian(
+                mean = fgMap.map(_._2.mean).sum,
+                variance = fgMap.map(_._2.variance).sum,
+                stddev = fgMap.map(_._2.stddev).sum
+              )
+            )
+        }
 
-      case None =>
-        Gaussian.empty
+    // A gaussian distribution averaged over all features and all labels.
+    val defaultGauAcrossLabel = {
+      val (fMean, fVariance, fStddev) =
+        estGauByLabel
+          .foldLeft((num.zero, num.zero, num.zero)) {
+            case ((mean, variance, stddev), (_, fgMap)) =>
+              (
+                num.plus(mean, fgMap.map(_._2.mean).sum),
+                num.plus(variance, fgMap.map(_._2.variance).sum),
+                num.plus(stddev, fgMap.map(_._2.stddev).sum)
+              )
+          }
+      gauFac.Gaussian(
+        mean = fMean,
+        variance = fVariance,
+        stddev = fStddev
+      )
     }
 
-}
+    // Finally, our Gaussian-powered likelihood function.
+    (label: L) =>
+      (feature: F, value: N) =>
+        num.toDouble {
+          if (estGauByLabel contains label) {
+            val labelGau = estGauByLabel(label)
 
-object XXX {
+            val featGau =
+              if (labelGau contains feature)
+                labelGau(feature)
+              else
+                defaultGauByLabel(label)
 
-  import breeze.linalg.Vector
+            gauFac.logProbabilityOf(featGau)(value)
 
-  def add[N: Numeric, V[_] <: Vector[_]](v1: V[N], v2: V[N])(implicit sr: Semiring[V[N]]): V[N] =
-    sr.+(v1, v2)
+          } else
+            gauFac.logProbabilityOf(defaultGauAcrossLabel)(value)
+        }
 
-  def subtract[N: Numeric, V[_] <: Vector[_]](v1: V[N], v2: V[N])(implicit sr: Semiring[V[N]]): V[N] =
-    ???
-  //    sr.-(v1, v2)
-
-  def multiply[N: Numeric, V[_] <: Vector[_]](v1: V[N], v2: V[N])(implicit sr: Semiring[V[N]]): V[N] =
-    sr.*(v1, v2)
-
-  def elemDivide[N: Numeric, V[_] <: Vector[_]](v: V[N], x: N)(implicit sr: Semiring[V[N]]): V[N] =
-    ???
-  //    v./=(x)
-
-  //
-  ////  def add[N:Numeric, V[_] <: Vector[_]](v1:V[N], v2:V[N])(implicit ops: NumericOps[V[N]]) = {
-  //  def add[N:Numeric](v1: Vector[N], v2: Vector[N])(implicit ev: Semiring[Vector[N]]) = {
-  ////  def add(v1: Vector[Double], v2: Vector[Double]) = {
-  //    v1 match {
-  //      case v1Dense: DenseVector[_] =>
-  //        v2 match {
-  //          case v2Dense: DenseVector[_] =>
-  //            ev.+(v1Dense, v2Dense)
-  ////            implicitly[Semiring[N]]
-  ////            v1Dense + v2Dense
-  ////            operators.OpAdd
-  //
-  //          case _ => ???
-  //        }
-  //      case _ => ???
-  //    }
-  //  }case
+  }
 
 }

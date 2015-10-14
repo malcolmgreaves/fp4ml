@@ -8,11 +8,13 @@ trait LocalSparkContext extends BeforeAndAfterAll with Serializable {
 
   @transient var sc: SparkContext = _
 
+  val nExecutors = 2
+
   override def beforeAll() = {
     sc = new SparkContext(
       new SparkConf()
-        .setMaster("local[2]")
-        .setAppName("unittests")
+        .setMaster(s"local[$nExecutors]")
+        .setAppName("spark_enabled_unit_tests")
         .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     )
     super.beforeAll()

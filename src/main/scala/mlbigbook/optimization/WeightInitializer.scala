@@ -12,8 +12,8 @@ object WeightInitializer {
 
   val gaussianInit = WeightInit(
     f = (numEl: Int, seed: Long) => {
-      val rand = new Random(seed)
-      new DenseVector[Double](Array.fill(numEl)(rand.nextGaussian()))
-    }
+    val rand = new Random(seed)
+    new DenseVector[Double](Array.fill(numEl)(rand.nextGaussian()))
+  }
   )
 }

@@ -18,8 +18,8 @@ class VectorTest extends FunSuite {
 
     assert(
       vecFox.cardinality == vecBoth.cardinality
-      && vecSanta.cardinality == vecFox.cardinality
-      && vecFox.cardinality == knownCardinality,
+        && vecSanta.cardinality == vecFox.cardinality
+        && vecFox.cardinality == knownCardinality,
       s"cardinality is not the same for computed document vectors"
     )
 
@@ -40,8 +40,8 @@ class VectorTest extends FunSuite {
 
     assert(
       vecFox.cardinality == vecBoth.cardinality
-      && vecSanta.cardinality == vecFox.cardinality
-      && vecFox.cardinality == knownCardinality,
+        && vecSanta.cardinality == vecFox.cardinality
+        && vecFox.cardinality == knownCardinality,
       s"cardinality is not the same for computed document vectors"
     )
 

@@ -1,6 +1,6 @@
 language: scala
 scala:
-  - 2.10.4
+  - 2.11.7
 script: "sbt -J-Xmx2g -J-XX:+UseConcMarkSweepGC test"
 after_success: "sbt -J-Xmx2g -J-XX:+UseConcMarkSweepGC coveralls"
 

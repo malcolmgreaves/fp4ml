@@ -1,148 +1,234 @@
 package mlbigbook.ml
 
-import mlbigbook.data._
-import mlbigbook.wordcount.NumericMap
+import mlbigbook.wordcount.GenericCount
 
+/**
+ * Implementations of counting naive bayes for Int, Long, Float, and Double
+ * numeric types.
+ */
 object CountingNaiveBayes {
-  case object Int extends CountingNaiveBayes[Int] {}
-  case object Long extends CountingNaiveBayes[Long] {}
-  case object Double extends CountingNaiveBayes[Double] {}
+
+  def apply[N: CountSmoothFactory]: CountingNaiveBayes[N] = {
+    val sf = implicitly[CountSmoothFactory[N]]
+    new CountingNaiveBayes[N] {
+      override implicit val smoothFac = sf
+    }
+  }
+
+  object ZeroCount {
+
+    val Double = CountingNaiveBayes[Double](ZeroCsFactory.Implicits.doubleZsf)
+
+    val Float = CountingNaiveBayes[Float](ZeroCsFactory.Implicits.floatZsf)
+
+    val Long = CountingNaiveBayes[Long](ZeroCsFactory.Implicits.longZsf)
+
+    val Int = CountingNaiveBayes[Int](ZeroCsFactory.Implicits.intZsf)
+  }
+
+  object Laplacian {
+
+    val Double = CountingNaiveBayes[Double](ConstantCsFactory.Laplacian.Implicits.doubleCsf)
+
+    val Float = CountingNaiveBayes[Float](ConstantCsFactory.Laplacian.Implicits.floatCsf)
+
+    val Long = CountingNaiveBayes[Long](ConstantCsFactory.Laplacian.Implicits.longCsf)
+
+    val Int = CountingNaiveBayes[Int](ConstantCsFactory.Laplacian.Implicits.intCsf)
+  }
 }
 
-abstract class CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Double) N: Numeric]() {
+/**
+ * Implementation of naive Bayes for discrete, event-based features.
+ */
+trait CountingNaiveBayes[@specialized(scala.Int, scala.Long, scala.Float, scala.Double) N] {
 
   import NaiveBayesModule._
 
-  type Smoothing = N
+  /**
+   * The factory that produces a count smoothing instance for the numeric type N.
+   */
+  implicit def smoothFac: CountSmoothFactory[N]
 
-  def produce[F: Equiv, L: Equiv](
-    data: Learning[Feature.Vector[F], L]#TrainingData,
-    smooth: Smoothing = implicitly[Numeric[N]].one): NaiveBayes[F, L] = {
-    val (labelMap, featureMap) = count(data)
-    val (prior, likelihood) = counts2priorandlikeihood((labelMap, featureMap), smooth)
+  /**
+   * The numeric instance associated with this class's generic number parameter.
+   */
+  implicit final lazy val num: Numeric[N] = smoothFac.num
+
+  //
+  // Type Definitions
+  //
+
+  /**
+   * Helper object that allows one to construct an instance of
+   * NaiveBayesModule.Train using the train method defined within the
+   * CountingNaiveBayes class.
+   */
+  object Train {
+    def apply[F: Equiv, L: Equiv]: Train[F, L, N] =
+      train[F, L]
+  }
+
+  /**
+   * Type representing the mapping between features and the number of times
+   * each one was encountered during training. Each one of these maps is
+   * partitioned by the label that was associated with the particular
+   * observed feature-count co-occurrence.
+   */
+  type FeatureMap[Label, Feature] = Map[Label, Map[Feature, N]]
+
+  object FeatureMap {
+    /**
+     * An empty feature map instance.
+     */
+    def empty[Label, Feature]: FeatureMap[Label, Feature] =
+      Map.empty[Label, Map[Feature, N]]
+  }
+
+  /**
+   * Type containing the raw count information produced during training.
+   * The associated label sequence serve as the keys of the included label and
+   * feature maps. In addition, this sequence provides a single ordering for
+   * the labels. Note that this ordering is arbitrary, but fixed.
+   */
+  type Counts[Label, Feature] = (Seq[Label], LabelMap[Label], FeatureMap[Label, Feature])
+
+  //
+  // Implementations
+  //
+
+  /**
+   * Produces a naive Bayes model from the input data. Uses no count smoothing.
+   */
+  final def train[F, L](data: TrainingData[F, L, N]): NaiveBayes[F, L, N] = {
+    val cs = count(data)
+    val (labels, _, _) = cs
+    val (prior, likelihood) = countsToFuncs(cs)
     NaiveBayes(
-      labelMap.keys.toSeq,
+      labels,
       prior,
       likelihood
     )
   }
 
-  implicit val nm = NumericMap[N]
+  /**
+   * Collects co-occurrence counts across the input training data.
+   */
+  final def count[Label, F](data: TrainingData[F, Label, N]): Counts[Label, F] = {
+    val (finalLabelMap, finalFeatureMap) =
+      data
+        .aggregate((GenericCount.empty[Label, Long], FeatureMap.empty[Label, F]))(
+          {
+            case ((labelMap, featureMap), (features, label)) =>
 
-  type LabelMap[Label] = NumericMap[N]#M[Label]
+              val updatedLabelMap = GenericCount.increment(labelMap, label)
 
-  type FeatureMap[Label, Feature] = Map[Label, NumericMap[N]#M[Feature]]
+              val existing = featureMap.getOrElse(label, GenericCount.empty[F, N])
 
-  object FeatureMap {
-    def empty[Label, Feature]: FeatureMap[Label, Feature] =
-      Map.empty[Label, NumericMap[N]#M[Feature]]
-  }
+              val updatedFeatureMapForLabel =
+                features.data
+                  .aggregate(existing)(
+                    {
+                      case (fm, (feature, count)) =>
+                        GenericCount.increment(fm, feature, count)
+                    },
+                    GenericCount.combine[F, N]
+                  )
 
-  type Counts[Label, Feature] = (LabelMap[Label], FeatureMap[Label, Feature])
+              (updatedLabelMap, featureMap + (label -> updatedFeatureMapForLabel))
+          },
+          {
+            case ((lm1, fm1), (lm2, fm2)) =>
 
-  final def count[Label: Equiv, F: Equiv](data: Data[(Feature.Vector[F], Label)])(implicit nm: NumericMap[N]): Counts[Label, F] =
-    data
-      .aggregate((nm.empty[Label], FeatureMap.empty[Label, F]))(
-        {
-          case ((labelMap, featureMap), (features, label)) =>
+              val combinedLabelMap = GenericCount.combine(lm1, lm2)
 
-            val updatedLabelMap = nm.increment(labelMap, label)
+              val combinedFeatureMap =
+                combinedLabelMap.keys
+                  .map { label =>
+                    (label, GenericCount.combine(fm1(label), fm2(label)))
+                  }
+                  .toMap
 
-            val existing = featureMap.getOrElse(label, nm.empty[F])
-
-            val updatedFeatureMapForLabel =
-              features
-                .aggregate(existing)(
-                  { case (fm, feature) => nm.increment(fm, feature) },
-                  nm.combine
-                )
-
-            (updatedLabelMap, featureMap + (label -> updatedFeatureMapForLabel))
-        },
-        {
-          case ((lm1, fm1), (lm2, fm2)) =>
-
-            val combinedLabelMap = nm.combine(lm1, lm2)
-
-            val combinedFeatureMap =
-              combinedLabelMap.keys
-                .map { label =>
-                  (label, nm.combine(fm1(label), fm2(label)))
-                }
-                .toMap
-
-            (combinedLabelMap, combinedFeatureMap)
-        }
-      )
-
-  final def counts2priorandlikeihood[F: Equiv, L](
-    c: Counts[L, F],
-    smooth: Smoothing = implicitly[Numeric[N]].one): (Prior[L], Likelihood[F, L]) = {
-
-    val num = implicitly[Numeric[N]]
-    val (labelMap, featureMap) = c
-
-    val prior = {
-      val totalClassCount = num.toDouble(labelMap.map(_._2).sum)
-      val priormap =
-        labelMap.map {
-          case (label, count) =>
-            (label, num.toDouble(count) / totalClassCount)
-        }
-
-      (label: L) =>
-        if (priormap contains label)
-          priormap(label)
-        else
-          0.0
-    }
-
-    val likelihood = {
-
-      val totalFeatureClassCount = {
-        val totalSmoothPsuedocounts = {
-          // todo -- replace with bloom filter ! (and add 1 just to make sure that we get somethin'...)
-          val nDistinctFeatures =
-            featureMap
-              .map(_._2.keySet)
-              .reduce(_ ++ _)
-              .size
-              .toDouble
-          nDistinctFeatures * num.toDouble(smooth)
-        }
-        num.toDouble(featureMap.map(_._2.map(_._2).sum).sum) + totalSmoothPsuedocounts
-      }
-
-      val s = num.toDouble(smooth)
-      val psuedoCount = s / totalFeatureClassCount
-
-      val likelihoodMap = {
-        val smoother = (x: N) => num.toDouble(x) + s
-        featureMap.map {
-          case (label, featMap) =>
-            (
-              label,
-              featMap.map {
-                case (feature, count) =>
-                  (feature, smoother(count) / totalFeatureClassCount)
-              }
-            )
-        }
-      }
-
-      (label: L) =>
-        (feature: F) =>
-          if (likelihoodMap contains label) {
-            val fmap = likelihoodMap(label)
-            if (fmap contains feature)
-              fmap(feature)
-            else
-              psuedoCount
-          } else {
-            psuedoCount
+              (combinedLabelMap, combinedFeatureMap)
           }
-    }
-
-    (prior, likelihood)
+        )
+    (finalLabelMap.keys.toSeq, finalLabelMap, finalFeatureMap)
   }
+
+  /**
+   * Using the input smoothing value and counts generated from training data,
+   * this method produces appropriate prior and likelihood functions.
+   *
+   * Uses the `mkPrior` and `mkLikelihood` methods.
+   */
+  final def countsToFuncs[F, L](c: Counts[L, F]): (LogPrior[L], LogLikelihood[F, L, N]) = {
+    val (_, labelMap, featureMap) = c
+    (mkPrior(labelMap), mkLikelihood(featureMap))
+  }
+
+  /**
+   * Produces a likelihood function from a feature mapping. Every feature-label
+   * co-occurrence count has an added "hallucinated" count, which is equal to
+   * input the smooth parameter's value. These modified co-occurrence counts
+   * are used to estimate probabilities as well as come up with a pseudo count.
+   * When applying the resulting Likelihood function to a feature and label
+   * combination that was not observed during training, the function will
+   * evaluate to this pseudo count (instead of zero).
+   */
+  final def mkLikelihood[L, F](featureMap: FeatureMap[L, F]): LogLikelihood[F, L, N] = {
+
+    val smoother = smoothFac(featureMap)
+
+    val pseudoCount = num.toDouble(smoother.sCount)
+
+    // calculate likelihood for each (label,feature) pair
+    val logLikelihoodMap =
+      featureMap.map {
+        case (label, featureValues) =>
+
+          val sTotalForLabel = num.toDouble(smoother.sAggregateLabel(label))
+          (
+            label,
+            featureValues.map {
+              case (feature, count) =>
+                val dCount = num.toDouble(count)
+                (
+                  feature,
+                  math.log { (dCount + pseudoCount) / sTotalForLabel }
+                )
+            }
+          )
+      }
+
+    val pCountIsZero = num.compare(smoother.sCount, num.zero) == 0
+
+    val labelNotPresent =
+      if (pCountIsZero)
+        0.0
+      else
+        math.log(pseudoCount / num.toDouble(smoother.sAggregateTotal))
+
+    val perLabelNotPresent =
+      if (pCountIsZero)
+        logLikelihoodMap
+          .map {
+            case (label, _) => (label, 0.0)
+          }
+      else
+        logLikelihoodMap
+          .map {
+            case (label, _) =>
+              val sTotalForLabel = num.toDouble(smoother.sAggregateLabel(label))
+              (label, math.log { pseudoCount / sTotalForLabel })
+          }
+
+    // likelihood function
+    (label: L) =>
+      (feature: F, count: N) =>
+        if (logLikelihoodMap contains label)
+          num.toDouble(count) * logLikelihoodMap(label).getOrElse(feature, perLabelNotPresent(label))
+        else
+          labelNotPresent
+  }
+
 }
