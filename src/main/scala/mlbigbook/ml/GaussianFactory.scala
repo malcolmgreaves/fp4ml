@@ -35,7 +35,7 @@ trait GaussianFactory[@specialized(Float, Double) N] { factory =>
 
   def apply[Label, Feature](
     cardinality: Int,
-    data:        Data[Feature.Vector[Feature, N]]
+    data:        DataClass[Feature.Vector[Feature, N]]
   ): Map[Feature, Gaussian] = ???
 
   case class Gaussian(mean: N, variance: N, stddev: N)

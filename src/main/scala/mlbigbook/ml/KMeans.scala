@@ -67,7 +67,7 @@ object KMeans {
    * short-circuit and evaluate to the initial clusters. Otherwise, it will proceed
    * with k-means.
    */
-  def apply[T](initial: VectorizedCenters[T])(k: KMeansIn)(vectorized: Data[(T, OldVector)]): VectorizedCenters[T] =
+  def apply[T](initial: VectorizedCenters[T])(k: KMeansIn)(vectorized: DataClass[(T, OldVector)]): VectorizedCenters[T] =
     if (initial.cardinality > 0 && k.nClusters == initial.centers.size)
       apply_h(k, initial, 0.0, 0, vectorized)
     else
@@ -79,7 +79,7 @@ object KMeans {
     current:  VectorizedCenters[T],
     currTol:  Double,
     currIter: Int,
-    data:     Data[(T, OldVector)]
+    data:     DataClass[(T, OldVector)]
   ): VectorizedCenters[T] =
 
     if (currIter >= k.maxIterations) {
@@ -100,7 +100,7 @@ object KMeans {
   /** Performs a single assignment and update step of k-means. */
   def updateCenters[T](
     k:       KMeansIn,
-    data:    Data[(T, OldVector)],
+    data:    DataClass[(T, OldVector)],
     current: VectorizedCenters[T]
   ): VectorizedCenters[T] = {
 
@@ -162,7 +162,7 @@ object KMeans {
    * Uses the Classifier to assign a label to each datapoint. When this Classifier is
    * a HardCluster, this is equivalent to assigning each datapoint to the nearest cluster.
    */
-  def assignment[T](c: Learning[T, Labeled]#Classifier)(data: Data[(T, OldVector)]): Data[(Labeled, OldVector)] =
+  def assignment[T](c: Learning[T, Labeled]#Classifier)(data: DataClass[(T, OldVector)]): DataClass[(Labeled, OldVector)] =
     data.map({ case (item, vector) => (c(item), vector) })
 
   /**

@@ -1,6 +1,6 @@
 package mlbigbook.optimization
 
-import mlbigbook.data.{ VectorizedData, Data }
+import mlbigbook.data.{ VectorizedData, DataClass }
 import mlbigbook.optimization.Types.{ WeightInit, WeightUpdate, CostFn, GradFn }
 import org.apache.log4j.Logger
 
@@ -13,15 +13,15 @@ object Optimizer {
 
   def optimize(
     iter:              Int,
-    seed:              Long                 = 42L,
-    initAlpha:         Double               = 0.1,
-    momentum:          Double               = 0.0,
+    seed:              Long                      = 42L,
+    initAlpha:         Double                    = 0.1,
+    momentum:          Double                    = 0.0,
     gradFn:            GradFn,
     costFn:            CostFn,
     updateFn:          WeightUpdate,
     miniBatchFraction: Double,
     weightInitializer: WeightInit,
-    data:              Data[VectorizedData]
+    data:              DataClass[VectorizedData]
   ): OptHistory = {
 
     val count = data.size

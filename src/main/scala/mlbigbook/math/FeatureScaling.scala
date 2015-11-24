@@ -1,6 +1,6 @@
 package mlbigbook.math
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 
 /**
  * @author Marek Kolodziej
@@ -9,7 +9,7 @@ object FeatureScaling {
 
   private[this] case class Product3(n: Int, mean: Double, m2: Double)
 
-  def welfordsMethodVariance(elems: Data[Double]): Double = {
+  def welfordsMethodVariance(elems: DataClass[Double]): Double = {
 
     val res = elems.aggregate(Product3(0, 0D, 0D))(
       seqOp = {

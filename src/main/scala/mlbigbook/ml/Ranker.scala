@@ -53,7 +53,7 @@ object Ranker {
    * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
    * returned Traversable has at most limit items.
    */
-  def takeTopK[T](f: OldVector => Double, limit: Int, elements: Data[(T, OldVector)]): Traversable[(T, OldVector)] = {
+  def takeTopK[T](f: OldVector => Double, limit: Int, elements: DataClass[(T, OldVector)]): Traversable[(T, OldVector)] = {
 
     val BoundPq = BoundedPriorityQueue.create[(T, OldVector)](OldVector.rankFnOrdering[T](f))(limit)
 
@@ -87,7 +87,7 @@ object Ranker {
    * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
    * returned Traversable has at most limit items.
    */
-  def takeTopK[T, N](limit: Int, elements: Data[(T, N)])(
+  def takeTopK[T, N](limit: Int, elements: DataClass[(T, N)])(
     implicit
     n: Numeric[N], c: ClassTag[N]
   ): Traversable[(T, N)] =

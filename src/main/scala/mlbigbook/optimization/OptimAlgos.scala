@@ -1,7 +1,7 @@
 package mlbigbook.optimization
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{ Data, VectorizedData }
+import mlbigbook.data.{ DataClass, VectorizedData }
 import mlbigbook.optimization.Types.{ CostFn, GradFn, WeightUpdate }
 import mlbigbook.util.Sampling.sampleMiniBatch
 
@@ -14,7 +14,7 @@ object OptimAlgos {
 
   // helper class to make the SGD and Adagrad code more DRY, since this is repetitive stuff
   private case class OptInfo(
-      private val data:              Data[VectorizedData],
+      private val data:              DataClass[VectorizedData],
       private val miniBatchFraction: Double,
       private val currSeed:          Long,
       private val history:           OptHistory,
@@ -35,7 +35,7 @@ object OptimAlgos {
      see http://leon.bottou.org/publications/pdf/online-1998.pdf
    */
   val sgd = WeightUpdate(
-    f = (data: Data[VectorizedData],
+    f = (data: DataClass[VectorizedData],
     history: OptHistory,
     gradFn: GradFn,
     costFn: CostFn,
@@ -63,7 +63,7 @@ object OptimAlgos {
      see http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf
    */
   val adaGrad = WeightUpdate(
-    f = (data: Data[VectorizedData],
+    f = (data: DataClass[VectorizedData],
     history: OptHistory,
     gradFn: GradFn,
     costFn: CostFn,

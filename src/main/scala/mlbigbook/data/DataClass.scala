@@ -16,19 +16,19 @@ import scala.reflect.ClassTag
  * The implementation of Data is suitable for both large-scale, distributed data
  * or in-memory structures.
  */
-abstract class Data[A] {
+abstract class DataClass[A] {
 
   /** Transform a dataset by applying f to each element. */
-  def map[B: ClassTag](f: A => B): Data[B]
+  def map[B: ClassTag](f: A => B): DataClass[B]
 
-  def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): Data[B]
+  def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): DataClass[B]
 
   /** Apply a side-effecting function to each element. */
   def foreach(f: A => Any): Unit
 
   def foreachPartition(f: Iterator[A] => Any): Unit
 
-  def filter(f: A => Boolean): Data[A]
+  def filter(f: A => Boolean): DataClass[A]
 
   /**
    * Starting from a defined zero value, perform an operation seqOp on each element
@@ -37,7 +37,7 @@ abstract class Data[A] {
   def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B
 
   /** Sort the dataset using a function f that evaluates each element to an orderable type */
-  def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): Data[A]
+  def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DataClass[A]
 
   /** Construct a traversable for the first k elements of a dataset. Will load into main mem. */
   def take(k: Int): Traversable[A]
@@ -47,11 +47,11 @@ abstract class Data[A] {
   /** Load all elements of the dataset into an array in main memory. */
   def toSeq: Seq[A]
   //    override def zip[A1 >: A, B
-  def flatMap[B: ClassTag](f: A => TraversableOnce[B]): Data[B]
+  def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DataClass[B]
 
-  def groupBy[B: ClassTag](f: A => B): Data[(B, Iterable[A])]
+  def groupBy[B: ClassTag](f: A => B): DataClass[(B, Iterable[A])]
 
-  def as: Data[A] = this
+  def as: DataClass[A] = this
 
   def reduce[A1 >: A: ClassTag](r: (A1, A1) => A1): A1
 
@@ -66,27 +66,27 @@ abstract class Data[A] {
 
   def sum[N >: A](implicit num: Numeric[N]): N
 
-  def zip[A1 >: A: ClassTag, B: ClassTag](that: Data[B]): Data[(A1, B)]
+  def zip[A1 >: A: ClassTag, B: ClassTag](that: DataClass[B]): DataClass[(A1, B)]
 
-  def zipWithIndex: Data[(A, Long)]
+  def zipWithIndex: DataClass[(A, Long)]
 
-  def sample(withReplacement: Boolean, fraction: Double, seed: Long): Data[A]
+  def sample(withReplacement: Boolean, fraction: Double, seed: Long): DataClass[A]
 
-  def exactSample(fraction: Double, seed: Long): Data[A]
+  def exactSample(fraction: Double, seed: Long): DataClass[A]
 
 }
 
-object Data {
+object DataClass {
 
-  implicit def rdd2data[A: ClassTag](d: RDD[A]): Data[A] =
-    RddData(d)
+  implicit def rdd2data[A: ClassTag](d: RDD[A]): DataClass[A] =
+    RddDataClass(d)
 
-  implicit def traversable2data[A](t: Traversable[A]): Data[A] =
-    TravData(t)
+  implicit def traversable2data[A](t: Traversable[A]): DataClass[A] =
+    TravDataClass(t)
 
-  implicit def seq2data[A](s: Seq[A]): Data[A] =
+  implicit def seq2data[A](s: Seq[A]): DataClass[A] =
     s.toTraversable
 
-  implicit def array2Data[A](a: Array[A]): Data[A] =
+  implicit def array2Data[A](a: Array[A]): DataClass[A] =
     a.toTraversable
 }

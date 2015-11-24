@@ -34,12 +34,12 @@ class CountingNaiveBayesTest extends FunSuite {
 
 object CountingNaiveBayesTest {
 
-  import mlbigbook.data.Data
-  import Data._
+  import mlbigbook.data.DataClass
+  import DataClass._
 
   import Feature.Vector.Implicits.from
 
-  def smallVocabData[N: Numeric]: Data[Feature.Vector[String, N]] =
+  def smallVocabData[N: Numeric]: DataClass[Feature.Vector[String, N]] =
     Seq(
       "tom hello world how are you today"
         .split(" ")
@@ -51,7 +51,7 @@ object CountingNaiveBayesTest {
       .map(array2Data)
       .map(from[String, N])
 
-  val smallVocabLabels: Data[String] =
+  val smallVocabLabels: DataClass[String] =
     Seq(
       "positive",
       "negative"

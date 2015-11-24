@@ -1,7 +1,7 @@
 package mlbigbook.optimization
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{ VectorizedData, Data }
+import mlbigbook.data.{ VectorizedData, DataClass }
 
 /**
  * Common types used throughout the optimization code base.
@@ -10,19 +10,19 @@ import mlbigbook.data.{ VectorizedData, Data }
  */
 object Types {
 
-  case class GradFn(f: (Data[VectorizedData], DenseVector[Double]) => DenseVector[Double]) {
-    def apply(data: Data[VectorizedData], weights: DenseVector[Double]) =
+  case class GradFn(f: (DataClass[VectorizedData], DenseVector[Double]) => DenseVector[Double]) {
+    def apply(data: DataClass[VectorizedData], weights: DenseVector[Double]) =
       f(data, weights)
   }
 
-  case class CostFn(f: (Data[VectorizedData], DenseVector[Double]) => Double) {
-    def apply(data: Data[VectorizedData], weights: DenseVector[Double]) =
+  case class CostFn(f: (DataClass[VectorizedData], DenseVector[Double]) => Double) {
+    def apply(data: DataClass[VectorizedData], weights: DenseVector[Double]) =
       f(data, weights)
   }
 
-  case class WeightUpdate(f: (Data[VectorizedData], OptHistory, GradFn, CostFn, Double, Double, Double, Int, Long) => OptHistory) {
+  case class WeightUpdate(f: (DataClass[VectorizedData], OptHistory, GradFn, CostFn, Double, Double, Double, Int, Long) => OptHistory) {
     def apply(
-      data:              Data[VectorizedData],
+      data:              DataClass[VectorizedData],
       history:           OptHistory,
       gradFn:            GradFn,
       costFn:            CostFn,

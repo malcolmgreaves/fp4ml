@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{ Datum, Data, VectorizedData }
+import mlbigbook.data.{ Datum, DataClass, VectorizedData }
 import mlbigbook.optimization.Optimizer.optimize
 import mlbigbook.optimization.Types.WeightUpdate
 import mlbigbook.optimization._
@@ -27,7 +27,7 @@ class LinearRegressionTest extends FunSpec with Matchers with LocalSparkContext 
       }
 
   // These lazy vals are important due to initialization issues (Spark needs to start up first)
-  lazy val rdd: Data[VectorizedData] =
+  lazy val rdd: DataClass[VectorizedData] =
     toVectorizedData(data = sc.parallelize(data), numExamplesPerGroup = 10)
 
   lazy val commonParams = optimize(

@@ -14,10 +14,11 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.4.0",
-  "org.scalanlp" %% "breeze" % "0.11.2",
-  "com.quantifind" %% "wisp" % "0.0.4",
-  "org.scalatest" %% "scalatest" % "2.2.4" % Test
+  "org.apache.spark"  %% "spark-core"    % "1.4.0",
+  "org.scalanlp"      %% "breeze"        % "0.11.2",
+  "com.quantifind"    %% "wisp"          % "0.0.4",
+  "io.malcolmgreaves" %% "abstract_data" % "0.0.2",
+  "org.scalatest"     %% "scalatest"     % "2.2.4" % Test
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +34,7 @@ scalaVersion := "2.11.7"
 
 crossScalaVersions := Seq("2.10.5", "2.11.7")
 
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 scalacOptions ++= Seq(
   "-optimise",
   "-Xfatal-warnings",
@@ -55,7 +57,7 @@ scalacOptions ++= Seq(
   "-Ywarn-infer-any",
   "-Yinline",
   "-Yinline-handlers",
-  "-Yopt-warnings",
+  //"-Yopt-warnings",
   "-Yopt:_"
 )
 

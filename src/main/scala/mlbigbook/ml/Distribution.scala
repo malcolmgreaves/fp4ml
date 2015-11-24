@@ -1,11 +1,11 @@
 package mlbigbook.ml
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 
 object Distribution {
   type Probability = Double
   type Density[Item] = Item => Probability
-  type Range[Item] = Option[Data[Item]]
+  type Range[Item] = Option[DataClass[Item]]
 }
 
 sealed abstract class Distribution[A] {
@@ -34,6 +34,6 @@ case class DiscreteDistribution[A](m: Map[A, Distribution.Probability]) extends 
 }
 
 case class ContinuousDistribution[A](pdf: Distribution.Density[A]) extends Distribution[A] {
-  override val range: Option[Data[Item]] =
+  override val range: Option[DataClass[Item]] =
     None
 }

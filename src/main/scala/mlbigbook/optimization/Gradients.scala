@@ -1,7 +1,7 @@
 package mlbigbook.optimization
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{ VectorizedData, Data }
+import mlbigbook.data.{ VectorizedData, DataClass }
 import mlbigbook.optimization.Types.GradFn
 
 /**
@@ -13,7 +13,7 @@ object Gradients {
 
   val linearRegressionGradient = GradFn(
     f =
-    (data: Data[VectorizedData], weights: DenseVector[Double]) => {
+    (data: DataClass[VectorizedData], weights: DenseVector[Double]) => {
       data.aggregate(DenseVector.zeros[Double](weights.iterableSize))(
         seqOp = {
 

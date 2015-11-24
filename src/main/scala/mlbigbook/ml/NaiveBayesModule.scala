@@ -8,14 +8,14 @@ import scala.reflect.ClassTag
 object Feature {
   trait Vector[F, N] {
     implicit def num: Numeric[N]
-    def data: Data[(F, N)]
+    def data: DataClass[(F, N)]
   }
 
   object Vector {
 
     object Implicits {
 
-      implicit def from[F, N: Numeric](d: Data[(F, N)]): Vector[F, N] = {
+      implicit def from[F, N: Numeric](d: DataClass[(F, N)]): Vector[F, N] = {
         val n = implicitly[Numeric[N]]
         new Vector[F, N] {
           override final lazy val num = n
@@ -50,7 +50,7 @@ object NaiveBayesModule {
    * prior, and likelihood functions.
    */
   case class NaiveBayes[F, Label, N](
-    labels: Data[Label],
+    labels: DataClass[Label],
     p:      LogPrior[Label],
     l:      LogLikelihood[F, Label, N]
   )
@@ -100,7 +100,7 @@ object NaiveBayesModule {
         DiscreteDistribution {
 
           // calculate log-posterior distribution (across labels)
-          val logPosteriors: Data[(Label, LogProbability)] =
+          val logPosteriors: DataClass[(Label, LogProbability)] =
             nb.labels
               .map { label =>
                 val logPrior = nb.p(label)

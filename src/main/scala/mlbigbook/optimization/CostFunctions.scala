@@ -1,7 +1,7 @@
 package mlbigbook.optimization
 
 import breeze.linalg.DenseVector
-import mlbigbook.data.{ VectorizedData, Data }
+import mlbigbook.data.{ VectorizedData, DataClass }
 import mlbigbook.optimization.Types.CostFn
 
 /**
@@ -12,7 +12,7 @@ import mlbigbook.optimization.Types.CostFn
 object CostFunctions {
 
   val linearRegressionCost = CostFn(
-    (data: Data[VectorizedData], weights: DenseVector[Double]) => {
+    (data: DataClass[VectorizedData], weights: DenseVector[Double]) => {
 
       val counts = data.map(_.target.activeSize).reduceLeft(_ + _)
 

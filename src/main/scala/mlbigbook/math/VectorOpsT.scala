@@ -34,6 +34,8 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
    */
   def fill(size: Int)(value: N): V[N]
 
+  def valueAt(v: V[N])(index: Int): N
+
   /**
    * Performs element-wise addition of two vectors.
    */
@@ -139,6 +141,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[DenseVector[Double], DenseVector[Double], DenseVector[Double]] =
         DenseVector.dv_dv_Op_Double_OpMulScalar
+
+      override def valueAt(v: DenseVector[Double])(index: Int): Double =
+        v(index)
     }
 
     object FloatDenseVectorOptsT extends VectorOpsT[Float, DenseVector] {
@@ -178,6 +183,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[DenseVector[Float], DenseVector[Float], DenseVector[Float]] =
         DenseVector.dv_dv_Op_Float_OpMulScalar
+
+      override def valueAt(v: DenseVector[Float])(index: Int): Float =
+        v(index)
     }
 
     object LongDenseVectorOptsT extends VectorOpsT[Long, DenseVector] {
@@ -217,6 +225,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[DenseVector[Long], DenseVector[Long], DenseVector[Long]] =
         DenseVector.dv_dv_Op_Long_OpMulScalar
+
+      override def valueAt(v: DenseVector[Long])(index: Int): Long =
+        v(index)
     }
 
     object IntDenseVectorOptsT extends VectorOpsT[Int, DenseVector] {
@@ -256,6 +267,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[DenseVector[Int], DenseVector[Int], DenseVector[Int]] =
         DenseVector.dv_dv_Op_Int_OpMulScalar
+
+      override def valueAt(v: DenseVector[Int])(index: Int): Int =
+        v(index)
     }
   }
 
@@ -313,6 +327,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[SparseVector[Double], SparseVector[Double], SparseVector[Double]] =
         SparseVector.implOpMulScalar_SVT_SVT_eq_SVT_Double
+
+      override def valueAt(v: SparseVector[Double])(index: Int): Double =
+        v(index)
     }
 
     object FloatSparseVectorOptsT extends VectorOpsT[Float, SparseVector] {
@@ -364,6 +381,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[SparseVector[Float], SparseVector[Float], SparseVector[Float]] =
         SparseVector.implOpMulScalar_SVT_SVT_eq_SVT_Float
+
+      override def valueAt(v: SparseVector[Float])(index: Int): Float =
+        v(index)
     }
 
     object LongSparseVectorOptsT extends VectorOpsT[Long, SparseVector] {
@@ -415,6 +435,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[SparseVector[Long], SparseVector[Long], SparseVector[Long]] =
         SparseVector.implOpMulScalar_SVT_SVT_eq_SVT_Long
+
+      override def valueAt(v: SparseVector[Long])(index: Int): Long =
+        v(index)
     }
 
     object IntSparseVectorOptsT extends VectorOpsT[Int, SparseVector] {
@@ -466,6 +489,9 @@ object VectorOpsT {
 
       override val mulV: OpMulScalar.Impl2[SparseVector[Int], SparseVector[Int], SparseVector[Int]] =
         SparseVector.implOpMulScalar_SVT_SVT_eq_SVT_Int
+
+      override def valueAt(v: SparseVector[Int])(index: Int): Int =
+        v(index)
     }
   }
 

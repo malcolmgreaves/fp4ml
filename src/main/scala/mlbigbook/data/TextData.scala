@@ -32,7 +32,7 @@ object TextData {
   }
 
   /** A corpus is a collection of documents. */
-  type Corpus = Data[TextData.Document]
+  type Corpus = DataClass[TextData.Document]
 
   /** The result of counting words from text. */
   type WordCount = Map[Word, Long]

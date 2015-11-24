@@ -12,13 +12,13 @@ import mlbigbook.util.Sampling
 import scala.reflect.ClassTag
 
 /** Wraps a Traversable as a Data. */
-case class TravData[A](ls: Traversable[A]) extends Data[A] {
+case class TravDataClass[A](ls: Traversable[A]) extends DataClass[A] {
 
-  override def map[B: ClassTag](f: A => B): Data[B] =
-    TravData(ls.map(f))
+  override def map[B: ClassTag](f: A => B): DataClass[B] =
+    TravDataClass(ls.map(f))
 
-  override def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): Data[B] =
-    TravData(f(ls.toIterator).toTraversable)
+  override def mapParition[B: ClassTag](f: Iterator[A] => Iterator[B]): DataClass[B] =
+    TravDataClass(f(ls.toIterator).toTraversable)
 
   override def foreach(f: A => Any): Unit =
     ls.foreach(f)
@@ -27,14 +27,14 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
     val _ = f(ls.toIterator)
   }
 
-  override def filter(f: A => Boolean): Data[A] =
-    TravData(ls.filter(f))
+  override def filter(f: A => Boolean): DataClass[A] =
+    TravDataClass(ls.filter(f))
 
   override def aggregate[B: ClassTag](zero: B)(seqOp: (B, A) => B, combOp: (B, B) => B): B =
     ls.aggregate(zero)(seqOp, combOp)
 
-  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): Data[A] =
-    TravData(ls.toSeq.sortBy(f))
+  override def sortBy[B: ClassTag](f: (A) ⇒ B)(implicit ord: math.Ordering[B]): DataClass[A] =
+    TravDataClass(ls.toSeq.sortBy(f))
 
   override def take(k: Int): Traversable[A] =
     ls.take(k)
@@ -45,11 +45,11 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
   override def toSeq: Seq[A] =
     ls.toSeq
 
-  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): Data[B] =
-    TravData(ls.flatMap(f))
+  override def flatMap[B: ClassTag](f: A => TraversableOnce[B]): DataClass[B] =
+    TravDataClass(ls.flatMap(f))
 
-  override def groupBy[B: ClassTag](f: A => B): Data[(B, Iterable[A])] =
-    TravData(
+  override def groupBy[B: ClassTag](f: A => B): DataClass[(B, Iterable[A])] =
+    TravDataClass(
       ls
         .groupBy(f)
         .toTraversable
@@ -76,15 +76,15 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
   override def sum[N >: A](implicit num: Numeric[N]): N =
     ls.sum(num)
 
-  override def zip[A1 >: A: ClassTag, B: ClassTag](that: Data[B]): Data[(A1, B)] =
+  override def zip[A1 >: A: ClassTag, B: ClassTag](that: DataClass[B]): DataClass[(A1, B)] =
     that match {
 
-      case TravData(thatLs) =>
-        TravData(ls.toIterable.zip(thatLs.toIterable).toTraversable)
+      case TravDataClass(thatLs) =>
+        TravDataClass(ls.toIterable.zip(thatLs.toIterable).toTraversable)
 
-      case RddData(thatD) =>
+      case RddDataClass(thatD) =>
         val x: Seq[A1] = ls.toSeq
-        RddData(thatD.sparkContext.parallelize(x).zip(thatD))
+        RddDataClass(thatD.sparkContext.parallelize(x).zip(thatD))
 
       case other =>
         other
@@ -92,13 +92,13 @@ case class TravData[A](ls: Traversable[A]) extends Data[A] {
           .map { case (b, a1) => (a1, b) }
     }
 
-  override def zipWithIndex: Data[(A, Long)] =
+  override def zipWithIndex: DataClass[(A, Long)] =
     ls.toIndexedSeq.zipWithIndex.map(a => (a._1, a._2.toLong))
 
-  override def sample(withReplacement: Boolean, fraction: Double, seed: Long): Data[A] =
+  override def sample(withReplacement: Boolean, fraction: Double, seed: Long): DataClass[A] =
     Sampling.sample(ls, math.round(fraction * ls.size).toInt, withReplacement, seed)
 
-  override def exactSample(fraction: Double, seed: Long): Data[A] =
+  override def exactSample(fraction: Double, seed: Long): DataClass[A] =
     sample(withReplacement = false, fraction = fraction, seed = seed)
 
 }

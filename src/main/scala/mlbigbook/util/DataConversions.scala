@@ -1,7 +1,7 @@
 package mlbigbook.util
 
 import breeze.linalg.{ DenseMatrix, DenseVector }
-import mlbigbook.data.{ VectorizedData, Datum, Data }
+import mlbigbook.data.{ VectorizedData, Datum, DataClass }
 
 /**
  * Various utils for data conversion, etc.
@@ -19,7 +19,7 @@ object DataConversions {
    * @param numExamplesPerGroup
    * @return
    */
-  def toVectorizedData(data: Data[Datum], numExamplesPerGroup: Int): Data[VectorizedData] = {
+  def toVectorizedData(data: DataClass[Datum], numExamplesPerGroup: Int): DataClass[VectorizedData] = {
 
     val exampleCount = data.size
     val numGroups = exampleCount / numExamplesPerGroup

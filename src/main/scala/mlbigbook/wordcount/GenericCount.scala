@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 
 object GenericCount {
 
@@ -16,7 +16,7 @@ object GenericCount {
     else
       map + (e -> times)
 
-  final def increment[T, N: Numeric](map: Map[T, N], es: Data[T]): Map[T, N] =
+  final def increment[T, N: Numeric](map: Map[T, N], es: DataClass[T]): Map[T, N] =
     es.aggregate(map)(
       { case (m, e) => increment(m, e) },
       { case (m1, m2) => combine(m1, m2) }

@@ -25,7 +25,7 @@ object DocVectorizer {
     n: Numeric[N]
   ): VectorizerMaker[TextData.Document] =
 
-    (documents: Data[TextData.Document]) => {
+    (documents: DataClass[TextData.Document]) => {
 
       // each index corresponds to an individual word
       val index2word =
@@ -92,7 +92,7 @@ object DocVectorizer {
  * Abstract definition of a class that has a function that produces
  * a word count mapping (either whole or real numbered) from a corpus.
  */
-abstract class CorpusCounter[@specialized(Long, Double) N: Numeric] extends (Data[TextData.Document] => Map[TextData.Word, N])
+abstract class CorpusCounter[@specialized(Long, Double) N: Numeric] extends (DataClass[TextData.Document] => Map[TextData.Word, N])
 
 /**
  * Abstract definition of a class that has a function that produces

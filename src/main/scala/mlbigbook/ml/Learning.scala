@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 
 import scala.language.postfixOps
 import scala.reflect.ClassTag
@@ -20,7 +20,7 @@ trait Learning[A, B] {
   type Estimator = Instance => DiscreteDistribution[Label]
 
   type Pair = (Instance, Label)
-  type TrainingData = Data[Pair]
+  type TrainingData = DataClass[Pair]
 
   type Learner = TrainingData => (Classifier, Estimator)
 }
@@ -33,5 +33,5 @@ case class DiscreteEstimator[F: ClassTag, Label, N: Numeric](
     TupleVal2[Label]
 
   val classify: Learning[Feature.Vector[F, N], Label]#Classifier =
-    (x: Feature.Vector[F, N]) => Argmax(estimate(x) toSeq)._1
+    (x: Feature.Vector[F, N]) => ArgmaxOld(estimate(x) toSeq)._1
 }

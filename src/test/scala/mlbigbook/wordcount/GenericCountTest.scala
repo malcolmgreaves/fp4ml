@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 import org.scalatest.FunSuite
 
 import scala.collection.Map
@@ -34,8 +34,8 @@ class GenericCountTest extends FunSuite {
 
     assert(wcManual == correct)
 
-    import Data._
-    val wcIncrement = GenericCount.increment(GenericCount.empty[String, Int], implicitly[Data[String]](words))
+    import DataClass._
+    val wcIncrement = GenericCount.increment(GenericCount.empty[String, Int], implicitly[DataClass[String]](words))
 
     assert(wcIncrement == correct)
   }

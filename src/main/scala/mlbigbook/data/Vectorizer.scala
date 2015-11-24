@@ -17,11 +17,11 @@ object Vectorizer {
 }
 
 /** Type that can construct a vectorizer, if given a distributed data source. */
-trait VectorizerMaker[T] extends (Data[T] => Vectorizer[T])
+trait VectorizerMaker[T] extends (DataClass[T] => Vectorizer[T])
 
 object VectorizerMaker {
 
-  implicit class Fn[T](val f: Data[T] => Vectorizer[T]) extends VectorizerMaker[T] {
-    override def apply(x: Data[T]) = f(x)
+  implicit class Fn[T](val f: DataClass[T] => Vectorizer[T]) extends VectorizerMaker[T] {
+    override def apply(x: DataClass[T]) = f(x)
   }
 }

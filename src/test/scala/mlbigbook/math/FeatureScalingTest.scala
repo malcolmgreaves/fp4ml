@@ -1,6 +1,6 @@
 package mlbigbook.math
 
-import mlbigbook.data.Data
+import mlbigbook.data.DataClass
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.{ FunSpec, Matchers }
 
@@ -28,7 +28,7 @@ class FeatureScalingTest extends FunSpec with Matchers with LocalSparkContext {
 
   object DataVarianceSmall {
     lazy val numEl = 3
-    lazy val data: Data[Double] = Seq(-1.0, 12.0, 55.0)
+    lazy val data: DataClass[Double] = Seq(-1.0, 12.0, 55.0)
     lazy val estimate = FeatureScaling.welfordsMethodVariance(data)
     lazy val expected = 859.0
   }

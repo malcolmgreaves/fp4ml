@@ -1,12 +1,14 @@
 package mlbigbook.math
 
+import scala.reflect.ClassTag
+
 /**
  * Typeclass supporting conversions between primitive types, with the
  * constraint that the primitive has Numeric evidence.
  */
 sealed abstract class NumericConversion[@specialized N: Numeric] {
 
-  val numeric = implicitly[Numeric[N]]
+  implicit val numeric = implicitly[Numeric[N]]
 
   final def fromInt(i: Int): N =
     numeric.fromInt(i)
@@ -20,9 +22,14 @@ sealed abstract class NumericConversion[@specialized N: Numeric] {
   def fromShort(s: Short): N
 
   def fromFloat(f: Float): N
+
+  implicit def ct: ClassTag[N]
 }
 
 object NumericConversion {
+
+  def apply[N: NumericConversion]: NumericConversion[N] =
+    implicitly[NumericConversion[N]]
 
   /**
    * Implicit NumericConversion instances for every primitive numeric type:
@@ -36,6 +43,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Float = b.toFloat
       override def fromDouble(d: Double): Float = d.toFloat
       override def fromFloat(f: Float): Float = f
+      override implicit val ct: ClassTag[Float] = ClassTag(classOf[Float])
     }
 
     implicit case object LongC extends NumericConversion[Long] {
@@ -44,6 +52,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Long = b.toLong
       override def fromDouble(d: Double): Long = d.toLong
       override def fromFloat(f: Float): Long = f.toLong
+      override implicit val ct: ClassTag[Long] = ClassTag(classOf[Long])
     }
 
     implicit case object DoubleC extends NumericConversion[Double] {
@@ -52,6 +61,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Double = b.toDouble
       override def fromDouble(d: Double): Double = d
       override def fromFloat(f: Float): Double = f.toDouble
+      override implicit val ct: ClassTag[Double] = ClassTag(classOf[Double])
     }
 
     implicit case object IntC extends NumericConversion[Int] {
@@ -60,6 +70,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Int = b.toInt
       override def fromDouble(d: Double): Int = d.toInt
       override def fromFloat(f: Float): Int = f.toInt
+      override implicit val ct: ClassTag[Int] = ClassTag(classOf[Int])
     }
 
     implicit case object ShortC extends NumericConversion[Short] {
@@ -68,6 +79,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Short = b.toShort
       override def fromDouble(d: Double): Short = d.toShort
       override def fromFloat(f: Float): Short = f.toShort
+      override implicit val ct: ClassTag[Short] = ClassTag(classOf[Short])
     }
 
     implicit case object ByteC extends NumericConversion[Byte] {
@@ -76,6 +88,7 @@ object NumericConversion {
       override def fromByte(b: Byte): Byte = b
       override def fromDouble(d: Double): Byte = d.toByte
       override def fromFloat(f: Float): Byte = f.toByte
+      override implicit val ct: ClassTag[Byte] = ClassTag(classOf[Byte])
     }
   }
 }

@@ -2,7 +2,7 @@ package mlbigbook.wordcount
 
 import java.io.File
 
-import mlbigbook.data.{ NeedsApplicationVDIn, TextData, Data }
+import mlbigbook.data.{ NeedsApplicationVDIn, TextData, DataClass }
 import mlbigbook.ml.Ranker
 import org.apache.spark.SparkContext
 import org.scalatest.FunSuite
@@ -12,7 +12,7 @@ import scala.io.Source
 
 class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
-  import Data._
+  import DataClass._
   import mlbigbook.wordcount.TwentyNewsgroupsExperimentTestIgnore._
 
   lazy val sc: SparkContext = {
@@ -45,7 +45,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
     println(s"Finished in ${end - start}ms")
   }
 
-  def doExperimentPrintResults(docLimit: Int)(train: Data[TextData.Document], test: Data[TextData.Document]): Unit = {
+  def doExperimentPrintResults(docLimit: Int)(train: DataClass[TextData.Document], test: DataClass[TextData.Document]): Unit = {
 
     val rankWC = DocRanker(docLimit)(NeedsApplicationVDIn(VectorTest.wordcountVectorizer, train))
 
@@ -72,7 +72,7 @@ class TwentyNewsgroupsExperimentTestIgnore extends FunSuite {
 
 object TwentyNewsgroupsExperimentTestIgnore {
 
-  def lines(scOpt: Option[SparkContext])(fi: File): Data[String] = scOpt match {
+  def lines(scOpt: Option[SparkContext])(fi: File): DataClass[String] = scOpt match {
     case Some(sc) => sc.textFile(fi.toString).filter(_.size > 0)
     case None     => Source.fromFile(fi).getLines().filter(_.size > 0).foldLeft(List.empty[String])((a, line) => a :+ line)
   }
@@ -110,7 +110,7 @@ object TwentyNewsgroupsExperimentTestIgnore {
     "talk.religion.misc"
   )
 
-  def mkDoc(d: Data[String]) = TextData.Document({
+  def mkDoc(d: DataClass[String]) = TextData.Document({
     var ab = ArrayBuffer.empty[TextData.Sentence]
     d.map(convertSentence).map(s => {
       ab += s

@@ -1,7 +1,8 @@
 package mlbigbook.math
 
 import breeze.linalg.Vector
-import mlbigbook.data.Data
+import fif.Data
+import Data.ops._
 import mlbigbook.ml.Stats
 
 import scala.language.higherKinds
@@ -69,9 +70,9 @@ object OnlineMeanVariance {
    * values will be appropriate for all of the prior data that went into creating
    * the existing state as well as this additional data.
    */
-  def apply[N: NumericConversion, V[_] <: Vector[_]](
+  def apply[D[_]: Data, N: NumericConversion, V[_] <: Vector[_]](
     existing: State[N, V],
-    elems:    Data[V[N]]
+    elems:    D[V[N]]
   )(implicit ops: VectorOpsT[N, V]): State[N, V] =
     elems.headOption match {
 
@@ -109,7 +110,9 @@ object OnlineMeanVariance {
                     )
 
                   // := m21 + m22 + ((delta * delta) * n1 * n2) / (n1 + n2)
-                  ops.addV(ops.addV(m21, m22), fraction)
+                  ops.addV(
+                    ops.addV(m21, m22), fraction
+                  )
                 }
 
                 State[N, V](newN, newMean, newM)
@@ -120,14 +123,14 @@ object OnlineMeanVariance {
         State[N, V](0, ops.zeros(0), ops.zeros(0))
     }
 
-  def batch[N: NumericConversion, V[_] <: Vector[_]](
-    elems: Data[V[N]]
+  def batch[D[_]: Data, N: NumericConversion, V[_] <: Vector[_]](
+    elems: D[V[N]]
   )(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
     elems.headOption match {
 
       case Some(v) =>
         val size = v.size
-        apply[N, V](State[N, V](0l, ops.zeros(size), ops.zeros(size)), elems).toStats()
+        apply[D, N, V](State[N, V](0l, ops.zeros(size), ops.zeros(size)), elems).toStats()
 
       case None =>
         Stats(0, ops.zeros(0), ops.zeros(0))

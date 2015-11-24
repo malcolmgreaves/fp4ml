@@ -1,0 +1,1 @@
+I think we need to replace the map, filter, etc. (all HOFs) with our own type classes. The breeze ones assume waaayyy too much inheritence. It's fucking up our type-level machine learning groove!

@@ -1,6 +1,6 @@
 package mlbigbook.util
 
-import mlbigbook.data.{ VectorizedData, Data }
+import mlbigbook.data.{ VectorizedData, DataClass }
 import org.apache.log4j.Logger
 
 import scala.util.Random
@@ -79,10 +79,10 @@ object Sampling {
    * @return
    */
   def sampleMiniBatch(
-    data:              Data[VectorizedData],
+    data:              DataClass[VectorizedData],
     miniBatchFraction: Double,
     currSeed:          Long
-  ): Data[VectorizedData] = {
+  ): DataClass[VectorizedData] = {
 
     val collCount = data.size
 

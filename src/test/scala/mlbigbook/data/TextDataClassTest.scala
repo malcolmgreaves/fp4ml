@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 import scala.collection.Map
 import scala.util.Random
 
-class TextDataTest extends FunSuite {
+class TextDataClassTest extends FunSuite {
 
   import TextData._
 
