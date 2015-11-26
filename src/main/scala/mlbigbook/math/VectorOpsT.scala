@@ -36,6 +36,8 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
 
   def valueAt(v: V[N])(index: Int): N
 
+  def toSeq(v: V[N]): Seq[N]
+
   /**
    * Performs element-wise addition of two vectors.
    */
@@ -144,6 +146,9 @@ object VectorOpsT {
 
       override def valueAt(v: DenseVector[Double])(index: Int): Double =
         v(index)
+
+      override def toSeq(v: DenseVector[Double]): Seq[Double] =
+        v.toArray.toSeq
     }
 
     object FloatDenseVectorOptsT extends VectorOpsT[Float, DenseVector] {
@@ -186,6 +191,9 @@ object VectorOpsT {
 
       override def valueAt(v: DenseVector[Float])(index: Int): Float =
         v(index)
+
+      override def toSeq(v: DenseVector[Float]): Seq[Float] =
+        v.toArray.toSeq
     }
 
     object LongDenseVectorOptsT extends VectorOpsT[Long, DenseVector] {
@@ -228,6 +236,9 @@ object VectorOpsT {
 
       override def valueAt(v: DenseVector[Long])(index: Int): Long =
         v(index)
+
+      override def toSeq(v: DenseVector[Long]): Seq[Long] =
+        v.toArray.toSeq
     }
 
     object IntDenseVectorOptsT extends VectorOpsT[Int, DenseVector] {
@@ -270,6 +281,9 @@ object VectorOpsT {
 
       override def valueAt(v: DenseVector[Int])(index: Int): Int =
         v(index)
+
+      override def toSeq(v: DenseVector[Int]): Seq[Int] =
+        v.toArray.toSeq
     }
   }
 
@@ -330,6 +344,9 @@ object VectorOpsT {
 
       override def valueAt(v: SparseVector[Double])(index: Int): Double =
         v(index)
+
+      override def toSeq(v: SparseVector[Double]): Seq[Double] =
+        v.toArray.toSeq
     }
 
     object FloatSparseVectorOptsT extends VectorOpsT[Float, SparseVector] {
@@ -384,6 +401,9 @@ object VectorOpsT {
 
       override def valueAt(v: SparseVector[Float])(index: Int): Float =
         v(index)
+
+      override def toSeq(v: SparseVector[Float]): Seq[Float] =
+        v.toArray.toSeq
     }
 
     object LongSparseVectorOptsT extends VectorOpsT[Long, SparseVector] {
@@ -438,6 +458,9 @@ object VectorOpsT {
 
       override def valueAt(v: SparseVector[Long])(index: Int): Long =
         v(index)
+
+      override def toSeq(v: SparseVector[Long]): Seq[Long] =
+        v.toArray.toSeq
     }
 
     object IntSparseVectorOptsT extends VectorOpsT[Int, SparseVector] {
@@ -492,6 +515,9 @@ object VectorOpsT {
 
       override def valueAt(v: SparseVector[Int])(index: Int): Int =
         v(index)
+
+      override def toSeq(v: SparseVector[Int]): Seq[Int] =
+        v.toArray.toSeq
     }
   }
 
