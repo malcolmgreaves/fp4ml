@@ -21,7 +21,7 @@ class DiscretizationTest extends FunSuite {
     assert(newFiveNumSums(1) === dim1_expectedFiveNumSum)
     assert(newFiveNumSums.last === dim2_expectedFiveNumSum)
 
-    (1 until 1)
+    (0 until 3)
       .foreach { index =>
         checkDataWithIqr(
           newFiveNumSums(index),
@@ -63,7 +63,7 @@ class DiscretizationTest extends FunSuite {
 
   }
 
-  test("Testing IQR based discretization") {
+  ignore("Testing IQR based discretization") {
     val (newData, newDiscretizedFeatureValues) =
       IqrDiscretization(dataForDiscretization, headers)
 
@@ -156,9 +156,10 @@ object DiscretizationTest {
     (0 to 100)
       .flatMap { value =>
         Seq(
-          DenseVector(value - 50, value, value * 10),
-          DenseVector(value - 50, value, value * 10),
           DenseVector(value - 50, value, value * 10)
+//          ,
+//          DenseVector(value - 50, value, value * 10),
+//          DenseVector(value - 50, value, value * 10)
         )
       }
       .map { vector => (vector, math.random) }
