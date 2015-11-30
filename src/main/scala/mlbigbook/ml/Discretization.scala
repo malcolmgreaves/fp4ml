@@ -170,6 +170,9 @@ object Iqr extends Serializable {
 
 object IqrDiscretization {
 
+  val discretizedValues =
+    Seq("below_min", "min_q1", "q1_median", "median_q2", "q2_max", "above_or_equal_to_max")
+
   def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
     data:    D[V[N]],
     headers: Seq[String]
@@ -184,15 +187,12 @@ object IqrDiscretization {
 
     else {
 
-      val discretizedValues =
-        Seq("below_min", "min_q1", "q1_median", "median_q2", "q2_max", "above_max")
-
-      val newHeaders =
+      val newDiscreteValuesPerFeat =
         headers.map { featureName =>
           discretizedValues.map { dv => s"$dv-$featureName" }
         }
 
-      val discretizedData = {
+      val discretizedData: D[Seq[String]] = {
         val lessThan = implicitly[Numeric[N]].lt _
         data
           .map { vector =>
@@ -222,7 +222,7 @@ object IqrDiscretization {
           }
       }
 
-      (discretizedData, newHeaders)
+      (discretizedData, newDiscreteValuesPerFeat)
     }
   }
 
