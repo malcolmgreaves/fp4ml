@@ -50,20 +50,18 @@ class DiscretizationTest extends FunSuite {
               counts.copy(_6 = nAMax + 1)
         }
 
-    println(s"IQR final counts: ${belowMin}, ${minQ1}, ${q1Median}, ${medianQ2}, ${q2Max}, ${aboveMax}")
-
-    val expected = data.size / 6
+    val expected = data.size / 4
 
     assert(belowMin === 0, ": below min wrong")
     assert(minQ1 === expected, ": min-q1 wrong")
     assert(q1Median === expected, ": q1-median wrong")
     assert(medianQ2 === expected, ": median-q2 wrong")
     assert(q2Max === expected, ": q2-max wrong")
-    assert(aboveMax === 0, ": above or equal to max wrong")
+    assert(aboveMax === data.size / 100, ": above or equal to max wrong")
 
   }
 
-  ignore("Testing IQR based discretization") {
+  test("Testing IQR based discretization") {
     val (newData, newDiscretizedFeatureValues) =
       IqrDiscretization(dataForDiscretization, headers)
 
@@ -91,7 +89,7 @@ class DiscretizationTest extends FunSuite {
   // check data
   def verifyData(data: Seq[Seq[String]]) = {
 
-    val expected = data.size / 6
+    val expected = data.size / 4
 
     val (belowMin, minQ1, q1Median, medianQ2, q2Max, aboveMax) =
       data
@@ -121,7 +119,7 @@ class DiscretizationTest extends FunSuite {
     assert(q1Median === expected, ": q1-median wrong")
     assert(medianQ2 === expected, ": median-q2 wrong")
     assert(q2Max === expected, ": q2-max wrong")
-    assert(aboveMax === 0, ": above or equal to max wrong")
+    assert(aboveMax === data.size / 100, ": above or equal to max wrong")
   }
 
 }
@@ -156,10 +154,9 @@ object DiscretizationTest {
     (0 to 100)
       .flatMap { value =>
         Seq(
+          DenseVector(value - 50, value, value * 10),
+          DenseVector(value - 50, value, value * 10),
           DenseVector(value - 50, value, value * 10)
-//          ,
-//          DenseVector(value - 50, value, value * 10),
-//          DenseVector(value - 50, value, value * 10)
         )
       }
       .map { vector => (vector, math.random) }
