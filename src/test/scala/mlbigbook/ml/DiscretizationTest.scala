@@ -12,7 +12,6 @@ class DiscretizationTest extends FunSuite {
   import DiscretizationTest._
   import fif.ImplicitCollectionsData._
   import VectorOpsT.Implicits._
-  import fif.Data.ops._
 
   test("testing that IQR compuation is correct") {
     val newFiveNumSums = Iqr(dataForDiscretization)
@@ -89,7 +88,8 @@ class DiscretizationTest extends FunSuite {
   // check data
   def verifyData(data: Seq[Seq[String]]) = {
 
-    val expected = data.size / 4
+    val mult = data.head.size
+    val expected = (data.size / 4) * mult
 
     val (belowMin, minQ1, q1Median, medianQ2, q2Max, aboveMax) =
       data
@@ -112,14 +112,12 @@ class DiscretizationTest extends FunSuite {
             }
         }
 
-    println(s"final counts: ${belowMin}, ${minQ1}, ${q1Median}, ${medianQ2}, ${q2Max}, ${aboveMax}")
-
     assert(belowMin === 0, ": below min wrong")
     assert(minQ1 === expected, ": min-q1 wrong")
     assert(q1Median === expected, ": q1-median wrong")
     assert(medianQ2 === expected, ": median-q2 wrong")
     assert(q2Max === expected, ": q2-max wrong")
-    assert(aboveMax === data.size / 100, ": above or equal to max wrong")
+    assert(aboveMax === (data.size / 100) * mult, ": above or equal to max wrong")
   }
 
 }
