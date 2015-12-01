@@ -13,7 +13,7 @@ class DiscretizationTest extends FunSuite {
   import fif.ImplicitCollectionsData._
   import VectorOpsT.Implicits._
 
-  test("testing that IQR compuation is correct") {
+  test("testing that IQR computation is correct") {
     val newFiveNumSums = Iqr(dataForDiscretization)
     assert(newFiveNumSums.size === 3)
     assert(newFiveNumSums.head === dim0_expectedFiveNumSum)
