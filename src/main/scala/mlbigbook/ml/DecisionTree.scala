@@ -1,5 +1,7 @@
 package mlbigbook.ml
 
+import org.apache.commons.lang.IllegalClassException
+
 import scala.annotation.tailrec
 import scala.language.{ postfixOps, higherKinds }
 
@@ -38,28 +40,7 @@ trait DecisionTree {
    * The Node abstract data type has two concrete instantiations:
    * Parent and Leaf.
    */
-  sealed trait Node {
-
-    override def toString =
-      nodeToString(this, 0)
-
-    private[this] def nodeToString(n: Node, depth: Int): String = {
-      val depthString = (0 until depth).map { _ => "  " }.mkString("")
-      n match {
-
-        case Parent(_, children) =>
-          val childrenStr =
-            children.map { child => nodeToString(child, depth + 1) }.mkString("\n")
-          s"""${depthString}Parent(
-                              |$childrenStr
-              |$depthString)""".stripMargin
-
-        case Leaf(decision) =>
-          s"${depthString}Leaf(decision=$decision)"
-      }
-    }
-
-  }
+  sealed trait Node
 
   /**
    * A Parent is a Node sub-type that makes up a decision tree. Parents contain
@@ -106,10 +87,60 @@ trait DecisionTree {
 
 object DecisionTree {
 
-  def apply[D, FV]: DecisionTree { type Decision = D; type FeatureVector = FV } =
+  def apply[D, F]: DecisionTree { type Decision = D; type FeatureVector = F } =
     new DecisionTree {
       override type Decision = D
-      override type FeatureVector = FV
+      override type FeatureVector = F
     }
 
+  object Implicits {
+
+    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] =
+      new Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] {
+
+        override def show(
+          t: (DecisionTree { type Decision = D; type FeatureVector = F })#Node
+        ): String =
+          nodeToString(t, 0)
+
+        private[this] def nodeToString(
+          n:     (DecisionTree { type Decision = D; type FeatureVector = F })#Node,
+          depth: Int
+        ): String = {
+          val depthString = (0 until depth).map { _ => "  " }.mkString("")
+
+          type T = (DecisionTree { type Decision = D; type FeatureVector = F })
+
+          n match {
+
+            case parent: T#Parent =>
+              val childrenStr =
+                parent.c
+                  .map { child => nodeToString(child, depth + 1) }
+                  .mkString("\n")
+
+              s"""${depthString}Parent(
+                 |$childrenStr
+                 |$depthString)""".stripMargin
+
+            case leaf: T#Leaf =>
+              val decision = leaf.d
+              s"${depthString}Leaf(decision=$decision"
+
+            case _ =>
+              throw new IllegalClassException(s"Expecting a T#Parent or T#Leaf. Instead have: ${n.getClass}: ")
+          }
+        }
+      }
+  }
+
 }
+
+trait Showable[T] {
+  def show(t: T): String
+}
+
+object Showable {
+  def apply[S: Showable]: Showable[S] = implicitly[Showable[S]]
+}
+
