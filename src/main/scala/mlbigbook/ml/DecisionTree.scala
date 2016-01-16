@@ -125,7 +125,7 @@ object DecisionTree {
 
             case leaf: T#Leaf =>
               val decision = leaf.d
-              s"${depthString}Leaf(decision=$decision"
+              s"${depthString}Leaf(decision=$decision)"
 
             case _ =>
               throw new IllegalClassException(s"Expecting a T#Parent or T#Leaf. Instead have: ${n.getClass}: ")

@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import breeze.linalg.{QuasiTensor, DenseVector}
+import breeze.linalg.{ QuasiTensor, DenseVector }
 import mlbigbook.math.VectorOpsT
 import org.scalatest.FunSuite
 
@@ -21,7 +21,7 @@ class DiscretizationTest extends FunSuite {
       .foreach { index =>
         checkDataWithIqr(
           newFiveNumSums(index),
-          dataForDiscretization.map((v: QuasiTensor[Int,Int]) => v(index))
+          dataForDiscretization.map((v: QuasiTensor[Int, Int]) => v(index))
         )
       }
   }

@@ -66,7 +66,7 @@ class DecisionTreeTest extends FunSuite {
       )
     }
 
-    assert(decisionTree.toString == """Parent(
+    assert(DecisionTree.Implicits.showableNode.show(decisionTree) == """Parent(
                                       |  Leaf(decision=true)
                                       |  Leaf(decision=false)
                                       |  Parent(
