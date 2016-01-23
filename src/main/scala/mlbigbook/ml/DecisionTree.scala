@@ -95,25 +95,18 @@ object DecisionTree {
 
   object Implicits {
 
-    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] =
-      new Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] {
+    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] = {
+      type DT = (DecisionTree { type Decision = D; type FeatureVector = F })
+      new Showable[DT#Node] {
 
-        override def show(
-          t: (DecisionTree { type Decision = D; type FeatureVector = F })#Node
-        ): String =
+        override def show(t: DT#Node): String =
           nodeToString(t, 0)
 
-        private[this] def nodeToString(
-          n:     (DecisionTree { type Decision = D; type FeatureVector = F })#Node,
-          depth: Int
-        ): String = {
+        private[this] def nodeToString(n: DT#Node, depth: Int): String = {
           val depthString = (0 until depth).map { _ => "  " }.mkString("")
-
-          type T = (DecisionTree { type Decision = D; type FeatureVector = F })
-
           n match {
 
-            case parent: T#Parent =>
+            case parent: DT#Parent =>
               val childrenStr =
                 parent.c
                   .map { child => nodeToString(child, depth + 1) }
@@ -123,7 +116,7 @@ object DecisionTree {
                  |$childrenStr
                  |$depthString)""".stripMargin
 
-            case leaf: T#Leaf =>
+            case leaf: DT#Leaf =>
               val decision = leaf.d
               s"${depthString}Leaf(decision=$decision)"
 
@@ -132,6 +125,7 @@ object DecisionTree {
           }
         }
       }
+    }
   }
 
 }
