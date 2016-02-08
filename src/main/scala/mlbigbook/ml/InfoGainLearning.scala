@@ -14,6 +14,4 @@ object InfoGainLearning extends FeatureImportance {
     fs: FeatureSpace
   ) =
     fs.features.zip(InformationBinaryLabel.gainRatio(data))
-
 }
-

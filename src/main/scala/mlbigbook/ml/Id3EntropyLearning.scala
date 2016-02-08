@@ -5,7 +5,7 @@ import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
 
 import scala.language.{ higherKinds, postfixOps }
 
-object Id3LearningSimpleFv extends FeatureImportance {
+object Id3EntropyLearning extends FeatureImportance {
 
   import Data.ops._
 
@@ -21,4 +21,3 @@ object Id3LearningSimpleFv extends FeatureImportance {
       }
     ).toSeq
 }
-

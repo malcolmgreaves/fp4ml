@@ -37,7 +37,7 @@ class DecisionTreeTest extends FunSuite {
     EntropyBasedTreeLearning(
       dtModule,
       syntheticLabeledData,
-      Id3LearningSimpleFv
+      Id3EntropyLearning
     ) match {
 
       case Some(decisionTree) =>
