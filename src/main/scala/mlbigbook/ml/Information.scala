@@ -159,21 +159,21 @@ object InformationBinaryLabel extends Information {
     fs: FeatureSpace
   ) = {
 
-//    data
-//      .aggregate(0)(
-//        { ??? },
-//        { ??? }
-//      )
-//
-//    // for each distinct feature value V:
-//    //   a = calculate # of times in dataset that an example had V occur
-//    //   b = calculate total # of examples
-//    //   ++ (a/b) * log_2(a/b)
-//
-//    fs.features
-//      .map { featureName =>
-//
-//      }
+    //    data
+    //      .aggregate(0)(
+    //        { ??? },
+    //        { ??? }
+    //      )
+    //
+    //    // for each distinct feature value V:
+    //    //   a = calculate # of times in dataset that an example had V occur
+    //    //   b = calculate total # of examples
+    //    //   ++ (a/b) * log_2(a/b)
+    //
+    //    fs.features
+    //      .map { featureName =>
+    //
+    //      }
 
     ???
   }

@@ -87,7 +87,9 @@ trait DecisionTree {
 
 object DecisionTree {
 
-  def apply[D, F]: DecisionTree { type Decision = D; type FeatureVector = F } =
+  type Type[D, F] = DecisionTree { type Decision = D; type FeatureVector = F }
+
+  def apply[D, F]: Type[D, F] =
     new DecisionTree {
       override type Decision = D
       override type FeatureVector = F
@@ -95,18 +97,17 @@ object DecisionTree {
 
   object Implicits {
 
-    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] = {
-      type DT = (DecisionTree { type Decision = D; type FeatureVector = F })
-      new Showable[DT#Node] {
+    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] =
+      new Showable[Type[D, F]#Node] {
 
-        override def show(t: DT#Node): String =
+        override def show(t: Type[D, F]#Node): String =
           nodeToString(t, 0)
 
-        private[this] def nodeToString(n: DT#Node, depth: Int): String = {
+        private[this] def nodeToString(n: Type[D, F]#Node, depth: Int): String = {
           val depthString = (0 until depth).map { _ => "  " }.mkString("")
           n match {
 
-            case parent: DT#Parent =>
+            case parent: Type[D, F]#Parent =>
               val childrenStr =
                 parent.c
                   .map { child => nodeToString(child, depth + 1) }
@@ -116,7 +117,7 @@ object DecisionTree {
                  |$childrenStr
                  |$depthString)""".stripMargin
 
-            case leaf: DT#Leaf =>
+            case leaf: Type[D, F]#Leaf =>
               val decision = leaf.d
               s"${depthString}Leaf(decision=$decision)"
 
@@ -125,7 +126,6 @@ object DecisionTree {
           }
         }
       }
-    }
   }
 
 }
