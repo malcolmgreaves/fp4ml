@@ -7,12 +7,6 @@ import mlbigbook.ml.FeatureVectorSupport._
 
 import scala.language.{ higherKinds, postfixOps }
 
-trait FeatVecOps[F] {
-
-  def contains(featureName: String)(fvec: F)(implicit fs: FeatureSpace): Boolean
-
-}
-
 trait Information {
 
   type Entropy
@@ -24,8 +18,6 @@ trait Information {
   type GainRaitoPerFeature = Seq[Entropy]
 
   type FV = Seq[String]
-
-  implicit def fvOps: FeatVecOps[FV]
 
   def gain[D[_]: Data](
     data: D[(FV, Label)]
@@ -41,7 +33,7 @@ trait Information {
     fs: FeatureSpace
   ): SplitInfoPerFeature
 
-  def gainRatio[D[_]: Data](
+  final def gainRatio[D[_]: Data](
     data: D[(FV, Label)]
   )(
     implicit
@@ -152,6 +144,12 @@ object InformationBinaryLabel extends Information {
     -(pNeg * Information.log2(pNeg) + pPos * Information.log2(pPos))
   }
 
+  private[this] def mkFeatDistCounts(fs: FeatureSpace): Seq[Array[Long]] =
+    fs.features
+      .map { featureName =>
+        Array.fill[Long](fs.categorical2values(featureName).size)(0l)
+      }
+
   override def split[D[_]: Data](
     data: D[(FV, Label)]
   )(
@@ -159,25 +157,57 @@ object InformationBinaryLabel extends Information {
     fs: FeatureSpace
   ) = {
 
-    //    data
-    //      .aggregate(0)(
-    //        { ??? },
-    //        { ??? }
-    //      )
-    //
-    //    // for each distinct feature value V:
-    //    //   a = calculate # of times in dataset that an example had V occur
-    //    //   b = calculate total # of examples
-    //    //   ++ (a/b) * log_2(a/b)
-    //
-    //    fs.features
-    //      .map { featureName =>
-    //
-    //      }
+    val distinctPerFeatIndex: Seq[Map[String, Int]] =
+      fs.features
+        .map { featureName =>
+          fs.categorical2values(featureName)
+            .zipWithIndex
+            .toMap
+        }
 
-    ???
+    val nExamples = data.size.toDouble
+
+    data
+      .aggregate(mkFeatDistCounts(fs))(
+        {
+          case (fdlc, (fv, label)) =>
+            // MUTATION WARNING
+            // We are mutating the inner array for each feature as we are doing
+            // a sequence of updates.
+            // It is more efficient to use mutable state and control its outside
+            // scope.
+            fdlc.zipWithIndex
+              .foreach {
+                case (featCountsArray, fIndex) =>
+                  val featureValue = fv(fIndex)
+                  val distinctIndex = distinctPerFeatIndex(fIndex)(featureValue)
+                  featCountsArray(distinctIndex) += 1l
+              }
+            fdlc
+        },
+        {
+          case (fdlc1, fdlc2) =>
+            fdlc1.zip(fdlc2)
+              .map {
+                case (featCountsArray1, featCountsArray2) =>
+                  // WLOG we're going to mutate the first one and evaluate to it
+                  featCountsArray1.indices
+                    .foreach { fIndex =>
+                      featCountsArray1(fIndex) += featCountsArray2(fIndex)
+                    }
+                  featCountsArray1
+              }
+        }
+      )
+      .map { featCountsArray =>
+        // the negative sign here is important !
+        -featCountsArray.indices
+          .foldLeft(0.0) {
+            case (sum, countForDistinct) =>
+              val frac = countForDistinct.toDouble / nExamples
+              frac * Information.log2(frac)
+          }
+      }
   }
 
-  override implicit def fvOps: FeatVecOps[InformationBinaryLabel.FV] =
-    ???
 }
