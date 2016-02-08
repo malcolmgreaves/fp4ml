@@ -9,8 +9,8 @@ object Id3LearningSimpleFv {
   import FeatureVectorSupport._
   import fif.Data.ops._
 
-  def apply[D[_]: Data, T <: DecisionTree { type FeatureVector = Seq[String]; type Decision = Boolean }](
-    dtModule: T,
+  def apply[D[_]: Data]( //), T <: DecisionTree { type FeatureVector = Seq[String]; type Decision = Boolean }](
+    dtModule: DecisionTree.Type[Boolean, Seq[String]],
     data:     D[(Seq[String], Boolean)]
   )(
     implicit
@@ -25,13 +25,13 @@ object Id3LearningSimpleFv {
     else
       None
 
-  private[this] def learn[D[_]: Data, T <: DecisionTree { type FeatureVector = Seq[String]; type Decision = Boolean }](
+  private[this] def learn[D[_]: Data]( //), T <: DecisionTree { type FeatureVector = Seq[String]; type Decision = Boolean }](
     data:         D[(Seq[String], Boolean)],
     featuresLeft: Set[Int]
   )(
     implicit
     fs:       FeatureSpace,
-    dtModule: T
+    dtModule: DecisionTree.Type[Boolean, Seq[String]]
   ): Option[dtModule.Node] =
 
     if (data isEmpty)
