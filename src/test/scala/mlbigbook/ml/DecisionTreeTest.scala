@@ -34,7 +34,11 @@ class DecisionTreeTest extends FunSuite {
 
   test("ID3 learning on synthetic categorical data") {
     import fif.ImplicitCollectionsData._
-    Id3LearningSimpleFv(dtModule, syntheticLabeledData) match {
+    EntropyBasedTreeLearning(
+      dtModule,
+      syntheticLabeledData,
+      Id3LearningSimpleFv
+    ) match {
 
       case Some(decisionTree) =>
 
