@@ -1,6 +1,5 @@
 package mlbigbook.ml
 
-import fif.TravData
 import org.scalatest.FunSuite
 
 class DecisionTreeTest extends FunSuite {
@@ -34,11 +33,28 @@ class DecisionTreeTest extends FunSuite {
 
   test("ID3 learning on synthetic categorical data") {
     import fif.ImplicitCollectionsData._
-    EntropyBasedTreeLearning(
-      dtModule,
-      syntheticLabeledData,
-      Id3EntropyLearning
-    ) match {
+    testLearnedTreeMakesSense(
+      EntropyBasedTreeLearning(
+        dtModule,
+        syntheticLabeledData,
+        Id3EntropyLearning
+      )
+    )
+  }
+
+  test("Information Gain Ratio learning on synthetic categorical data") {
+    import fif.ImplicitCollectionsData._
+    testLearnedTreeMakesSense(
+      EntropyBasedTreeLearning(
+        dtModule,
+        syntheticLabeledData,
+        InfoGainRatioLearning
+      )
+    )
+  }
+
+  def testLearnedTreeMakesSense(dt: Option[dtModule.Node]): Unit =
+    dt match {
 
       case Some(decisionTree) =>
 
@@ -52,7 +68,6 @@ class DecisionTreeTest extends FunSuite {
       case None =>
         fail(s"Expecting to learn a decision tree on synthetic data. Algorithm resulted in None.")
     }
-  }
 
   test("Decision tree toString is properly nested.") {
 

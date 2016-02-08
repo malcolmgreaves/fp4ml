@@ -5,7 +5,7 @@ import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
 
 import scala.language.{ higherKinds, postfixOps }
 
-object InfoGainLearning extends FeatureImportance {
+object InfoGainRatioLearning extends FeatureImportance {
 
   override def apply[D[_]: Data](
     data: D[(Seq[String], Boolean)]
