@@ -1,0 +1,133 @@
+
+NEW DATA TO OBTAIN
+* golfnew/tennis dataset
+* yahoo reviews?
+* netflix ? possible?
+* imagenet
+* NELL data
+* bits of clueweb... which ones?
+* UCI ML stuff?
+* what stuff does andy P. use @ datafellas?
+* the font dataset from the blogpost
+* any credit card fraud datasets?
+* SVO data from NELL..anything interesting for predicting VERB? or SUBJECT? or OBJECT? (does this make sense? kinda....)
+* some good tree data?
+
+CODE IDEAS
+* BinaryFormat type class
+trait BinaryFormat[T]{
+  def write(x: T): Array[Byte]
+  def read(bytes: Array[Byte]): Or[Err, T]
+}
+
+object StringBf extends BinaryFormat[String] {
+  override def write(x: String) = s.getBytes
+  override def read(bytes: Array[Byte]) = 
+    Try(String.fromBytes(bytes)) match {
+      case Success(s) => Good(s)
+      case Failure(e) => Bad(Err(e))
+    }
+}
+
+// Avro BinaryFormat 
+
+* use Scalaz disjunction, but w/ "Or" "Good" "Bad" aliases
+
+~~~
+type Or[L,R] = scalaz.Disjunction..
+type Good[R] = ...
+type Bad[L]  = ...
+~~~
+
+with implicit conversions for Try[T] => Or[Exception, T]
+
+
+* Standard error class. abstact w/ companiion apply constructor
+abstract class Err { 
+  def message: String
+  override def toString = message
+}
+object Err {
+  def apply(m: String): Err = new Err {
+    override val message = m
+  }
+  def apply(t: Throwable): Err = new Err {
+    override val message = s"""${t.toString}\n${t.getStacktrace.mkString("\n")}"""
+  }
+}
+
+
+MISC IDEAS
+* way to read things into a "Row" format? maybe bag-of-things?
+* reading has concrete ways (i.e. do spark stuff to get things, then pass through RDD[T] => RDD[FeatVec] for ML)
+* need to create concrete reader for Seq, Scala collections (... ? do I? what community stuff can I piggy-back on? remember to give shoutouts..)
+
+
+
+object Readers {
+
+  def readRdd(sc: SparkContext)(location: File): Try[RDD[String]] =
+    Try(sc.readFromFile(location.getAbsolutePaht))
+
+  def readSeq(location: File): Try[Seq[String]] =
+    Try(Source.fromFile(location).getLines.toSeq)
+
+}
+
+object Writers {
+
+
+  def asStrToFi[D : Data](location: File, d: D[String]): Try[Unit] = {
+   // ask OS if there's approximately enough space to save the contents of d
+   // if not, then Failure(new IllegalStateException("not enough space on local disk"))
+   // otherwise, below:
+   val w = new BufferedWriter(new FileWriter(location))
+   Try {
+      import Data.ops._
+      d.foreach { x => 
+        w.write(x)
+        w.newline()
+      }
+   }
+   .recover { _ => w.close() }
+  }
+
+
+  def asByteFormat[D:Data, T:BinaryFormat](out: ByteOutputStream, data: D[T]): Try[Unit] =
+    Try {
+      import Data.ops._
+      data.foreach { x =>
+        out.write(implicitly[BinaryFormat[T]].write(x))
+      }
+      out.flush()
+    }
+
+  def asByteFormat[D : Data, T : BinaryFormat](fi: File, data: D[T]): Try[Unit] = {
+    val baos = new ByteOutputStream(new FileOutputStream(fi))
+    asByteFormat(baos, data)
+      .finally { baos.close() }
+  } 
+
+
+trait Reader[Input] {
+
+  type Row
+  
+  def read(in: Input): Or[Err, Data[Row]]
+
+}
+
+
+object Readers {
+
+  object Implicits {
+
+    implicit object FileReader extends Reader[File] {
+    
+      override def read(in: Input): Or[Err, Data[Row]]
+
+    }  
+
+  }
+
+}
