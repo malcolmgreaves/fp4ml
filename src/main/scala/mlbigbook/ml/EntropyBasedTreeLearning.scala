@@ -13,10 +13,7 @@ object EntropyBasedTreeLearning {
     dtModule:       DecisionTree.Type[Boolean, Seq[String]],
     data:           D[(Seq[String], Boolean)],
     importantFeats: FeatureImportance
-  )(
-    implicit
-    fs: FeatureSpace
-  ): Option[dtModule.Node] =
+  )(implicit fs: FeatureSpace): Option[dtModule.Node] =
     if (fs.size > 0 && fs.isCategorical.forall(identity))
       learn(data, fs.features.indices.toSet)(
         implicitly[Data[D]],

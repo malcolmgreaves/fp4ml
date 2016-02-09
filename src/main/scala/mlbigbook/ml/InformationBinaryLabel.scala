@@ -76,12 +76,6 @@ object InformationBinaryLabel extends Information {
     -(pNeg * Information.log2(pNeg) + pPos * Information.log2(pPos))
   }
 
-  private[this] def mkFeatDistCounts(fs: FeatureSpace): Seq[Array[Long]] =
-    fs.features
-      .map { featureName =>
-        Array.fill[Long](fs.categorical2values(featureName).size)(0l)
-      }
-
   override def split[D[_]: Data](
     data: D[(FV, Label)]
   )(implicit fs: FeatureSpace) = {
@@ -138,5 +132,11 @@ object InformationBinaryLabel extends Information {
           }
       }
   }
+
+  private[this] def mkFeatDistCounts(fs: FeatureSpace): Seq[Array[Long]] =
+    fs.features
+      .map { featureName =>
+        Array.fill[Long](fs.categorical2values(featureName).size)(0l)
+      }
 
 }
