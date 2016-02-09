@@ -8,13 +8,13 @@ import scala.language.{ higherKinds, postfixOps }
 
 object InformationBinaryLabel extends Information {
 
-  import Data.ops._
-
   override type Entropy = Double
   override type Label = Boolean
 
   override implicit val entropyIsNumeric =
     NumericX.Implicits.DoubleX
+
+  import Data.ops._
 
   override def gain[D[_]: Data](
     data: D[(FV, Label)]
@@ -33,11 +33,9 @@ object InformationBinaryLabel extends Information {
             .map { distinct =>
 
               val subset =
-                Information.partition(
-                  data,
-                  (fv: Seq[String]) => fv(featureIndex),
-                  distinct
-                )
+                data.filter {
+                  case (fv, _) => fv(featureIndex) == distinct
+                }
 
               val proportionOfDistinct = subset.size.toDouble / totalSize
 
@@ -113,6 +111,7 @@ object InformationBinaryLabel extends Information {
             fdlc1.zip(fdlc2)
               .map {
                 case (featCountsArray1, featCountsArray2) =>
+                  // MUTATION WARNING
                   // WLOG we're going to mutate the first one and evaluate to it
                   featCountsArray1.indices
                     .foreach { fIndex =>

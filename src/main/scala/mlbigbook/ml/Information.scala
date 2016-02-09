@@ -43,22 +43,11 @@ trait Information {
 
 object Information {
 
-  import Data.ops._
+  type Type[E, L] = Information { type Entropy = E; type Label = L }
 
   @inline def log2(value: Double): Double =
     math.log(value) / logBase10of2
 
   private[this] val logBase10of2 = math.log(2.0)
-
-  def partition[D[_]: Data, FV, Label](
-    data:          D[(FV, Label)],
-    viewValueOfFv: FV => String,
-    value:         String
-  ): D[(FV, Label)] =
-    data.filter {
-      case (fv, _) => viewValueOfFv(fv) == value
-    }
-
-  type Type[E,L] = Information { type Entropy = E; type Label = L}
 
 }
