@@ -6,7 +6,8 @@ import mlbigbook.math.{ NumericConversion, OnlineMeanVariance, VectorOpsT }
 
 import scala.language.{ higherKinds, postfixOps }
 
-object InformationSimpleFv {
+@deprecated("check if this is still necessary", "if not, move to archive")
+object Entropy {
 
   import FeatureVectorSupport._
   import fif.Data.ops._
