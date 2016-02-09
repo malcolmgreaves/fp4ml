@@ -59,4 +59,6 @@ object Information {
       case (fv, _) => viewValueOfFv(fv) == value
     }
 
+  type Type[E,L] = Information { type Entropy = E; type Label = L}
+
 }
