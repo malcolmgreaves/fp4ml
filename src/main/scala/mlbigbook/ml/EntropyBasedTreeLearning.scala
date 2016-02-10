@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import fif.{SeqData, Data, TravData}
+import fif.{ SeqData, Data, TravData }
 
 import scala.language.{ higherKinds, postfixOps }
 
@@ -70,13 +70,10 @@ object EntropyBasedTreeLearning {
             Some(dtModule.Leaf(true))
 
           case (_, _) =>
-
-            val gainRatioPerFeature = importantFeats(data)
-
             {
               implicit val v = TupleVal2[String]
               implicit val sd = SeqData
-              Argmax(gainRatioPerFeature)
+              Argmax(importantFeats(data))
             }
               .map {
                 case (nameOfMinEntropyFeature, _) =>
