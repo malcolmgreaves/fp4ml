@@ -86,4 +86,35 @@ object FeatureVectorSupport {
 
   }
 
+  object FeatureSpace {
+
+    val empty: FeatureSpace =
+      FeatureSpace(
+        features = Seq.empty[String],
+        isCategorical = Seq.empty[Boolean],
+        feat2index = Map.empty[String, Int],
+        categorical2values = Map.empty[String, Seq[String]]
+      )
+
+    def allCategorical(
+      features:           Seq[String],
+      categorical2values: Map[String, Seq[String]]
+    ): FeatureSpace =
+      FeatureSpace(
+        features = features,
+        isCategorical = Seq.fill(features.size)(true),
+        feat2index = features.zipWithIndex.toMap,
+        categorical2values = categorical2values
+      )
+
+    def allReal(features: Seq[String]): FeatureSpace =
+      FeatureSpace(
+        features = features,
+        isCategorical = Seq.fill(features.size)(false),
+        feat2index = features.zipWithIndex.toMap,
+        categorical2values = Map.empty[String, Seq[String]]
+      )
+
+  }
+
 }

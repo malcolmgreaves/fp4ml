@@ -3,7 +3,6 @@ package mlbigbook.ml
 import fif.Data
 import mlbigbook.math.VectorOpsT
 import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
-import simulacrum.typeclass
 import breeze.linalg.Vector
 
 import scala.language.{ higherKinds, postfixOps }
@@ -14,13 +13,12 @@ trait Discretization {
   import Discretization._
 
   def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
-    data:    D[V[N]],
-    headers: Seq[String]
+    data: D[V[N]]
   )(
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace
-  ): (D[DiscretizedVector], ValuesPerFeature)
+  ): (D[DiscretizedVector], FeatureSpace)
 
 }
 

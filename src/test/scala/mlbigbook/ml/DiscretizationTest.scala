@@ -11,7 +11,7 @@ class DiscretizationTest extends FunSuite {
   import VectorOpsT.Implicits._
 
   test("testing that IQR computation is correct") {
-    val newFiveNumSums = Iqr(dataForDiscretization)
+    val newFiveNumSums = InterQuartileRange(dataForDiscretization)
     assert(newFiveNumSums.size === 3)
     assert(newFiveNumSums.head === dim0_expectedFiveNumSum)
     assert(newFiveNumSums(1) === dim1_expectedFiveNumSum)
@@ -26,7 +26,7 @@ class DiscretizationTest extends FunSuite {
       }
   }
 
-  def checkDataWithIqr(fns: Iqr.FiveNumSummary[Int], data: Seq[Int]) = {
+  def checkDataWithIqr(fns: InterQuartileRange.FiveNumSummary[Int], data: Seq[Int]) = {
 
     val (belowMin, minQ1, q1Median, medianQ2, q2Max, aboveMax) =
       data
@@ -121,7 +121,7 @@ class DiscretizationTest extends FunSuite {
 
 object DiscretizationTest {
 
-  val dim0_expectedFiveNumSum = Iqr.FiveNumSummary(
+  val dim0_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
     min = -50,
     q1 = -25,
     median = 0,
@@ -129,7 +129,7 @@ object DiscretizationTest {
     max = 50
   )
 
-  val dim1_expectedFiveNumSum = Iqr.FiveNumSummary(
+  val dim1_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
     min = 0,
     q1 = 25,
     median = 50,
@@ -137,7 +137,7 @@ object DiscretizationTest {
     max = 100
   )
 
-  val dim2_expectedFiveNumSum = Iqr.FiveNumSummary(
+  val dim2_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
     min = 0,
     q1 = 250,
     median = 500,
