@@ -107,10 +107,7 @@ object InterQuartileRange extends Serializable {
 
   def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
     data: D[V[N]]
-  )(
-    implicit
-    vops: VectorOpsT[N, V]
-  ): Seq[FiveNumSummary[N]] =
+  )(implicit vops: VectorOpsT[N, V]): Seq[FiveNumSummary[N]] =
     data.headOption match {
 
       case Some(firstVector) =>
