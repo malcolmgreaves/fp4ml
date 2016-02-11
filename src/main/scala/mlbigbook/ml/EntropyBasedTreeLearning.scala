@@ -76,12 +76,12 @@ object EntropyBasedTreeLearning {
               Argmax(importantFeats(data))
             }
               .map {
-                case (nameOfMinEntropyFeature, _) =>
+                case (nameOfMostImportantFeat, _) =>
                   makeNodeForFeature(
                     data,
                     featuresLeft,
                     majorityDecision,
-                    nameOfMinEntropyFeature
+                    nameOfMostImportantFeat
                   )
               }
         }
@@ -92,7 +92,7 @@ object EntropyBasedTreeLearning {
     data:                    D[(Seq[String], Boolean)],
     featuresLeft:            Set[Int],
     majorityDecision:        Boolean,
-    nameOfMinEntropyFeature: String
+    nameOfMostImportantFeat: String
   )(
     implicit
     fs:             FeatureSpace,
@@ -101,8 +101,8 @@ object EntropyBasedTreeLearning {
   ): dtModule.Node = {
 
     // partition data according to the discrete values of each
-    val distinctValues = fs.categorical2values(nameOfMinEntropyFeature)
-    val indexOfMinEntropyFeat = fs.feat2index(nameOfMinEntropyFeature)
+    val distinctValues = fs.categorical2values(nameOfMostImportantFeat)
+    val indexOfMinEntropyFeat = fs.feat2index(nameOfMostImportantFeat)
     val newFeaturesLeft = featuresLeft - indexOfMinEntropyFeat
 
     val partitionedByDistinctValues: Seq[(String, D[(Seq[String], Boolean)])] =
