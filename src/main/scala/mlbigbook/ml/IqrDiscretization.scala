@@ -4,11 +4,12 @@ import breeze.linalg.Vector
 import fif.Data
 import fif.Data.ops._
 import mlbigbook.math.VectorOpsT
+import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
 
-object IqrDiscretization {
+object IqrDiscretization extends Discretization {
 
   val discretizedValues =
     Seq("below_min", "min_q1", "q1_median", "median_q2", "q2_max", "above_or_equal_to_max")
@@ -18,7 +19,8 @@ object IqrDiscretization {
     headers: Seq[String]
   )(
     implicit
-    vops: VectorOpsT[N, V]
+    vops: VectorOpsT[N, V],
+    fs:   FeatureSpace
   ): (D[Seq[String]], Seq[Seq[String]]) = {
 
     val fiveNumberSummaries = Iqr(data)
