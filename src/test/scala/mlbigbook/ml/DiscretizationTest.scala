@@ -26,7 +26,7 @@ class DiscretizationTest extends FunSuite {
       }
   }
 
-  def checkDataWithIqr(fns: InterQuartileRange.FiveNumSummary[Int], data: Seq[Int]) = {
+  def checkDataWithIqr(fns: FiveNumSummary[Int], data: Seq[Int]) = {
 
     val (belowMin, minQ1, q1Median, medianQ2, q2Max, aboveMax) =
       data
@@ -58,8 +58,23 @@ class DiscretizationTest extends FunSuite {
   }
 
   test("Testing IQR based discretization") {
-    val (newData, newDiscretizedFeatureValues) =
-      IqrDiscretization(dataForDiscretization, headers)
+
+    val (newData, newFs) = {
+      implicit val _ = oldFs
+      IqrDiscretization(dataForDiscretization)
+    }
+
+    assert(newFs.isCategorical.forall(identity))
+    assert(newFs.categorical2values.keys.toSet === newFs.features.toSet)
+
+    val newDiscretizedFeatureValues =
+      newFs.categorical2values.toSeq
+        .map {
+          case (featureName, newValues) =>
+            (newFs.feat2index(featureName), newValues)
+        }
+        .sortBy { case (featIndex, _) => featIndex }
+        .map { case (_, newValues) => newValues }
 
     assert(newData.size === dataForDiscretization.size)
     newData.foreach { values =>
@@ -121,7 +136,7 @@ class DiscretizationTest extends FunSuite {
 
 object DiscretizationTest {
 
-  val dim0_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
+  val dim0_expectedFiveNumSum = FiveNumSummary(
     min = -50,
     q1 = -25,
     median = 0,
@@ -129,7 +144,7 @@ object DiscretizationTest {
     max = 50
   )
 
-  val dim1_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
+  val dim1_expectedFiveNumSum = FiveNumSummary(
     min = 0,
     q1 = 25,
     median = 50,
@@ -137,7 +152,7 @@ object DiscretizationTest {
     max = 100
   )
 
-  val dim2_expectedFiveNumSum = InterQuartileRange.FiveNumSummary(
+  val dim2_expectedFiveNumSum = FiveNumSummary(
     min = 0,
     q1 = 250,
     median = 500,
@@ -160,7 +175,9 @@ object DiscretizationTest {
       .toSeq
   }
 
-  val headers = Seq("dimension_0", "dimension_1", "dimension_2")
+  val oldFs = FeatureVectorSupport.FeatureSpace.allReal(
+    Seq("dimension_0", "dimension_1", "dimension_2")
+  )
 
 }
 
