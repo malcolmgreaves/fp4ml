@@ -80,30 +80,14 @@ object GaussianDiscretization {
       gaussianDiscretizedValueBases
   }
 
-  def ruleProducer[Num: NumericConversion: MathOps: ClassTag]: RuleProducer.Type[Num] = {
-
-    val nc = NumericConversion[Num]
-    val ctForN = implicitly[ClassTag[Num]]
-
-    new RuleProducer {
-
-      override type N = Num
-      override implicit val numConv = nc
-      override implicit val ct = ctForN
-
+  def ruleProducer[N: NumericConversion: MathOps: ClassTag]: RuleProducer[N] =
+    new RuleProducer[N] {
       override def apply[D[_]: Data, V[_]](data: D[V[N]])(
         implicit
         fs:   FeatureSpace,
         vops: VectorOpsT[N, V]
       ): Seq[Rule[N]] =
-        GaussianDiscretization(data)(
-          implicitly[Data[D]],
-          numConv,
-          implicitly[MathOps[N]],
-          vops,
-          fs
-        )
-    }
+        GaussianDiscretization(data)
   }
 
 }

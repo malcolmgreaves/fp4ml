@@ -6,16 +6,7 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-trait RuleProducer {
-
-  /** Number type */
-  type N
-
-  implicit def ct: ClassTag[N]
-  implicit def numConv: NumericConversion[N]
-  implicit lazy val num: Numeric[N] = numConv.numeric
-
-  //  implicit def vops: VectorOpsT[N, V]
+abstract class RuleProducer[N : ClassTag : NumericConversion] {
 
   def apply[D[_]: Data, V[_]](data: D[V[N]])(
     implicit
@@ -23,11 +14,6 @@ trait RuleProducer {
     vops: VectorOpsT[N, V]
   ): Seq[Rule[N]]
 
-}
-
-object RuleProducer {
-
-  type Type[Num] = RuleProducer { type N = Num }
 }
 
 abstract class Rule[N: Numeric] {
