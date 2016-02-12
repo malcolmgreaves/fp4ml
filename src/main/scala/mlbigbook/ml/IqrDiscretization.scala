@@ -48,6 +48,19 @@ object IqrDiscretization {
 
       override val discretizedValueBases =
         iqrDiscretizedValueBases
+
+      /*
+      Rule(
+        Seq(
+          (fns.min, below_min),
+          (fns.q1, min_q1),
+          (fns.median, q1_median),
+          (fns.q2, median_q2),
+          (fns.max, q2_max)
+        ),
+        above_or_equal_to_max
+      )
+       */
     }
 
   def ruleProducer[N: NumericConversion: ClassTag]: RuleProducer[N] =

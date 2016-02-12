@@ -15,10 +15,3 @@ abstract class RuleProducer[N: ClassTag: NumericConversion] {
   ): Seq[Rule[N]]
 
 }
-
-abstract class Rule[N: Numeric] {
-
-  def apply(value: N): String
-
-  def discretizedValueBases: Seq[String]
-}

@@ -75,6 +75,22 @@ object GaussianDiscretization {
 
     override val discretizedValueBases =
       gaussianDiscretizedValueBases
+
+    /*
+    Rule(
+      Seq(
+        (neg3, below_neg3_sdev),
+        (neg2, between_neg3_inclusive_and_neg2_exclusive),
+        (neg1, between_neg2_inclusive_and_neg1_exclusive),
+        (g.mean, between_neg1_inclusive_and_mean_exlcusive),
+        (pos1, between_mean_inclusive_and_pos1_exlcusive),
+        (pos2, between_pos1_inclusive_and_pos2_exlcusive),
+        (pos3, between_pos2_inclusive_and_pos3_exlcusive)
+      ),
+      above_pos3_sdev
+    )
+     */
+
   }
 
   def ruleProducer[N: NumericConversion: MathOps: ClassTag]: RuleProducer[N] =
