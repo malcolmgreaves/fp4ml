@@ -87,7 +87,10 @@ trait DecisionTree {
 
 object DecisionTree {
 
-  type Type[D, F] = DecisionTree { type Decision = D; type FeatureVector = F }
+  type Type[D, F] = DecisionTree {
+    type Decision = D
+    type FeatureVector = F
+  }
 
   def apply[D, F]: Type[D, F] =
     new DecisionTree {
@@ -97,7 +100,7 @@ object DecisionTree {
 
   object Implicits {
 
-    implicit def showableNode[D, F]: Showable[(DecisionTree { type Decision = D; type FeatureVector = F })#Node] =
+    implicit def showableNode[D, F]: Showable[Type[D, F]#Node] =
       new Showable[Type[D, F]#Node] {
 
         override def show(t: Type[D, F]#Node): String =

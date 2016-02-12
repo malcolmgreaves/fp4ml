@@ -6,12 +6,12 @@ import scala.language.{ higherKinds, postfixOps }
 
 object EntropyBasedTreeLearning {
 
-  import FeatureVectorSupport._
+  import Discretization.DiscretizedVector
   import fif.Data.ops._
 
   def apply[D[_]: Data](
     dtModule:       DecisionTree.Type[Boolean, Seq[String]],
-    data:           D[(Seq[String], Boolean)],
+    data:           D[(DiscretizedVector, Boolean)],
     importantFeats: FeatureImportance.Type[String, Boolean]
   )(implicit fs: CategoricalFeatureSpace): Option[dtModule.Node] =
     if (fs.size > 0 && fs.isCategorical.forall(identity))
@@ -25,12 +25,12 @@ object EntropyBasedTreeLearning {
       None
 
   private[this] def learn[D[_]: Data](
-    data:         D[(Seq[String], Boolean)],
+    data:         D[(DiscretizedVector, Boolean)],
     featuresLeft: Set[Int]
   )(
     implicit
     fs:             CategoricalFeatureSpace,
-    dtModule:       DecisionTree.Type[Boolean, Seq[String]],
+    dtModule:       DecisionTree.Type[Boolean, DiscretizedVector],
     importantFeats: FeatureImportance.Type[String, Boolean]
   ): Option[dtModule.Node] =
 
@@ -89,14 +89,14 @@ object EntropyBasedTreeLearning {
     }
 
   private[this] def makeNodeForFeature[D[_]: Data](
-    data:                    D[(Seq[String], Boolean)],
+    data:                    D[(DiscretizedVector, Boolean)],
     featuresLeft:            Set[Int],
     majorityDecision:        Boolean,
     nameOfMostImportantFeat: String
   )(
     implicit
     fs:             CategoricalFeatureSpace,
-    dtModule:       DecisionTree.Type[Boolean, Seq[String]],
+    dtModule:       DecisionTree.Type[Boolean, DiscretizedVector],
     importantFeats: FeatureImportance.Type[String, Boolean]
   ): dtModule.Node = {
 
@@ -105,7 +105,7 @@ object EntropyBasedTreeLearning {
     val indexOfMinEntropyFeat = fs.feat2index(nameOfMostImportantFeat)
     val newFeaturesLeft = featuresLeft - indexOfMinEntropyFeat
 
-    val partitionedByDistinctValues: Seq[(String, D[(Seq[String], Boolean)])] =
+    val partitionedByDistinctValues: Seq[(String, D[(DiscretizedVector, Boolean)])] =
       distinctValues
         .map { distinct =>
 
@@ -155,7 +155,7 @@ object EntropyBasedTreeLearning {
       val children = distinct2child.values.toSeq
 
       dtModule.Parent(
-        (fv: Seq[String]) => {
+        (fv: DiscretizedVector) => {
           val valueOfMinEntropyFeat = fv(indexOfMinEntropyFeat)
           if (distinct2child.contains(valueOfMinEntropyFeat))
             distinct2child(valueOfMinEntropyFeat)
