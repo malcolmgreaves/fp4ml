@@ -13,7 +13,7 @@ object EntropyBasedTreeLearning {
     dtModule:       DecisionTree.Type[Boolean, Seq[String]],
     data:           D[(Seq[String], Boolean)],
     importantFeats: FeatureImportance.Type[String, Boolean]
-  )(implicit fs: FeatureSpace): Option[dtModule.Node] =
+  )(implicit fs: CategoricalFeatureSpace): Option[dtModule.Node] =
     if (fs.size > 0 && fs.isCategorical.forall(identity))
       learn(data, fs.features.indices.toSet)(
         implicitly[Data[D]],
@@ -29,7 +29,7 @@ object EntropyBasedTreeLearning {
     featuresLeft: Set[Int]
   )(
     implicit
-    fs:             FeatureSpace,
+    fs:             CategoricalFeatureSpace,
     dtModule:       DecisionTree.Type[Boolean, Seq[String]],
     importantFeats: FeatureImportance.Type[String, Boolean]
   ): Option[dtModule.Node] =
@@ -95,7 +95,7 @@ object EntropyBasedTreeLearning {
     nameOfMostImportantFeat: String
   )(
     implicit
-    fs:             FeatureSpace,
+    fs:             CategoricalFeatureSpace,
     dtModule:       DecisionTree.Type[Boolean, Seq[String]],
     importantFeats: FeatureImportance.Type[String, Boolean]
   ): dtModule.Node = {

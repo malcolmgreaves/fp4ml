@@ -13,9 +13,9 @@ object Discretization {
 
   def newCategoricalFs(
     rules: Seq[Rule[_]]
-  )(implicit fs: FeatureSpace): FeatureSpace =
+  )(implicit fs: FeatureSpace): CategoricalFeatureSpace =
 
-    FeatureSpace.allCategorical(
+    CategoricalFeatureSpace(
       fs.features,
       fs.features.zip(rules)
       .map {
@@ -35,11 +35,11 @@ object Discretization {
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace
-  ): (D[DiscretizedVector], FeatureSpace) = {
+  ): (D[DiscretizedVector], CategoricalFeatureSpace) = {
     import Data.ops._
 
     if (data isEmpty)
-      (data.map(_ => Seq.empty[String]), FeatureSpace.empty)
+      (data.map(_ => Seq.empty[String]), CategoricalFeatureSpace.empty)
 
     else {
 

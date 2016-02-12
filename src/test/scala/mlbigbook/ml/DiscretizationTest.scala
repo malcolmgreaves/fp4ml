@@ -177,7 +177,7 @@ object DiscretizationTest {
       .toSeq
   }
 
-  val oldFs = FeatureSpace.allReal(
+  val oldFs = RealFeatureSpace(
     Seq("dimension_0", "dimension_1", "dimension_2")
   )
 

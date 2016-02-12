@@ -1,15 +1,15 @@
 package mlbigbook.ml
 
-case class FeatureSpace(
-    features:           Seq[String],
-    isCategorical:      Seq[Boolean],
-    feat2index:         Map[String, Int],
-    categorical2values: Map[String, Seq[String]]
-) {
+sealed abstract class FeatureSpace {
 
-  val size = features.size
+  val features: Seq[String]
+  val isCategorical: Seq[Boolean]
+  val feat2index: Map[String, Int]
+  val categorical2values: Map[String, Seq[String]]
 
-  val (realIndices, catIndices) =
+  lazy val size = features.size
+
+  lazy val (realIndices, catIndices) =
     isCategorical
       .zipWithIndex
       .foldLeft((Seq.empty[Int], Seq.empty[Int])) {
@@ -20,7 +20,7 @@ case class FeatureSpace(
             (ri :+ index, ci)
       }
 
-  val (realFeatNames, catFeatNames) = (
+  lazy val (realFeatNames, catFeatNames) = (
     realIndices.map { index => features(index) },
     catIndices.map { index => features(index) }
   )
@@ -74,33 +74,52 @@ case class FeatureSpace(
 
 }
 
+case class RealFeatureSpace(override val features: Seq[String])
+    extends FeatureSpace {
+
+  override val isCategorical = Seq.fill(features.size)(false)
+  override val feat2index = features.zipWithIndex.toMap
+  override val categorical2values = Map.empty[String, Seq[String]]
+}
+
+object RealFeatureSpace {
+  val empty = RealFeatureSpace(features = Seq.empty[String])
+}
+
+case class CategoricalFeatureSpace(
+    override val features:           Seq[String],
+    override val categorical2values: Map[String, Seq[String]]
+) extends FeatureSpace {
+
+  override val isCategorical = Seq.fill(features.size)(true)
+  override val feat2index = features.zipWithIndex.toMap
+}
+
+object CategoricalFeatureSpace {
+  val empty = CategoricalFeatureSpace(
+    features = Seq.empty[String],
+    categorical2values = Map.empty[String, Seq[String]]
+  )
+}
+
+case class MixedFeatureSpace(
+  override val features:           Seq[String],
+  override val isCategorical:      Seq[Boolean],
+  override val feat2index:         Map[String, Int],
+  override val categorical2values: Map[String, Seq[String]]
+) extends FeatureSpace
+
+object MixedFeatureSpace {
+  val empty = new MixedFeatureSpace(
+    features = Seq.empty[String],
+    isCategorical = Seq.empty[Boolean],
+    feat2index = Map.empty[String, Int],
+    categorical2values = Map.empty[String, Seq[String]]
+  )
+}
+
 object FeatureSpace {
-
-  val empty: FeatureSpace =
-    FeatureSpace(
-      features = Seq.empty[String],
-      isCategorical = Seq.empty[Boolean],
-      feat2index = Map.empty[String, Int],
-      categorical2values = Map.empty[String, Seq[String]]
-    )
-
-  def allCategorical(
-    features:           Seq[String],
-    categorical2values: Map[String, Seq[String]]
-  ): FeatureSpace =
-    FeatureSpace(
-      features = features,
-      isCategorical = Seq.fill(features.size)(true),
-      feat2index = features.zipWithIndex.toMap,
-      categorical2values = categorical2values
-    )
-
-  def allReal(features: Seq[String]): FeatureSpace =
-    FeatureSpace(
-      features = features,
-      isCategorical = Seq.fill(features.size)(false),
-      feat2index = features.zipWithIndex.toMap,
-      categorical2values = Map.empty[String, Seq[String]]
-    )
-
+  val empty: FeatureSpace = MixedFeatureSpace.empty
+  val emptyCategorical: CategoricalFeatureSpace = CategoricalFeatureSpace.empty
+  val emptyReal: RealFeatureSpace = RealFeatureSpace.empty
 }
