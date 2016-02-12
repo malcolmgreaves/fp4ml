@@ -88,7 +88,6 @@ object GaussianDiscretization {
     new RuleProducer {
 
       override type N = Num
-
       override implicit val numConv = nc
       override implicit val ct = ctForN
 
@@ -97,7 +96,7 @@ object GaussianDiscretization {
         fs:   FeatureSpace,
         vops: VectorOpsT[N, V]
       ): Seq[Rule[N]] =
-        GaussianDiscretization[D, V, N](data)(
+        GaussianDiscretization(data)(
           implicitly[Data[D]],
           numConv,
           implicitly[MathOps[N]],

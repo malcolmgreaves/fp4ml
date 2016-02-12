@@ -7,7 +7,7 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-object IqrDiscretization extends OldRuleProducer {
+object IqrDiscretization {
 
   val below_min = "below_min"
   val min_q1 = "between_min_inclusive_and_q1_exclusive"
@@ -20,7 +20,7 @@ object IqrDiscretization extends OldRuleProducer {
     below_min, min_q1, q1_median, median_q2, q2_max, above_or_equal_to_max
   )
 
-  override def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
+  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit
@@ -52,4 +52,30 @@ object IqrDiscretization extends OldRuleProducer {
       override val discretizedValueBases =
         iqrDiscretizedValueBases
     }
+
+  def ruleProducer[Num: NumericConversion: MathOps: ClassTag]: RuleProducer.Type[Num] = {
+
+    val nc = NumericConversion[Num]
+    val ctForN = implicitly[ClassTag[Num]]
+
+    new RuleProducer {
+
+      override type N = Num
+      override implicit val numConv = nc
+      override implicit val ct = ctForN
+
+      override def apply[D[_]: Data, V[_]](data: D[V[N]])(
+        implicit
+        fs:   FeatureSpace,
+        vops: VectorOpsT[N, V]
+      ): Seq[Rule[N]] =
+        IqrDiscretization(data)(
+          implicitly[Data[D]],
+          numConv,
+          ct,
+          vops,
+          fs
+        )
+    }
+  }
 }

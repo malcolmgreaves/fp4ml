@@ -1,6 +1,5 @@
 package mlbigbook.ml
 
-import breeze.linalg.Vector
 import fif.Data
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
 
@@ -29,19 +28,6 @@ trait RuleProducer {
 object RuleProducer {
 
   type Type[Num] = RuleProducer { type N = Num }
-
-}
-
-trait OldRuleProducer {
-
-  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
-    data: D[V[N]]
-  )(
-    implicit
-    vops: VectorOpsT[N, V],
-    fs:   FeatureSpace
-  ): Seq[Rule[N]]
-
 }
 
 abstract class Rule[N: Numeric] {
