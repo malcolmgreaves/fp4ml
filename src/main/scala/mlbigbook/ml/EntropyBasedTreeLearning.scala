@@ -1,6 +1,6 @@
 package mlbigbook.ml
 
-import fif.{ SeqData, Data, TravData }
+import fif.{ SeqData, Data }
 
 import scala.language.{ higherKinds, postfixOps }
 

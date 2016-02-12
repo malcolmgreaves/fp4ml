@@ -1,6 +1,5 @@
 package mlbigbook.math
 
-import breeze.linalg.Vector
 import fif.Data
 import Data.ops._
 import mlbigbook.ml.Stats
@@ -20,9 +19,13 @@ object OnlineMeanVariance {
    * Welford's online algorithm. The `toStats` method uses these variables to
    * perform the final variance calculation.
    */
-  case class State[N: NumericConversion, V[_]](count: Long, mean: V[N], m2: V[N]) {
+  case class State[N: NumericConversion, V[_]](
+      count: Long,
+      mean:  V[N],
+      m2:    V[N]
+  ) {
 
-    def toStats()(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
+    def toStats(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
       Stats(
         count = count,
         mean = mean,
@@ -133,7 +136,7 @@ object OnlineMeanVariance {
         apply[D, N, V](
           State[N, V](0l, ops.zeros(size), ops.zeros(size)),
           elems
-        ).toStats()
+        ).toStats
 
       case None =>
         Stats(0, ops.zeros(0), ops.zeros(0))
