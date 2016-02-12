@@ -7,7 +7,16 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
+
 trait RuleProducer {
+
+  type N
+  type V[_]
+
+
+}
+
+trait OldRuleProducer {
 
   def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]

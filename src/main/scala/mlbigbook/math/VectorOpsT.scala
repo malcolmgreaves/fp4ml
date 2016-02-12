@@ -88,8 +88,6 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
    */
   val divS: OpDiv.Impl2[V[N], N, V[N]]
 
-  def runtimeClassTag[B: ClassTag]: ClassTag[V[B]]
-
 }
 
 object VectorOpsT {
@@ -159,11 +157,6 @@ object VectorOpsT {
       override def map[B : ClassTag](v: DenseVector[Double])(f: (Double) => B): DenseVector[B] = {
         implicit val _ = DenseVector.canMapValues[DenseVector[Double], B]
         v.map(f)
-      }
-
-
-      override def runtimeClassTag[B: ClassTag]: ClassTag[DenseVector[B]] = {
-        ClassTag(DenseVector.zeros(0).getClass)
       }
     }
 

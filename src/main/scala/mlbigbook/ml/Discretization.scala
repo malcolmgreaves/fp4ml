@@ -31,7 +31,7 @@ object Discretization {
 
   def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
     data: D[V[N]],
-    rp:   RuleProducer
+    rp:   OldRuleProducer
   )(
     implicit
     vops: VectorOpsT[N, V],

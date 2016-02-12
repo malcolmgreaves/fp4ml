@@ -7,7 +7,8 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
 
-object GaussianDiscretization extends RuleProducer {
+object GaussianDiscretization {
+
 
   val below_neg3_sdev = "below_neg_3_sdev"
   val between_neg3_inclusive_and_neg2_exclusive = "between_neg3_inclusive_and_neg2_exclusive"
@@ -29,7 +30,7 @@ object GaussianDiscretization extends RuleProducer {
     above_pos3_sdev
   )
 
-  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
+  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
     data: D[V[N]]
   )(
     implicit
@@ -37,57 +38,9 @@ object GaussianDiscretization extends RuleProducer {
     fs:   FeatureSpace
   ): Seq[Rule[N]] = {
 
-
-    import Data.ops._
-    import NumericConversion.Implicits._
-    import MathOps.Implicits._
-    NumericConversion[N] match {
-
-
-      case FloatC  =>
-        Gaussian.estimate(data)
-          .map(g => gaussianRule(g))
-
-      case DoubleC =>
-        implicit val _ = NumericConversion[N].numeric
-        Gaussian.estimate(data)
-          .map(g => gaussianRule(g))
-
-      case LongC | IntC =>
-        implicit val _0 = ClassTag.Double
-        implicit val _1: ClassTag[V[Double]] = vops.runtimeClassTag[Double]
-        val converted = data.map { vector =>
-          vops.map(vector)(NumericConversion[N].numeric.toDouble)
-        }
-        import MathOps.Implicits.DoubleMo
-        Gaussian.estimate(converted)
-          .map{ gDbl =>
-            val gN = Gaussian[N](
-              mean = NumericConversion[N].fromDouble(gDbl.mean),
-              variance = NumericConversion[N].fromDouble(gDbl.variance),
-              stddev = NumericConversion[N].fromDouble(gDbl.stddev)
-            )
-            gaussianRule(gN)
-          }
-
-      case ShortC | ByteC =>
-        // convert to floats
-        // convert to doubles
-        implicit val _0 = ClassTag.Float
-        implicit val _1: ClassTag[V[Float]] = vops.runtimeClassTag[Float]
-        val converted = data.map { vector =>
-          vops.map(vector)(NumericConversion[N].numeric.toFloat)
-        }
-        Gaussian.estimate(converted)
-          .map { gFlt =>
-            val gN = Gaussian[N](
-              mean = NumericConversion[N].fromDouble(gFlt.mean),
-              variance = NumericConversion[N].fromDouble(gFlt.variance),
-              stddev = NumericConversion[N].fromDouble(gFlt.stddev)
-            )
-            gaussianRule(gN)
-          }
-    }
+    implicit val _0 = NumericConversion[N].numeric
+    Gaussian.estimate(data)
+      .map(g => gaussianRule(g))
   }
 
   def gaussianRule[N: Numeric: MathOps](g: Gaussian[N]): Rule[N] = new Rule[N] {

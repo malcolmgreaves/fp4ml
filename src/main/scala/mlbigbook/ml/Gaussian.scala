@@ -30,10 +30,10 @@ object Gaussian {
       (0 until fs.size).map { fIndex =>
 
         val variance =
-          VectorOpsT[N, V].valueAt(statsForEachFeature.variance)(fIndex)
+          vops.valueAt(statsForEachFeature.variance)(fIndex)
 
         Gaussian(
-          mean = VectorOpsT[N, V].valueAt(statsForEachFeature.mean)(fIndex),
+          mean = vops.valueAt(statsForEachFeature.mean)(fIndex),
           variance = variance,
           stddev = MathOps[N].sqrt(variance)
         )

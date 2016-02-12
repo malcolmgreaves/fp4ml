@@ -7,7 +7,7 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-object IqrDiscretization extends RuleProducer {
+object IqrDiscretization extends OldRuleProducer {
 
   val below_min = "below_min"
   val min_q1 = "between_min_inclusive_and_q1_exclusive"
