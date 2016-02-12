@@ -32,7 +32,7 @@ object OnlineMeanVariance {
         else
           ops.divS(
             m2,
-            implicitly[NumericConversion[N]].fromLong(count - 1l)
+            NumericConversion[N].fromLong(count - 1l)
           )
       )
   }
@@ -45,7 +45,7 @@ object OnlineMeanVariance {
     current:  V[N]
   )(implicit ops: VectorOpsT[N, V]): State[N, V] = {
 
-    val nc = implicitly[NumericConversion[N]]
+    val nc = NumericConversion[N]
 
     val newN = existing.count + 1l
     // delta := current - mean
@@ -78,7 +78,7 @@ object OnlineMeanVariance {
 
       case Some(v) =>
         assert(v.size == existing.mean.size)
-        val nc = implicitly[NumericConversion[N]]
+        val nc = NumericConversion[N]
         elems
           .aggregate(existing)(
             update[N, V],

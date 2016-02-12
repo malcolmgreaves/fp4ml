@@ -11,7 +11,7 @@ case class Gaussian[N: Numeric](mean: N, variance: N, stddev: N)
 
 object Gaussian {
 
-  def apply[D[_]: Data, N: NumericConversion: MathOps, V[_] <: Vector[_]](
+  def estimate[D[_]: Data, N: NumericConversion: MathOps, V[_] <: Vector[_]](
     data: D[V[N]]
   )(
     implicit

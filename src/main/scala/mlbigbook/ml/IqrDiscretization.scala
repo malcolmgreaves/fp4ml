@@ -4,6 +4,7 @@ import breeze.linalg.Vector
 import fif.Data
 import fif.Data.ops._
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import spire.syntax.cfor._
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
@@ -39,48 +40,72 @@ object IqrDiscretization extends Discretization {
 
     else {
 
-      val newDiscreteValuesPerFeat =
-        fs.features
-          .map { featureName =>
-            (
-              featureName,
-              discretizedValues.map { dv => s"$dv-$featureName" }
-            )
-          }
-          .toMap
-
       val discretizedData: D[Seq[String]] = {
         val lessThan = NumericConversion[N].numeric.lt _
         data.map { vector =>
-          vops.toSeq(vector)
-            .zip(fiveNumberSummaries)
-            .map {
-              case (value, fns) =>
-                // ordering of if statements below is _important_ !!
-                if (lessThan(value, fns.min))
-                  below_min
 
-                else if (lessThan(value, fns.q1))
-                  min_q1
+          val valAt = vops.valueAt(vector) _
 
-                else if (lessThan(value, fns.median))
-                  q1_median
+          val res = new Array[String](fs.size)
+          cfor(0)(_ < fs.size, _ + 1) { fIndex =>
 
-                else if (lessThan(value, fns.q2))
-                  median_q2
+            val value = valAt(fIndex)
+            val fns = fiveNumberSummaries(fIndex)
 
-                else if (lessThan(value, fns.max))
-                  q2_max
+            res(fIndex) =
+              // ordering of if statements below is _important_ !!
+              if (lessThan(value, fns.min))
+                below_min
 
-                else
-                  above_or_equal_to_max
-            }
+              else if (lessThan(value, fns.q1))
+                min_q1
+
+              else if (lessThan(value, fns.median))
+                q1_median
+
+              else if (lessThan(value, fns.q2))
+                median_q2
+
+              else if (lessThan(value, fns.max))
+                q2_max
+
+              else
+                above_or_equal_to_max
+          }
+          res.toSeq
+
+          //
+          // Equivalent to the following FP code
+          //
+          //          vops.toSeq(vector)
+          //            .zip(fiveNumberSummaries)
+          //            .map {
+          //              case (value, fns) =>
+          //                // ordering of if statements below is _important_ !!
+          //                if (lessThan(value, fns.min))
+          //                  below_min
+          //
+          //                else if (lessThan(value, fns.q1))
+          //                  min_q1
+          //
+          //                else if (lessThan(value, fns.median))
+          //                  q1_median
+          //
+          //                else if (lessThan(value, fns.q2))
+          //                  median_q2
+          //
+          //                else if (lessThan(value, fns.max))
+          //                  q2_max
+          //
+          //                else
+          //                  above_or_equal_to_max
+          //            }
         }
       }
 
       (
         discretizedData,
-        FeatureSpace.allCategorical(fs.features, newDiscreteValuesPerFeat)
+        Discretization.newCategoricalFs(discretizedValues)
       )
     }
   }

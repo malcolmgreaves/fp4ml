@@ -23,7 +23,22 @@ trait Discretization {
 
 object Discretization {
 
-  type ValuesPerFeature = Seq[Seq[String]]
   type DiscretizedVector = Seq[String]
+
+  def newCategoricalFs(
+    discretizedValueBasesForEach: Seq[String]
+  )(implicit fs: FeatureSpace): FeatureSpace =
+
+    FeatureSpace.allCategorical(
+      fs.features,
+      fs.features
+      .map { feature =>
+        (
+          feature,
+          discretizedValueBasesForEach.map { dv => s"$feature--$dv" }
+        )
+      }
+      .toMap
+    )
 
 }
