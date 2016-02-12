@@ -88,6 +88,9 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
 
 object VectorOpsT {
 
+  def apply[N: Numeric, V[_] <: Vector[_]](implicit vops: VectorOpsT[N, V]): VectorOpsT[N, V] =
+    vops
+
   object Implicits {
     // dense operations
     implicit val DoubleDenseVot = Dense.DoubleDenseVectorOptsT
