@@ -20,7 +20,7 @@ object OnlineMeanVariance {
    * Welford's online algorithm. The `toStats` method uses these variables to
    * perform the final variance calculation.
    */
-  case class State[N: NumericConversion, V[_] <: Vector[_]](count: Long, mean: V[N], m2: V[N]) {
+  case class State[N: NumericConversion, V[_]](count: Long, mean: V[N], m2: V[N]) {
 
     def toStats()(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
       Stats(
@@ -28,7 +28,7 @@ object OnlineMeanVariance {
         mean = mean,
         variance =
         if (count < 2l)
-          ops.zeros(mean.size)
+          ops.zeros(ops.size(mean))
         else
           ops.divS(
             m2,
@@ -40,7 +40,7 @@ object OnlineMeanVariance {
   /**
    * Adds a vector to the existing state, producing updated state.
    */
-  def update[N: NumericConversion, V[_] <: Vector[_]](
+  def update[N: NumericConversion, V[_]](
     existing: State[N, V],
     current:  V[N]
   )(implicit ops: VectorOpsT[N, V]): State[N, V] = {
@@ -70,14 +70,14 @@ object OnlineMeanVariance {
    * values will be appropriate for all of the prior data that went into creating
    * the existing state as well as this additional data.
    */
-  def apply[D[_]: Data, N: NumericConversion, V[_] <: Vector[_]](
+  def apply[D[_]: Data, N: NumericConversion, V[_]](
     existing: State[N, V],
     elems:    D[V[N]]
   )(implicit ops: VectorOpsT[N, V]): State[N, V] =
     elems.headOption match {
 
       case Some(v) =>
-        assert(v.size == existing.mean.size)
+        assert(ops.size(v) == ops.size(existing.mean))
         val nc = NumericConversion[N]
         elems
           .aggregate(existing)(
@@ -123,14 +123,17 @@ object OnlineMeanVariance {
         State[N, V](0, ops.zeros(0), ops.zeros(0))
     }
 
-  def batch[D[_]: Data, N: NumericConversion, V[_] <: Vector[_]](
+  def batch[D[_]: Data, N: NumericConversion, V[_]](
     elems: D[V[N]]
   )(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
     elems.headOption match {
 
       case Some(v) =>
-        val size = v.size
-        apply[D, N, V](State[N, V](0l, ops.zeros(size), ops.zeros(size)), elems).toStats()
+        val size = ops.size(v)
+        apply[D, N, V](
+          State[N, V](0l, ops.zeros(size), ops.zeros(size)),
+          elems
+        ).toStats()
 
       case None =>
         Stats(0, ops.zeros(0), ops.zeros(0))

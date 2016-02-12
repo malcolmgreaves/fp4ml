@@ -29,7 +29,7 @@ object Discretization {
       .toMap
     )
 
-  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps: ClassTag](
     data: D[V[N]],
     rp:   OldRuleProducer
   )(

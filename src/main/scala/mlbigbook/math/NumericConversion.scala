@@ -31,7 +31,6 @@ object NumericConversion {
   def apply[N: NumericConversion]: NumericConversion[N] =
     implicitly[NumericConversion[N]]
 
-
   /**
    * Implicit NumericConversion instances for every primitive numeric type:
    * float, long, double, int, short, byte

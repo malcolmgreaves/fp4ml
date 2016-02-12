@@ -7,8 +7,32 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
 
-object GaussianDiscretization {
+object GaussianDiscretizationRp {
 
+  def apply[Vec[_], Num: NumericConversion: ClassTag](
+    implicit
+    vectorOps: VectorOpsT[Num, Vec]
+  ): RuleProducer.Type[Num, Vec] = {
+
+    val nc = NumericConversion[Num]
+    val ctForN = implicitly[ClassTag[Num]]
+
+    new RuleProducer {
+
+      override type V[_] = Vec[_]
+      override type N = Num
+
+      override implicit val numConv = nc
+      override implicit val vops = null.asInstanceOf[VectorOpsT[this.N, this.V]] //: VectorOpsT[this.N, Vec] = vectorOps
+      override implicit val ct = ctForN
+
+      override def apply[D[_]: Data](data: D[V[N]])(implicit fs: FeatureSpace): Seq[Rule[N]] = ???
+    }
+  }
+
+}
+
+object GaussianDiscretization {
 
   val below_neg3_sdev = "below_neg_3_sdev"
   val between_neg3_inclusive_and_neg2_exclusive = "between_neg3_inclusive_and_neg2_exclusive"
@@ -30,7 +54,7 @@ object GaussianDiscretization {
     above_pos3_sdev
   )
 
-  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](
     data: D[V[N]]
   )(
     implicit

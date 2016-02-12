@@ -102,7 +102,7 @@ object InterQuartileRange extends Serializable {
     )
   }
 
-  def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
+  def apply[D[_]: Data, V[_], N: Numeric: ClassTag](
     data: D[V[N]]
   )(implicit vops: VectorOpsT[N, V]): Seq[FiveNumSummary[N]] =
     data.headOption match {
@@ -115,7 +115,7 @@ object InterQuartileRange extends Serializable {
         else {
 
           val fiveNumSum = iqrForSingleFeature[D, N](QuartileIndicies(nElements)) _
-          val dimensionality = firstVector.size
+          val dimensionality = vops.size(firstVector)
 
           (0 until dimensionality).map { vectorIndex =>
             fiveNumSum(

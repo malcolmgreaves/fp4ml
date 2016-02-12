@@ -19,7 +19,7 @@ object Entropy {
       (2) Construct a gaussian with ^^.
       (3) Calculate entropy of each estimated gaussian.
    */
-  def entropyContinous[D[_]: Data, N: NumericConversion, V[_] <: Vector[_]](
+  def entropyContinous[D[_]: Data, N: NumericConversion, V[_]](
     realOnly: D[V[N]]
   )(
     implicit
@@ -37,7 +37,7 @@ object Entropy {
 
     val realFeat2gaussian: Map[String, GaussianFactory[Double]#Gaussian] = {
       val toDouble = NumericConversion[N].numeric.toDouble _
-      (0 until statsForAllRealFeatures.mean.size)
+      (0 until ops.size(statsForAllRealFeatures.mean))
         .zip(fs.realFeatNames)
         .map {
           case (index, realFeatName) =>
