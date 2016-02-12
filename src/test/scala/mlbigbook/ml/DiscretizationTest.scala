@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import breeze.linalg.{ QuasiTensor, DenseVector }
-import mlbigbook.math.{NumericConversion, VectorOpsT}
+import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import org.scalatest.FunSuite
 
 class DiscretizationTest extends FunSuite {
@@ -61,8 +61,10 @@ class DiscretizationTest extends FunSuite {
 
   test("Testing IQR based discretization") {
 
-    val (newData, newFs) =
+    val (newData, newFs) = {
+      implicit val _ = oldFs
       Discretization(dataForDiscretization, IqrDiscretization)
+    }
 
     assert(newFs.isCategorical.forall(identity))
     assert(newFs.categorical2values.keys.toSet === newFs.features.toSet)
@@ -89,12 +91,12 @@ class DiscretizationTest extends FunSuite {
       .zipWithIndex
       .foreach {
         case (grouped, index) =>
-          assert(grouped.head === s"below_min-dimension_$index")
-          assert(grouped(1) === s"min_q1-dimension_$index")
-          assert(grouped(2) === s"q1_median-dimension_$index")
-          assert(grouped(3) === s"median_q2-dimension_$index")
-          assert(grouped(4) === s"q2_max-dimension_$index")
-          assert(grouped.last === s"above_or_equal_to_max-dimension_$index")
+          assert(grouped.head === s"below_min--dimension_$index")
+          assert(grouped(1) === s"${IqrDiscretization.min_q1}--dimension_$index")
+          assert(grouped(2) === s"${IqrDiscretization.q1_median}--dimension_$index")
+          assert(grouped(3) === s"${IqrDiscretization.median_q2}--dimension_$index")
+          assert(grouped(4) === s"${IqrDiscretization.q2_max}--dimension_$index")
+          assert(grouped.last === s"${IqrDiscretization.above_or_equal_to_max}--dimension_$index")
       }
 
   // check data
@@ -175,7 +177,7 @@ object DiscretizationTest {
       .toSeq
   }
 
-  implicit val oldFs = FeatureSpace.allReal(
+  val oldFs = FeatureSpace.allReal(
     Seq("dimension_0", "dimension_1", "dimension_2")
   )
 

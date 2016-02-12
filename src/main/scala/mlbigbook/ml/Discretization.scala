@@ -23,13 +23,13 @@ object Discretization {
         case (feature, rule) =>
           (
             feature,
-            rule.discretizedValueBases.map { dv => s"$feature--$dv" }
+            rule.discretizedValueBases.map { dv => s"$dv--$feature" }
           )
       }
       .toMap
     )
 
-  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps: ClassTag](
+  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
     data: D[V[N]],
     rp:   OldRuleProducer
   )(
