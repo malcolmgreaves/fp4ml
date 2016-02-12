@@ -9,19 +9,6 @@ import scala.reflect.ClassTag
 
 object GaussianDiscretization extends RuleProducer {
 
-  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
-    data: D[V[N]]
-  )(
-    implicit
-    vops: VectorOpsT[N, V],
-    fs:   FeatureSpace
-  ): Seq[Rule[N]] = {
-
-    implicit val _ = NumericConversion[N].numeric
-    Gaussian.estimate(data)
-      .map(g => gaussianRule(g))
-  }
-
   val below_neg3_sdev = "below_neg_3_sdev"
   val between_neg3_inclusive_and_neg2_exclusive = "between_neg3_inclusive_and_neg2_exclusive"
   val between_neg2_inclusive_and_neg1_exclusive = "between_neg2_inclusive_and_neg1_exclusive "
@@ -42,18 +29,55 @@ object GaussianDiscretization extends RuleProducer {
     above_pos3_sdev
   )
 
-  def gaussianRule[N: Numeric](g: Gaussian[N]): Rule[N] = new Rule[N] {
+  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+    data: D[V[N]]
+  )(
+    implicit
+    vops: VectorOpsT[N, V],
+    fs:   FeatureSpace
+  ): Seq[Rule[N]] = {
 
-    override def apply(value: N): String = {
-      /*
-        if value < g.mean - 3 *g.stddev then below_neg_3_sdev
-        ...
-        else above_pos_3_sdev
-       */
+    implicit val _ = NumericConversion[N].numeric
+    Gaussian.estimate(data)
+      .map(g => gaussianRule(g))
+  }
 
-      ???
-    }
+  def gaussianRule[N: Numeric: MathOps](g: Gaussian[N]): Rule[N] = new Rule[N] {
 
-    override val discretizedValueBases = gaussianDiscretizedValueBases
+    val num = implicitly[Numeric[N]]
+
+    val lessThan = num.lt _
+
+    // pre-calculate the values of 2, 3 times the standard deviation
+    val sdev2 = num.times(g.stddev, num.plus(num.one, num.one))
+    val sdev3 = num.times(sdev2, g.stddev)
+
+    // pre-calculate the threshold points for 1, 2, 3 times the
+    // standard deviation minus the mean
+    val neg1 = num.minus(g.mean, g.stddev)
+    val neg2 = num.minus(g.mean, sdev2)
+    val neg3 = num.minus(g.mean, sdev3)
+
+    // pre-calculate the threshold points for 1, 2, 3 times the
+    // standard deviation plus the mean
+    val pos1 = num.plus(g.mean, g.stddev)
+    val pos2 = num.plus(g.mean, sdev2)
+    val pos3 = num.plus(g.mean, sdev3)
+
+    override def apply(value: N): String =
+      //
+      // ORDERING OF if STATEMENTS IS CRITICAL!
+      //
+      if (lessThan(value, neg3)) below_neg3_sdev
+      else if (lessThan(value, neg2)) between_neg3_inclusive_and_neg2_exclusive
+      else if (lessThan(value, neg1)) between_neg2_inclusive_and_neg1_exclusive
+      else if (lessThan(value, g.mean)) between_neg1_inclusive_and_mean_exlcusive
+      else if (lessThan(value, pos1)) between_mean_inclusive_and_pos1_exlcusive
+      else if (lessThan(value, pos2)) between_pos1_inclusive_and_pos2_exlcusive
+      else if (lessThan(value, pos3)) between_pos2_inclusive_and_pos3_exlcusive
+      else above_pos3_sdev
+
+    override val discretizedValueBases =
+      gaussianDiscretizedValueBases
   }
 }

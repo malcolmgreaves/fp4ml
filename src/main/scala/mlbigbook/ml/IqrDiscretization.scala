@@ -39,6 +39,9 @@ object IqrDiscretization extends RuleProducer {
       val lessThan = implicitly[Numeric[N]].lt _
 
       override def apply(value: N): String =
+        //
+        // ORDERING OF if STATEMENTS IS CRITICAL!
+        //
         if (lessThan(value, fns.min)) below_min
         else if (lessThan(value, fns.q1)) min_q1
         else if (lessThan(value, fns.median)) q1_median
@@ -46,69 +49,7 @@ object IqrDiscretization extends RuleProducer {
         else if (lessThan(value, fns.max)) q2_max
         else above_or_equal_to_max
 
-      override val discretizedValueBases: Seq[String] =
+      override val discretizedValueBases =
         iqrDiscretizedValueBases
     }
 }
-
-//
-//def apply =
-//
-//
-//val fiveNumberSummaries = {
-//  implicit val _ = NumericConversion[N].numeric
-//  InterQuartileRange(data)
-//}
-//
-//
-//    if (fiveNumberSummaries isEmpty)
-//      (data.map(_ => Seq.empty[String]), FeatureSpace.empty)
-//
-//    else {
-//
-//      val discretizedData: D[Seq[String]] = {
-//        val lessThan = NumericConversion[N].numeric.lt _
-//        data.map { vector =>
-//
-//          val valAt = vops.valueAt(vector) _
-//
-//          val res = new Array[String](fs.size)
-//          cfor(0)(_ < fs.size, _ + 1) { fIndex =>
-//
-//            val value = valAt(fIndex)
-//            val fns = fiveNumberSummaries(fIndex)
-//
-//            res(fIndex) =
-//              // ordering of if statements below is _important_ !!
-//              if (lessThan(value, fns.min)) below_min
-//              else if (lessThan(value, fns.q1)) min_q1
-//              else if (lessThan(value, fns.median)) q1_median
-//              else if (lessThan(value, fns.q2)) median_q2
-//              else if (lessThan(value, fns.max)) q2_max
-//              else above_or_equal_to_max
-//          }
-//          res.toSeq
-//
-//          //
-//          // Equivalent to the following FP code
-//          //
-//          //          vops.toSeq(vector)
-//          //            .zip(fiveNumberSummaries)
-//          //            .map {
-//          //              case (value, fns) =>
-//          //                // ordering of if statements below is _important_ !!
-//          //                if (lessThan(value, fns.min)) below_min
-//          //                else if (lessThan(value, fns.q1)) min_q1
-//          //                else if (lessThan(value, fns.median)) q1_median
-//          //                else if (lessThan(value, fns.q2)) median_q2
-//          //                else if (lessThan(value, fns.max)) q2_max
-//          //                else above_or_equal_to_max
-//          //            }
-//        }
-//      }
-//
-//      (
-//        discretizedData,
-//        Discretization.newCategoricalFs(iqrDiscretizedValueBases)
-//      )
-//    }
