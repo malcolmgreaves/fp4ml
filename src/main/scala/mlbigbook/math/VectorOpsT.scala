@@ -3,9 +3,11 @@ package mlbigbook.math
 import breeze.linalg.{ SparseVector, NumericOps, DenseVector, Vector }
 import breeze.linalg.operators._
 import breeze.math.Semiring
+import breeze.storage.Zero
 import mlbigbook.math.VectorOpsT.Dense.DoubleDenseVectorOptsT
 
 import scala.language.{ higherKinds, implicitConversions }
+import scala.reflect.ClassTag
 
 /**
  * An abstraction specifying operations one may perform using vectors and
@@ -37,6 +39,8 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
   def valueAt(v: V[N])(index: Int): N
 
   def toSeq(v: V[N]): Seq[N]
+
+  def map[B : ClassTag](v : V[N])(f: N => B): V[B]
 
   /**
    * Performs element-wise addition of two vectors.
@@ -84,12 +88,11 @@ abstract class VectorOpsT[@specialized N: Numeric, V[_] <: Vector[_]] {
    */
   val divS: OpDiv.Impl2[V[N], N, V[N]]
 
+  def runtimeClassTag[B: ClassTag]: ClassTag[V[B]]
+
 }
 
 object VectorOpsT {
-
-  def apply[N: Numeric, V[_] <: Vector[_]](implicit vops: VectorOpsT[N, V]): VectorOpsT[N, V] =
-    vops
 
   object Implicits {
     // dense operations
@@ -152,6 +155,16 @@ object VectorOpsT {
 
       override def toSeq(v: DenseVector[Double]): Seq[Double] =
         v.toArray.toSeq
+
+      override def map[B : ClassTag](v: DenseVector[Double])(f: (Double) => B): DenseVector[B] = {
+        implicit val _ = DenseVector.canMapValues[DenseVector[Double], B]
+        v.map(f)
+      }
+
+
+      override def runtimeClassTag[B: ClassTag]: ClassTag[DenseVector[B]] = {
+        ClassTag(DenseVector.zeros(0).getClass)
+      }
     }
 
     object FloatDenseVectorOptsT extends VectorOpsT[Float, DenseVector] {
@@ -197,6 +210,11 @@ object VectorOpsT {
 
       override def toSeq(v: DenseVector[Float]): Seq[Float] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: DenseVector[Float])(f: (Float) => B): DenseVector[B] = {
+        implicit val _ = DenseVector.canMapValues[DenseVector[Float], B]
+        v.map(f)
+      }
     }
 
     object LongDenseVectorOptsT extends VectorOpsT[Long, DenseVector] {
@@ -242,6 +260,11 @@ object VectorOpsT {
 
       override def toSeq(v: DenseVector[Long]): Seq[Long] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: DenseVector[Long])(f: (Long) => B): DenseVector[B] = {
+        implicit val _ = DenseVector.canMapValues[DenseVector[Long], B]
+        v.map(f)
+      }
     }
 
     object IntDenseVectorOptsT extends VectorOpsT[Int, DenseVector] {
@@ -287,6 +310,11 @@ object VectorOpsT {
 
       override def toSeq(v: DenseVector[Int]): Seq[Int] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: DenseVector[Int])(f: (Int) => B): DenseVector[B] ={
+        implicit val _ = DenseVector.canMapValues[DenseVector[Long], B]
+        v.map(f)
+      }
     }
   }
 
@@ -350,6 +378,12 @@ object VectorOpsT {
 
       override def toSeq(v: SparseVector[Double]): Seq[Double] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: SparseVector[Double])(f: (Double) => B): SparseVector[B] ={
+        implicit val _0: Zero[B] = new Zero[B] { override val zero: B = null.asInstanceOf[B] }
+        implicit val _1 = SparseVector.canMapValues[SparseVector[Double], B]
+        v.map(f)
+      }
     }
 
     object FloatSparseVectorOptsT extends VectorOpsT[Float, SparseVector] {
@@ -407,6 +441,12 @@ object VectorOpsT {
 
       override def toSeq(v: SparseVector[Float]): Seq[Float] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: SparseVector[Float])(f: (Float) => B): SparseVector[B] ={
+        implicit val _0: Zero[B] = new Zero[B] { override val zero: B = null.asInstanceOf[B] }
+        implicit val _1 = SparseVector.canMapValues[SparseVector[Float], B]
+        v.map(f)
+      }
     }
 
     object LongSparseVectorOptsT extends VectorOpsT[Long, SparseVector] {
@@ -464,6 +504,12 @@ object VectorOpsT {
 
       override def toSeq(v: SparseVector[Long]): Seq[Long] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: SparseVector[Long])(f: (Long) => B): SparseVector[B] ={
+        implicit val _0: Zero[B] = new Zero[B] { override val zero: B = null.asInstanceOf[B] }
+        implicit val _1 = SparseVector.canMapValues[SparseVector[Long], B]
+        v.map(f)
+      }
     }
 
     object IntSparseVectorOptsT extends VectorOpsT[Int, SparseVector] {
@@ -521,6 +567,12 @@ object VectorOpsT {
 
       override def toSeq(v: SparseVector[Int]): Seq[Int] =
         v.toArray.toSeq
+
+      override def map[B:ClassTag](v: SparseVector[Int])(f: (Int) => B): SparseVector[B] ={
+        implicit val _0: Zero[B] = new Zero[B] { override val zero: B = null.asInstanceOf[B] }
+        implicit val _1 = SparseVector.canMapValues[SparseVector[Int], B]
+        v.map(f)
+      }
     }
   }
 

@@ -29,7 +29,7 @@ object GaussianDiscretization extends RuleProducer {
     above_pos3_sdev
   )
 
-  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit
@@ -37,9 +37,57 @@ object GaussianDiscretization extends RuleProducer {
     fs:   FeatureSpace
   ): Seq[Rule[N]] = {
 
-    implicit val _ = NumericConversion[N].numeric
-    Gaussian.estimate(data)
-      .map(g => gaussianRule(g))
+
+    import Data.ops._
+    import NumericConversion.Implicits._
+    import MathOps.Implicits._
+    NumericConversion[N] match {
+
+
+      case FloatC  =>
+        Gaussian.estimate(data)
+          .map(g => gaussianRule(g))
+
+      case DoubleC =>
+        implicit val _ = NumericConversion[N].numeric
+        Gaussian.estimate(data)
+          .map(g => gaussianRule(g))
+
+      case LongC | IntC =>
+        implicit val _0 = ClassTag.Double
+        implicit val _1: ClassTag[V[Double]] = vops.runtimeClassTag[Double]
+        val converted = data.map { vector =>
+          vops.map(vector)(NumericConversion[N].numeric.toDouble)
+        }
+        import MathOps.Implicits.DoubleMo
+        Gaussian.estimate(converted)
+          .map{ gDbl =>
+            val gN = Gaussian[N](
+              mean = NumericConversion[N].fromDouble(gDbl.mean),
+              variance = NumericConversion[N].fromDouble(gDbl.variance),
+              stddev = NumericConversion[N].fromDouble(gDbl.stddev)
+            )
+            gaussianRule(gN)
+          }
+
+      case ShortC | ByteC =>
+        // convert to floats
+        // convert to doubles
+        implicit val _0 = ClassTag.Float
+        implicit val _1: ClassTag[V[Float]] = vops.runtimeClassTag[Float]
+        val converted = data.map { vector =>
+          vops.map(vector)(NumericConversion[N].numeric.toFloat)
+        }
+        Gaussian.estimate(converted)
+          .map { gFlt =>
+            val gN = Gaussian[N](
+              mean = NumericConversion[N].fromDouble(gFlt.mean),
+              variance = NumericConversion[N].fromDouble(gFlt.variance),
+              stddev = NumericConversion[N].fromDouble(gFlt.stddev)
+            )
+            gaussianRule(gN)
+          }
+    }
   }
 
   def gaussianRule[N: Numeric: MathOps](g: Gaussian[N]): Rule[N] = new Rule[N] {

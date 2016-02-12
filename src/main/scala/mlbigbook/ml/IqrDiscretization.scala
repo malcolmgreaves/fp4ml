@@ -20,7 +20,7 @@ object IqrDiscretization extends RuleProducer {
     below_min, min_q1, q1_median, median_q2, q2_max, above_or_equal_to_max
   )
 
-  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit

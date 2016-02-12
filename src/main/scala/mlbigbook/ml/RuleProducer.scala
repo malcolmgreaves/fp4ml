@@ -9,7 +9,7 @@ import scala.reflect.ClassTag
 
 trait RuleProducer {
 
-  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: MathOps: ClassTag](
+  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit
