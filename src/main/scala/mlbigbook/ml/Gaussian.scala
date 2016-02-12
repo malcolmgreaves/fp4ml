@@ -1,6 +1,5 @@
 package mlbigbook.ml
 
-import breeze.linalg.Vector
 import fif.Data
 import Data.ops._
 import mlbigbook.math.{ OnlineMeanVariance, NumericConversion, VectorOpsT }
@@ -11,9 +10,7 @@ case class Gaussian[N: Numeric](mean: N, variance: N, stddev: N)
 
 object Gaussian {
 
-  def estimate[D[_]: Data, V[_], N: NumericConversion: MathOps](
-    data: D[V[N]]
-  )(
+  def estimate[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[V[N]])(
     implicit
     fs:   FeatureSpace,
     vops: VectorOpsT[N, V]

@@ -28,14 +28,11 @@ object GaussianDiscretization {
     above_pos3_sdev
   )
 
-  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](
-    data: D[V[N]]
-  )(
+  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[V[N]])(
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace
   ): Seq[Rule[N]] = {
-
     implicit val _0 = NumericConversion[N].numeric
     Gaussian.estimate(data)
       .map(g => gaussianRule(g))
@@ -88,6 +85,6 @@ object GaussianDiscretization {
         vops: VectorOpsT[N, V]
       ): Seq[Rule[N]] =
         GaussianDiscretization(data)
-  }
+    }
 
 }

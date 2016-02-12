@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import scala.language.implicitConversions
 
-trait MathOps[N] {
+abstract class MathOps[N] {
   def pi: N
   def negOneHalf: N
   def sqrt(v: N): N

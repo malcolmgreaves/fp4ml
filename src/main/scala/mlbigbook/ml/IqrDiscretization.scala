@@ -19,9 +19,7 @@ object IqrDiscretization {
     below_min, min_q1, q1_median, median_q2, q2_max, above_or_equal_to_max
   )
 
-  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
-    data: D[V[N]]
-  )(
+  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](data: D[V[N]])(
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace

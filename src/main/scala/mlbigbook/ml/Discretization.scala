@@ -2,7 +2,6 @@ package mlbigbook.ml
 
 import fif.Data
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
-import breeze.linalg.Vector
 import spire.syntax.cfor._
 
 import scala.language.{ higherKinds, postfixOps }

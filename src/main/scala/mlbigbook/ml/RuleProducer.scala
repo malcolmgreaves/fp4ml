@@ -6,7 +6,7 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-abstract class RuleProducer[N : ClassTag : NumericConversion] {
+abstract class RuleProducer[N: ClassTag: NumericConversion] {
 
   def apply[D[_]: Data, V[_]](data: D[V[N]])(
     implicit
