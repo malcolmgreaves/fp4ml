@@ -11,25 +11,24 @@ trait RuleProducer {
 
   /** Number type */
   type N
-  /** Vector type */
-  type V[_]
 
   implicit def ct: ClassTag[N]
   implicit def numConv: NumericConversion[N]
   implicit lazy val num: Numeric[N] = numConv.numeric
 
-  implicit def vops: VectorOpsT[N, V]
+  //  implicit def vops: VectorOpsT[N, V]
 
-  def apply[D[_]: Data](data: D[V[N]])(implicit fs: FeatureSpace): Seq[Rule[N]]
+  def apply[D[_]: Data, V[_]](data: D[V[N]])(
+    implicit
+    fs:   FeatureSpace,
+    vops: VectorOpsT[N, V]
+  ): Seq[Rule[N]]
 
 }
 
 object RuleProducer {
 
-  type Type[Num, Vec[_]] = RuleProducer {
-    type N = Num
-    type V[_] = Vec[_]
-  }
+  type Type[Num] = RuleProducer { type N = Num }
 
 }
 

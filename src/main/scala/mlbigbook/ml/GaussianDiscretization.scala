@@ -1,36 +1,10 @@
 package mlbigbook.ml
 
-import breeze.linalg.Vector
 import fif.Data
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
-
-object GaussianDiscretizationRp {
-
-  def apply[Vec[_], Num: NumericConversion: ClassTag](
-    implicit
-    vectorOps: VectorOpsT[Num, Vec]
-  ): RuleProducer.Type[Num, Vec] = {
-
-    val nc = NumericConversion[Num]
-    val ctForN = implicitly[ClassTag[Num]]
-
-    new RuleProducer {
-
-      override type V[_] = Vec[_]
-      override type N = Num
-
-      override implicit val numConv = nc
-      override implicit val vops = null.asInstanceOf[VectorOpsT[this.N, this.V]] //: VectorOpsT[this.N, Vec] = vectorOps
-      override implicit val ct = ctForN
-
-      override def apply[D[_]: Data](data: D[V[N]])(implicit fs: FeatureSpace): Seq[Rule[N]] = ???
-    }
-  }
-
-}
 
 object GaussianDiscretization {
 
@@ -105,4 +79,32 @@ object GaussianDiscretization {
     override val discretizedValueBases =
       gaussianDiscretizedValueBases
   }
+
+  def ruleProducer[Num: NumericConversion: MathOps: ClassTag]: RuleProducer.Type[Num] = {
+
+    val nc = NumericConversion[Num]
+    val ctForN = implicitly[ClassTag[Num]]
+
+    new RuleProducer {
+
+      override type N = Num
+
+      override implicit val numConv = nc
+      override implicit val ct = ctForN
+
+      override def apply[D[_]: Data, V[_]](data: D[V[N]])(
+        implicit
+        fs:   FeatureSpace,
+        vops: VectorOpsT[N, V]
+      ): Seq[Rule[N]] =
+        GaussianDiscretization[D, V, N](data)(
+          implicitly[Data[D]],
+          numConv,
+          implicitly[MathOps[N]],
+          vops,
+          fs
+        )
+    }
+  }
+
 }
