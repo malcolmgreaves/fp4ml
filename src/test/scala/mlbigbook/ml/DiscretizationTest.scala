@@ -63,7 +63,7 @@ class DiscretizationTest extends FunSuite {
 
     val (newData, newFs) = {
       implicit val _ = oldFs
-      Discretization(dataForDiscretization, IqrDiscretization)
+      Discretization(dataForDiscretization, IqrDiscretization.ruleProducer[Int])
     }
 
     assert(newFs.isCategorical.forall(identity))

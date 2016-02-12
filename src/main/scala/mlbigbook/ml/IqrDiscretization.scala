@@ -53,7 +53,7 @@ object IqrDiscretization {
         iqrDiscretizedValueBases
     }
 
-  def ruleProducer[Num: NumericConversion: MathOps: ClassTag]: RuleProducer.Type[Num] = {
+  def ruleProducer[Num: NumericConversion: ClassTag]: RuleProducer.Type[Num] = {
 
     val nc = NumericConversion[Num]
     val ctForN = implicitly[ClassTag[Num]]
