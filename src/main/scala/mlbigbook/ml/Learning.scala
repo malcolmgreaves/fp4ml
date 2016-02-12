@@ -11,6 +11,7 @@ import scala.reflect.ClassTag
  * @tparam A The instance type.
  * @tparam B The label type.
  */
+//@deprecated("need to replace DataClass with typeclass", "")
 trait Learning[A, B] {
 
   type Instance = A

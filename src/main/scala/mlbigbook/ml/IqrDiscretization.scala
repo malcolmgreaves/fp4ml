@@ -3,8 +3,7 @@ package mlbigbook.ml
 import breeze.linalg.Vector
 import fif.Data
 import fif.Data.ops._
-import mlbigbook.math.VectorOpsT
-import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
+import mlbigbook.math.{ NumericConversion, VectorOpsT }
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
@@ -22,7 +21,7 @@ object IqrDiscretization extends Discretization {
     below_min, min_q1, q1_median, median_q2, q2_max, above_or_equal_to_max
   )
 
-  override def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
+  override def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit
@@ -30,7 +29,11 @@ object IqrDiscretization extends Discretization {
     fs:   FeatureSpace
   ) = {
 
-    val fiveNumberSummaries = InterQuartileRange(data)
+    val fiveNumberSummaries = {
+      implicit val _ = NumericConversion[N].numeric
+      InterQuartileRange(data)
+    }
+
     if (fiveNumberSummaries isEmpty)
       (data.map(_ => Seq.empty[String]), FeatureSpace.empty)
 
@@ -47,7 +50,7 @@ object IqrDiscretization extends Discretization {
           .toMap
 
       val discretizedData: D[Seq[String]] = {
-        val lessThan = implicitly[Numeric[N]].lt _
+        val lessThan = NumericConversion[N].numeric.lt _
         data.map { vector =>
           vops.toSeq(vector)
             .zip(fiveNumberSummaries)

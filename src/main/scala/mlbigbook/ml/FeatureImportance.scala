@@ -1,9 +1,8 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
 
-import scala.language.{ higherKinds, postfixOps }
+import scala.language.higherKinds
 
 /**
  * Given a data set, calculates a notion of importance on a per-feature basis.

@@ -4,6 +4,7 @@ import mlbigbook.wordcount.GenericCount
 
 import scala.language.implicitConversions
 
+//@deprecated("need to replace DataClass with typeclass", "")
 object GaussianNaiveBayes {
 
   def apply[N: GaussianFactory]: GaussianNaiveBayes[N] = {

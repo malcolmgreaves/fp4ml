@@ -14,6 +14,8 @@ trait MathOps[N] {
 
 object MathOps {
 
+  def apply[N: MathOps]: MathOps[N] = implicitly[MathOps[N]]
+
   object Implicits {
 
     implicit val DoubleMo = new MathOps[Double] {

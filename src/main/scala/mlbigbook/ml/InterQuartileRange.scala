@@ -3,13 +3,14 @@ package mlbigbook.ml
 import breeze.linalg.Vector
 import fif.Data
 import fif.Data.ops._
-import mlbigbook.math.VectorOpsT
+import mlbigbook.math.{ NumericConversion, VectorOpsT }
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
 
 object InterQuartileRange extends Serializable {
 
+  // A container that helps us build the five number summary.
   private[this] case class BuildingFns[N: Numeric](
     min:    Option[N],
     q1:     Option[N],
@@ -18,11 +19,17 @@ object InterQuartileRange extends Serializable {
     max:    Option[N]
   )
 
+  // Provides a convenient function for creating a BuildingFns instance where
+  // all members are None.
   private[this] object BuildingFns {
     def empty[N: Numeric] =
       BuildingFns[N](None, None, None, None, None)
   }
 
+  /**
+   * Evaluates to the first non-None element in the sequence of Options.
+   * If there are no non-None elements, then the method evaluates to None.
+   */
   def getFirst[T](options: Option[T]*): Option[T] =
     options.foldLeft(Option.empty[T]) {
       case (result, nextOpt) =>
@@ -52,35 +59,25 @@ object InterQuartileRange extends Serializable {
         .mapParition { bothPartIndices =>
 
           val partiallyBuildFns =
-            bothPartIndices
-              .foldLeft(BuildingFns.empty) {
-                case (bFns, (value, index)) =>
-
-                  index match {
-                    case 0L =>
-                      bFns.copy(min = Some(value))
-
-                    case `q1Index` =>
-                      bFns.copy(q1 = Some(value))
-
-                    case `medianIndex` =>
-                      bFns.copy(median = Some(value))
-
-                    case `q2Index` =>
-                      bFns.copy(q2 = Some(value))
-
-                    case `maxIndex` =>
-                      bFns.copy(max = Some(value))
-
-                    case _ =>
-                      bFns
-                  }
-              }
+            bothPartIndices.foldLeft(BuildingFns.empty) {
+              case (bFns, (value, index)) =>
+                index match {
+                  case 0L            => bFns.copy(min = Some(value))
+                  case `q1Index`     => bFns.copy(q1 = Some(value))
+                  case `medianIndex` => bFns.copy(median = Some(value))
+                  case `q2Index`     => bFns.copy(q2 = Some(value))
+                  case `maxIndex`    => bFns.copy(max = Some(value))
+                  case _             => bFns
+                }
+            }
           Iterable(partiallyBuildFns)
         }
         .reduce {
           case (bFns1, bFns2) =>
-
+            // Here we're using getFirst because we know that at most one
+            // of the BuildingFns instances fields will be non-None.
+            // This conclusion is due to the fact that we know there's only
+            // one minimum, one q1, etc. in the entire data.
             BuildingFns(
               min = getFirst(bFns1.min, bFns2.min),
               q1 = getFirst(bFns1.q1, bFns2.q1),
@@ -120,14 +117,13 @@ object InterQuartileRange extends Serializable {
           val fiveNumSum = iqrForSingleFeature[D, N](QuartileIndicies(nElements)) _
           val dimensionality = firstVector.size
 
-          (0 until dimensionality)
-            .map { vectorIndex =>
-              fiveNumSum {
-                data.map { vector =>
-                  vops.valueAt(vector)(vectorIndex)
-                }
+          (0 until dimensionality).map { vectorIndex =>
+            fiveNumSum(
+              data.map { vector =>
+                vops.valueAt(vector)(vectorIndex)
               }
-            }
+            )
+          }
         }
 
       case None =>

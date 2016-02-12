@@ -1,8 +1,7 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.math.VectorOpsT
-import mlbigbook.ml.FeatureVectorSupport.FeatureSpace
+import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import breeze.linalg.Vector
 
 import scala.language.{ higherKinds, postfixOps }
@@ -12,7 +11,7 @@ trait Discretization {
 
   import Discretization._
 
-  def apply[D[_]: Data, V[_] <: Vector[_], N: Numeric: ClassTag](
+  def apply[D[_]: Data, V[_] <: Vector[_], N: NumericConversion: ClassTag](
     data: D[V[N]]
   )(
     implicit
