@@ -18,7 +18,7 @@ object MathOps {
 
   object Implicits {
 
-    implicit val DoubleMo = new MathOps[Double] {
+    implicit object DoubleMo extends MathOps[Double] {
 
       override def sqrt(v: Double): Double =
         math.sqrt(v)
@@ -42,7 +42,7 @@ object MathOps {
         a / b
     }
 
-    implicit val FloatMo = new MathOps[Float] {
+    implicit object FloatMo extends MathOps[Float] {
 
       override def sqrt(v: Float): Float =
         math.sqrt(v.toDouble).toFloat

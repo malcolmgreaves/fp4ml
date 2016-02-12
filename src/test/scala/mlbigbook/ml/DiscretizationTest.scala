@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import breeze.linalg.{ QuasiTensor, DenseVector }
-import mlbigbook.math.VectorOpsT
+import mlbigbook.math.{NumericConversion, VectorOpsT}
 import org.scalatest.FunSuite
 
 class DiscretizationTest extends FunSuite {
@@ -9,6 +9,8 @@ class DiscretizationTest extends FunSuite {
   import DiscretizationTest._
   import fif.ImplicitCollectionsData._
   import VectorOpsT.Implicits._
+  import NumericConversion.Implicits._
+  import MathOps.Implicits._
 
   test("testing that IQR computation is correct") {
     val newFiveNumSums = InterQuartileRange(dataForDiscretization)
@@ -59,10 +61,8 @@ class DiscretizationTest extends FunSuite {
 
   test("Testing IQR based discretization") {
 
-    val (newData, newFs) = {
-      implicit val _ = oldFs
-      IqrDiscretization(dataForDiscretization)
-    }
+    val (newData, newFs) =
+      Discretization(dataForDiscretization, IqrDiscretization)
 
     assert(newFs.isCategorical.forall(identity))
     assert(newFs.categorical2values.keys.toSet === newFs.features.toSet)
@@ -175,7 +175,7 @@ object DiscretizationTest {
       .toSeq
   }
 
-  val oldFs = FeatureVectorSupport.FeatureSpace.allReal(
+  implicit val oldFs = FeatureSpace.allReal(
     Seq("dimension_0", "dimension_1", "dimension_2")
   )
 

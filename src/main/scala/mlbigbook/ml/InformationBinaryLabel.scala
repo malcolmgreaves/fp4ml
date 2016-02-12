@@ -2,7 +2,6 @@ package mlbigbook.ml
 
 import fif.Data
 import mlbigbook.math.NumericX
-import mlbigbook.ml.FeatureVectorSupport._
 
 import scala.language.{ higherKinds, postfixOps }
 

@@ -1,0 +1,3 @@
+* resolve MathOps difference / problem wrt. discretizing Numneric or Fractional data
+* maybe solution is to do NumericConvert to Double then MathOps on it?
+* can I do something where I can find the exact MathOps implementation from a NumericConverstion? probably since it is an AST...

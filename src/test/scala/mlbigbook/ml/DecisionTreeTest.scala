@@ -110,8 +110,8 @@ object DecisionTreeTest {
         (feats, feats.head == "foo")
       }
 
-  implicit val syntheticFeatureSpace: FeatureVectorSupport.FeatureSpace =
-    FeatureVectorSupport.FeatureSpace(
+  implicit val syntheticFeatureSpace: FeatureSpace =
+    FeatureSpace(
       features = Seq("foobar"),
       isCategorical = Seq(true),
       feat2index = Map("foobar" -> 0),
