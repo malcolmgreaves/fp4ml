@@ -91,7 +91,7 @@ class DiscretizationTest extends FunSuite {
       .zipWithIndex
       .foreach {
         case (grouped, index) =>
-          assert(grouped.head === s"below_min--dimension_$index")
+          assert(grouped.head === s"${IqrDiscretization.below_min}--dimension_$index")
           assert(grouped(1) === s"${IqrDiscretization.min_q1}--dimension_$index")
           assert(grouped(2) === s"${IqrDiscretization.q1_median}--dimension_$index")
           assert(grouped(3) === s"${IqrDiscretization.median_q2}--dimension_$index")
@@ -111,27 +111,27 @@ class DiscretizationTest extends FunSuite {
           case (c, values) =>
             values.foldLeft(c) {
               case (counts @ (nBMin, nMinQ1, nQ1Median, nMedianQ2, nQ2Max, nAMax), value) =>
-                if (value.contains("below_min"))
+                if (value.startsWith(IqrDiscretization.below_min))
                   counts.copy(_1 = nBMin + 1)
-                else if (value.contains("min_q1"))
+                else if (value.startsWith(IqrDiscretization.min_q1))
                   counts.copy(_2 = nMinQ1 + 1)
-                else if (value.contains("q1_median"))
+                else if (value.startsWith(IqrDiscretization.q1_median))
                   counts.copy(_3 = nQ1Median + 1)
-                else if (value.contains("median_q2"))
+                else if (value.startsWith(IqrDiscretization.median_q2))
                   counts.copy(_4 = nMedianQ2 + 1)
-                else if (value.contains("q2_max"))
+                else if (value.startsWith(IqrDiscretization.q2_max))
                   counts.copy(_5 = nQ2Max + 1)
                 else
                   counts.copy(_6 = nAMax + 1)
             }
         }
 
-    assert(belowMin === 0, ": below min wrong")
-    assert(minQ1 === expected, ": min-q1 wrong")
-    assert(q1Median === expected, ": q1-median wrong")
-    assert(medianQ2 === expected, ": median-q2 wrong")
-    assert(q2Max === expected, ": q2-max wrong")
-    assert(aboveMax === (data.size / 100) * mult, ": above or equal to max wrong")
+    assert(belowMin === 0, s": ${IqrDiscretization.below_min} wrong")
+    assert(minQ1 === expected, s": ${IqrDiscretization.min_q1}  wrong")
+    assert(q1Median === expected, s": ${IqrDiscretization.q1_median}  wrong")
+    assert(medianQ2 === expected, s": ${IqrDiscretization.median_q2}  wrong")
+    assert(q2Max === expected, s": ${IqrDiscretization.q2_max}  wrong")
+    assert(aboveMax === (data.size / 100) * mult, s": ${IqrDiscretization.above_or_equal_to_max}  wrong")
   }
 
 }
