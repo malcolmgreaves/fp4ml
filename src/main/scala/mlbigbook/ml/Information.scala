@@ -43,7 +43,10 @@ trait Information {
 
 object Information {
 
-  type Type[E, L] = Information { type Entropy = E; type Label = L }
+  type Type[E, L] = Information {
+    type Entropy = E
+    type Label = L
+  }
 
   @inline def log2(value: Double): Double =
     math.log(value) / logBase10of2
