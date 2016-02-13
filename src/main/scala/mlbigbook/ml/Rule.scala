@@ -27,7 +27,7 @@ object Rule {
         }
 
       override val discretizedValueBases =
-         thresholds.map { case (_, name) => name } :+ defaultTopInterval
+        thresholds.map { case (_, name) => name } :+ defaultTopInterval
     }
 
 }

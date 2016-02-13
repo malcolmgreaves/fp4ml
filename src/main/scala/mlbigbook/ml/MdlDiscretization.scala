@@ -28,15 +28,15 @@ object MdlDiscretization {
     above_pos3_sdev
   )
 
-  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[V[N]])(
+  def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[(V[N], Boolean)])(
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace
   ): Seq[Rule[N]] = ???
 
-  def ruleProducer[N: NumericConversion: MathOps: ClassTag]: RuleProducer[N] =
-    new RuleProducer[N] {
-      override def apply[D[_]: Data, V[_]](data: D[V[N]])(
+  def ruleProducer[N: NumericConversion: MathOps: ClassTag]: SupervisedRuleProducer[N] =
+    new SupervisedRuleProducer[N] {
+      override def apply[D[_]: Data, V[_]](data: D[(V[N], Boolean)])(
         implicit
         fs:   FeatureSpace,
         vops: VectorOpsT[N, V]

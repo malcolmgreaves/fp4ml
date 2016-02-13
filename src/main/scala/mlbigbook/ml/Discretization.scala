@@ -9,6 +9,8 @@ import scala.reflect.ClassTag
 
 object Discretization {
 
+  import Data.ops._
+
   type DiscretizedVector = Seq[String]
 
   def newCategoricalFs(
@@ -35,15 +37,39 @@ object Discretization {
     implicit
     vops: VectorOpsT[N, V],
     fs:   FeatureSpace
-  ): (D[DiscretizedVector], CategoricalFeatureSpace) = {
-    import Data.ops._
+  ): (D[DiscretizedVector], CategoricalFeatureSpace) =
+    if (data isEmpty)
+      (data.map(_ => Seq.empty[String]), CategoricalFeatureSpace.empty)
+    else
+      apply(data, rp(data))
+
+  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
+    data: D[(V[N], Boolean)],
+    rp:   SupervisedRuleProducer[N]
+  )(
+    implicit
+    vops:     VectorOpsT[N, V],
+    fs:       FeatureSpace,
+    ctNumVec: ClassTag[V[N]]
+  ): (D[DiscretizedVector], CategoricalFeatureSpace) =
+    if (data isEmpty)
+      (data.map(_ => Seq.empty[String]), CategoricalFeatureSpace.empty)
+    else
+      apply(data.map { case (vector, _) => vector }, rp(data))
+
+  def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](
+    data:         D[V[N]],
+    readyRulings: Seq[Rule[N]]
+  )(
+    implicit
+    vops: VectorOpsT[N, V],
+    fs:   FeatureSpace
+  ): (D[DiscretizedVector], CategoricalFeatureSpace) =
 
     if (data isEmpty)
       (data.map(_ => Seq.empty[String]), CategoricalFeatureSpace.empty)
 
     else {
-
-      val readyRulings = rp(data)
 
       val discretizedData = {
         implicit val _ = NumericConversion[N].numeric
@@ -71,7 +97,7 @@ object Discretization {
         discretizedData,
         Discretization.newCategoricalFs(readyRulings)
       )
+
     }
-  }
 
 }
