@@ -39,7 +39,7 @@ object InterQuartileRange extends Serializable {
     }
 
   def iqrForSingleFeature[D[_]: Data, N: Numeric: ClassTag](
-    qi: QuartileIndicies
+    qi: QuartileIndices
   )(
     reduced: D[N]
   ): FiveNumSummary[N] = {
@@ -51,7 +51,7 @@ object InterQuartileRange extends Serializable {
         .zipWithIndex
         .mapParition { bothPartIndices =>
           import qi._
-          // This import allows us to reference the fields of the QuartileIndicies
+          // This import allows us to reference the fields of the QuartileIndices
           // instance. It makes it easier to check if a particular index matches one
           // of these indicies; we can use the `<value name>` syntax in the match
           // statement below.
@@ -111,7 +111,7 @@ object InterQuartileRange extends Serializable {
 
         else {
 
-          val fiveNumSum = iqrForSingleFeature[D, N](QuartileIndicies(nElements)) _
+          val fiveNumSum = iqrForSingleFeature[D, N](QuartileIndices.from(nElements)) _
           val dimensionality = vops.size(firstVector)
 
           (0 until dimensionality).map { vectorIndex =>
