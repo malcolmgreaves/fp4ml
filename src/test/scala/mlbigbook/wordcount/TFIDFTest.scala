@@ -3,8 +3,6 @@ package mlbigbook.wordcount
 import mlbigbook.data.OLD_AddMap
 import org.scalatest.FunSuite
 
-import scala.collection.Map
-
 class TFIDFTest extends FunSuite {
 
   import mlbigbook.wordcount.WordcountTest._

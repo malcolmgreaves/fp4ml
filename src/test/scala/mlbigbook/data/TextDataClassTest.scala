@@ -2,7 +2,6 @@ package mlbigbook.data
 
 import org.scalatest.FunSuite
 
-import scala.collection.Map
 import scala.util.Random
 
 class TextDataClassTest extends FunSuite {

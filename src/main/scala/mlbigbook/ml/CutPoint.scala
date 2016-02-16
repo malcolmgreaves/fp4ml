@@ -30,10 +30,7 @@ object CutPoint {
         )
       }
 
-  def apply[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)])(
-    implicit
-    fs: FeatureSpace
-  ): N =
+  def apply[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)]): N =
     if (data isEmpty)
       implicitly[Numeric[N]].zero
 
@@ -94,6 +91,20 @@ object CutPoint {
         .getOrElse(implicitly[Numeric[N]].zero)
     }
 
-  def partition[D[_]: Data, N: Numeric](data: D[(N, Boolean)], cp: N): (D[(N, Boolean)], D[(N, Boolean)]) = ???
+  def partition[D[_]: Data, N: Numeric](
+    data: D[(N, Boolean)],
+    cp:   N
+  ): (D[(N, Boolean)], D[(N, Boolean)]) = {
+
+    val lessThan = implicitly[Numeric[N]].lt _
+
+    val lessThanCp =
+      data.filter { case (value, _) => lessThan(value, cp) }
+
+    val greaterThanOrEqualToCp =
+      data.filter { case (value, _) => !lessThan(value, cp) }
+
+    (lessThanCp, greaterThanOrEqualToCp)
+  }
 
 }
