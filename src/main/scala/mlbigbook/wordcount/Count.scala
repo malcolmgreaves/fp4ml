@@ -5,7 +5,7 @@
  */
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ AddMap, TextData }
+import mlbigbook.data.{ OLD_AddMap, TextData }
 
 import scala.collection.Map
 
@@ -21,7 +21,7 @@ object Count {
   def wordcountCorpus(documents: TextData.Corpus): TextData.WordCount = {
     documents
       .map(wordcountDocument)
-      .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine, AddMap.Whole.combine)
+      .aggregate(OLD_AddMap.Whole.empty)(OLD_AddMap.Whole.combine, OLD_AddMap.Whole.combine)
   }
 
   /**
@@ -31,7 +31,7 @@ object Count {
     document
       .sentences
       .map(wordcountSentence)
-      .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine, AddMap.Whole.combine)
+      .aggregate(OLD_AddMap.Whole.empty)(OLD_AddMap.Whole.combine, OLD_AddMap.Whole.combine)
 
   /**
    * Compute the word count on a single sentence.
@@ -39,9 +39,9 @@ object Count {
   def wordcountSentence(sentence: TextData.Sentence): TextData.WordCount =
     sentence
       .words
-      .aggregate(AddMap.Whole.empty)(add1, AddMap.Whole.combine)
+      .aggregate(OLD_AddMap.Whole.empty)(add1, OLD_AddMap.Whole.combine)
 
   // Increment the count of a word in a mapping by 1.
   @inline private[this] def add1(m: Map[String, Long], word: String) =
-    AddMap.Whole.add(m, word, 1)
+    OLD_AddMap.Whole.add(m, word, 1)
 }

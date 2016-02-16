@@ -10,7 +10,7 @@ object Entropy {
 
   import Data.ops._
 
-  def apply[D[_]: Data](data: D[(_, Boolean)]): Double = {
+  def binary[D[_]: Data](data: D[(_, Boolean)]): Double = {
 
     val (nPos, nNeg) =
       data.aggregate((0l, 0l))(
@@ -36,6 +36,30 @@ object Entropy {
     val infoNeg = probNeg * Information.log2(probNeg)
 
     -(infoPos + infoNeg)
+  }
+
+  def apply[D[_]: Data, Label: Equality](data: D[(_, Label)]): Double = {
+
+    val label2count = Map.empty[Label, Long]
+//      data.aggregate(EqualityMap.empty[Label, Long])(
+//        {
+//          case (map, (_, label)) =>
+//             ???
+//        },
+//        {
+//          case (map1, map2) =>
+//        }
+//      )
+
+    val total = data.size.toDouble
+
+    label2count
+      .foldLeft(0.0) {
+        case (sum, (label, count)) =>
+          val probability = count / total
+          val info = probability * Information.log2(probability)
+          sum - info
+      }
   }
 
   import FeatureVectorSupport._

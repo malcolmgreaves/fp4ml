@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ MultiplyMap, IndicatorMap, AddMap, TextData }
+import mlbigbook.data.{ MultiplyMap, IndicatorMap, OLD_AddMap, TextData }
 
 /**
  * Collection of functions that compute the term frequency - inverse document frequency weighting
@@ -19,7 +19,7 @@ object TFIDF {
   def docfreqCorpus(documents: TextData.Corpus): TextData.WordCount = {
     documents
       .map(docfreqDocument)
-      .aggregate(AddMap.Whole.empty)(AddMap.Whole.combine, AddMap.Whole.combine)
+      .aggregate(OLD_AddMap.Whole.empty)(OLD_AddMap.Whole.combine, OLD_AddMap.Whole.combine)
   }
 
   /**
@@ -39,9 +39,9 @@ object TFIDF {
    */
   def invDocFreq(documents: TextData.Corpus): TextData.NormalizedWordCount = {
     docfreqCorpus(documents)
-      .aggregate(AddMap.Real.empty)(
+      .aggregate(OLD_AddMap.Real.empty)(
         { case (accum, (word, df)) => accum + (word -> 1.0 / df) },
-        AddMap.Real.combine
+        OLD_AddMap.Real.combine
       )
   }
 
@@ -51,7 +51,7 @@ object TFIDF {
    */
   def termFreq(m: TextData.WordCount): TextData.NormalizedWordCount = {
     val total = m.foldLeft(0.0)({ case (a, (_, count)) => a + count })
-    m.foldLeft(AddMap.Real.empty)({
+    m.foldLeft(OLD_AddMap.Real.empty)({
       case (normalized, (word, count)) => normalized + (word -> count / total)
     })
   }
@@ -80,7 +80,7 @@ object TFIDF {
     val docLevelTFIDF = docTFIDF(documents)
     documents
       .map(docLevelTFIDF)
-      .aggregate(AddMap.Real.empty)(AddMap.Real.combine, AddMap.Real.combine)
+      .aggregate(OLD_AddMap.Real.empty)(OLD_AddMap.Real.combine, OLD_AddMap.Real.combine)
   }
 
 }

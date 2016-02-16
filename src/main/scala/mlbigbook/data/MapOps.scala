@@ -5,6 +5,8 @@
  */
 package mlbigbook.data
 
+import mlbigbook.ml.{EqualityMap, Equality}
+
 import scala.collection.Map
 
 object MapOps {
@@ -13,7 +15,7 @@ object MapOps {
    * Given two input maps of the same type, re-order them such that the first element of the
    * resulting tuple has more keys than the second element.
    */
-  def reoderLargeSmall[A, B](a: Map[A, B], b: Map[A, B]): (Map[A, B], Map[A, B]) =
+  def reoderSmallLarge[A, B](a: Map[A, B], b: Map[A, B]): (Map[A, B], Map[A, B]) =
     if (a.size < b.size)
       (a, b)
     else
@@ -25,7 +27,7 @@ object MapOps {
      * Implicit AddMap and MultiplyMap instances for Double.
      */
     object DoubleM {
-      implicit val Add = new AddMap[Double]
+      implicit val Add = new OLD_AddMap[Double]
       implicit val Multiply = new MultiplyMap[Double]
     }
 
@@ -33,7 +35,7 @@ object MapOps {
      * Implicit AddMap and MultiplyMap instances for Long.
      */
     object LongM {
-      implicit val Add = new AddMap[Long]
+      implicit val Add = new OLD_AddMap[Long]
       implicit val Multiply = new MultiplyMap[Long]
     }
 
@@ -41,7 +43,7 @@ object MapOps {
      * Implicit AddMap and MultiplyMap instances for Int.
      */
     object IntM {
-      implicit val Add = new AddMap[Int]
+      implicit val Add = new OLD_AddMap[Int]
       implicit val Multiply = new MultiplyMap[Int]
     }
   }
@@ -49,13 +51,13 @@ object MapOps {
 }
 
 /** Object for adding double and long maps together */
-object AddMap {
-  val Real = new AddMap[Double]
-  val Whole = new AddMap[Long]
+object OLD_AddMap {
+  val Real = new OLD_AddMap[Double]
+  val Whole = new OLD_AddMap[Long]
 }
 
 /** Class that supports operations for adding elements and combining maps */
-class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
+class OLD_AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
   import scala.Numeric.Implicits._
 
@@ -83,8 +85,36 @@ class AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
   }
 }
 
+class AddMap[K :Equality, @specialized(Byte, Int, Long, Float, Double) N: Numeric] {
+
+  import scala.Numeric.Implicits._
+
+  val empty: Map[K, N] = EqualityMap.empty[K, N]
+
+  def add(m: Map[K, N], k: K, v: N): Map[K, N] = {
+    m.get(k) match {
+      case Some(existing) => (m - k) + (k -> (existing + v))
+      case None           => m + (k -> v)
+    }
+  }
+
+  /**
+    * Combines two maps. If maps m1 and m2 both have key k, then the resulting
+    * map will have m1(k) + m2(k) for the value of k.
+    */
+  def combine(m1: Map[K, N], m2: Map[K, N]): Map[K, N] = {
+    val (a, b) = MapOps.reoderSmallLarge(m1, m2)
+    a.foldLeft(b)({
+      case (aggmap, (k, v)) => aggmap.get(k) match {
+        case Some(existing) => (aggmap - k) + (k -> (existing + v))
+        case None           => aggmap + (k -> v)
+      }
+    })
+  }
+}
+
 /** Class that supports operations on maps that indicate the presense of keys. */
-object IndicatorMap extends AddMap[Long] {
+object IndicatorMap extends OLD_AddMap[Long] {
 
   override def add(m: Map[String, Long], word: String, ignore: Long): Map[String, Long] =
     mark(m, word)
@@ -128,7 +158,7 @@ class MultiplyMap[@specialized(Long, Double) N: Numeric] {
 
   import scala.Numeric.Implicits._
 
-  private val addmap = new AddMap[N]()
+  private val addmap = new OLD_AddMap[N]()
   private lazy val empty: Map[String, N] = Map()
 
   /**

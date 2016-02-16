@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.{ AddMap, TextData }
+import mlbigbook.data.{ OLD_AddMap, TextData }
 import org.scalatest.FunSuite
 
 import scala.collection.Map
@@ -87,7 +87,7 @@ object WordcountTest {
     val e: Map[String, Long] = Map()
     actualCounts.foldLeft(e)({
       case (m, (_, actual)) => actual.foldLeft(m)({
-        case (a, (k, v)) => AddMap.Whole.add(a, k, v)
+        case (a, (k, v)) => OLD_AddMap.Whole.add(a, k, v)
       })
     })
   }

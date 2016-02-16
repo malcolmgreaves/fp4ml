@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.AddMap
+import mlbigbook.data.OLD_AddMap
 import org.scalatest.FunSuite
 
 import scala.collection.Map
@@ -30,7 +30,7 @@ class TFIDFTest extends FunSuite {
   val expectedFoxTF = {
     val nWords = sentFox.words.size.toDouble
     sentFox.words.foldLeft(emptyD)({
-      case (a, word) => AddMap.Real.add(a, word, 1.0 / nWords)
+      case (a, word) => OLD_AddMap.Real.add(a, word, 1.0 / nWords)
     })
   }
 
