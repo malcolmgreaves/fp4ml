@@ -1,9 +1,8 @@
 package mlbigbook.ml
 
-import breeze.linalg.Vector
 import fif.Data
 import fif.Data.ops._
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.VectorOpsT
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
@@ -15,7 +14,7 @@ object InterQuartileRange extends Serializable {
     min:    Option[N],
     q1:     Option[N],
     median: Option[N],
-    q2:     Option[N],
+    q3:     Option[N],
     max:    Option[N]
   )
 
@@ -38,6 +37,21 @@ object InterQuartileRange extends Serializable {
         else
           result
     }
+
+  private[this] case class QuartileIndicies(
+    q1Index:     Long,
+    medianIndex: Long,
+    q3Index:     Long,
+    maxIndex:    Long
+  )
+
+  private[this] def createQi(nElements: Long): QuartileIndicies = {
+    val q1Index: Long = nElements / 4l // integer division OK
+    val medianIndex: Long = nElements / 2l // integer division OK
+    val q3Index: Long = 3l * q1Index // integer division OK
+    val maxIndex: Long = nElements - 1l
+    QuartileIndicies(q1Index, medianIndex, q3Index, maxIndex)
+  }
 
   def iqrForSingleFeature[D[_]: Data, N: Numeric: ClassTag](
     qi: QuartileIndicies
@@ -65,7 +79,7 @@ object InterQuartileRange extends Serializable {
                   case 0L            => bFns.copy(min = Some(value))
                   case `q1Index`     => bFns.copy(q1 = Some(value))
                   case `medianIndex` => bFns.copy(median = Some(value))
-                  case `q2Index`     => bFns.copy(q2 = Some(value))
+                  case `q3Index`     => bFns.copy(q3 = Some(value))
                   case `maxIndex`    => bFns.copy(max = Some(value))
                   case _             => bFns
                 }
@@ -82,7 +96,7 @@ object InterQuartileRange extends Serializable {
               min = getFirst(bFns1.min, bFns2.min),
               q1 = getFirst(bFns1.q1, bFns2.q1),
               median = getFirst(bFns1.median, bFns2.median),
-              q2 = getFirst(bFns1.q2, bFns2.q2),
+              q3 = getFirst(bFns1.q3, bFns2.q3),
               max = getFirst(bFns1.max, bFns2.max)
             )
         }
@@ -97,7 +111,7 @@ object InterQuartileRange extends Serializable {
       min = buildingFns.min.get,
       q1 = buildingFns.q1.get,
       median = buildingFns.median.get,
-      q2 = buildingFns.q2.get,
+      q3 = buildingFns.q3.get,
       max = buildingFns.max.get
     )
   }

@@ -40,7 +40,7 @@ class DiscretizationTest extends FunSuite {
               counts.copy(_2 = nMinQ1 + 1)
             else if (value < fns.median)
               counts.copy(_3 = nQ1Median + 1)
-            else if (value < fns.q2)
+            else if (value < fns.q3)
               counts.copy(_4 = nMedianQ2 + 1)
             else if (value < fns.max)
               counts.copy(_5 = nQ2Max + 1)
@@ -94,8 +94,8 @@ class DiscretizationTest extends FunSuite {
           assert(grouped.head === s"${IqrDiscretization.below_min}--dimension_$index")
           assert(grouped(1) === s"${IqrDiscretization.min_q1}--dimension_$index")
           assert(grouped(2) === s"${IqrDiscretization.q1_median}--dimension_$index")
-          assert(grouped(3) === s"${IqrDiscretization.median_q2}--dimension_$index")
-          assert(grouped(4) === s"${IqrDiscretization.q2_max}--dimension_$index")
+          assert(grouped(3) === s"${IqrDiscretization.median_q3}--dimension_$index")
+          assert(grouped(4) === s"${IqrDiscretization.q3_max}--dimension_$index")
           assert(grouped.last === s"${IqrDiscretization.above_or_equal_to_max}--dimension_$index")
       }
 
@@ -117,9 +117,9 @@ class DiscretizationTest extends FunSuite {
                   counts.copy(_2 = nMinQ1 + 1)
                 else if (value.startsWith(IqrDiscretization.q1_median))
                   counts.copy(_3 = nQ1Median + 1)
-                else if (value.startsWith(IqrDiscretization.median_q2))
+                else if (value.startsWith(IqrDiscretization.median_q3))
                   counts.copy(_4 = nMedianQ2 + 1)
-                else if (value.startsWith(IqrDiscretization.q2_max))
+                else if (value.startsWith(IqrDiscretization.q3_max))
                   counts.copy(_5 = nQ2Max + 1)
                 else
                   counts.copy(_6 = nAMax + 1)
@@ -129,8 +129,8 @@ class DiscretizationTest extends FunSuite {
     assert(belowMin === 0, s": ${IqrDiscretization.below_min} wrong")
     assert(minQ1 === expected, s": ${IqrDiscretization.min_q1}  wrong")
     assert(q1Median === expected, s": ${IqrDiscretization.q1_median}  wrong")
-    assert(medianQ2 === expected, s": ${IqrDiscretization.median_q2}  wrong")
-    assert(q2Max === expected, s": ${IqrDiscretization.q2_max}  wrong")
+    assert(medianQ2 === expected, s": ${IqrDiscretization.median_q3}  wrong")
+    assert(q2Max === expected, s": ${IqrDiscretization.q3_max}  wrong")
     assert(aboveMax === (data.size / 100) * mult, s": ${IqrDiscretization.above_or_equal_to_max}  wrong")
   }
 
@@ -142,7 +142,7 @@ object DiscretizationTest {
     min = -50,
     q1 = -25,
     median = 0,
-    q2 = 25,
+    q3 = 25,
     max = 50
   )
 
@@ -150,7 +150,7 @@ object DiscretizationTest {
     min = 0,
     q1 = 25,
     median = 50,
-    q2 = 75,
+    q3 = 75,
     max = 100
   )
 
@@ -158,7 +158,7 @@ object DiscretizationTest {
     min = 0,
     q1 = 250,
     median = 500,
-    q2 = 750,
+    q3 = 750,
     max = 1000
   )
 

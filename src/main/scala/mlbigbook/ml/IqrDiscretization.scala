@@ -11,12 +11,12 @@ object IqrDiscretization {
   val below_min = "below_min"
   val min_q1 = "between_min_inclusive_and_q1_exclusive"
   val q1_median = "between_q1_inclusive_and_median_exclusive"
-  val median_q2 = "between_median_inclusive_and_q2_exclusive"
-  val q2_max = "between_q2_inclusive_and_max_exclusive"
+  val median_q3 = "between_median_inclusive_and_q3_exclusive"
+  val q3_max = "between_q3_inclusive_and_max_exclusive"
   val above_or_equal_to_max = "above_or_equal_to_max"
 
   val iqrDiscretizedValueBases = Seq(
-    below_min, min_q1, q1_median, median_q2, q2_max, above_or_equal_to_max
+    below_min, min_q1, q1_median, median_q3, q3_max, above_or_equal_to_max
   )
 
   def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](data: D[V[N]])(
@@ -42,8 +42,8 @@ object IqrDiscretization {
         if (lessThan(value, fns.min)) below_min
         else if (lessThan(value, fns.q1)) min_q1
         else if (lessThan(value, fns.median)) q1_median
-        else if (lessThan(value, fns.q2)) median_q2
-        else if (lessThan(value, fns.max)) q2_max
+        else if (lessThan(value, fns.q3)) median_q3
+        else if (lessThan(value, fns.max)) q3_max
         else above_or_equal_to_max
 
       override val discretizedValueBases =

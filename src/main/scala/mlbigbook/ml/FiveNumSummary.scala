@@ -4,12 +4,12 @@ case class FiveNumSummary[N: Numeric](
     min:    N,
     q1:     N,
     median: N,
-    q2:     N,
+    q3:     N,
     max:    N
 ) {
 
   override def toString =
-    s"[Min: $min, Quartile 1: $q1, Median: $median, Quartile 2: $q2, Max: $max]"
+    s"[Min: $min, Quartile 1: $q1, Median: $median, Quartile 2: $q3, Max: $max]"
 }
 
 object FiveNumSummary {
