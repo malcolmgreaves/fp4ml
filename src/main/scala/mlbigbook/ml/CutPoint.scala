@@ -75,7 +75,7 @@ object CutPoint {
 
       val totalSize = data.size.toDouble
 
-      val cpWithInfoIncrease =
+      val cpWithInfoIncrease: Seq[(N, Double)] =
         allCutPoints
           .map { cp =>
 
@@ -87,8 +87,11 @@ object CutPoint {
             (cp, informationGainFromSplit)
           }
 
-      ???
-      //      Argmax(cpWithInfoIncrease)._1
+      import fif.ImplicitCollectionsData._
+      implicit val _ = TupleVal2[N]
+      Argmax(cpWithInfoIncrease)
+        .map { case (bestCutPoint, _) => bestCutPoint }
+        .getOrElse(implicitly[Numeric[N]].zero)
     }
 
   def partition[D[_]: Data, N: Numeric](data: D[(N, Boolean)], cp: N): (D[(N, Boolean)], D[(N, Boolean)]) = ???
