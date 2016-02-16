@@ -16,5 +16,4 @@ object QuartileIndices {
     val maxIndex: Long = nElements - 1l
     QuartileIndicies(q1Index, medianIndex, q3Index, maxIndex)
   }
-
 }

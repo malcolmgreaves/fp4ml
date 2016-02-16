@@ -44,19 +44,17 @@ object InterQuartileRange extends Serializable {
     reduced: D[N]
   ): FiveNumSummary[N] = {
 
-    // This import allows us to reference the fields of the QuartileIndicies
-    // instance. It makes it easier to check if a particular index matches one
-    // of these indicies; we can use the `<value name>` syntax in the match
-    // statement below.
-    import qi._
-
     val sortedAscending = reduced.sortBy(identity)
 
     val buildingFns =
       sortedAscending
         .zipWithIndex
         .mapParition { bothPartIndices =>
-
+          import qi._
+          // This import allows us to reference the fields of the QuartileIndicies
+          // instance. It makes it easier to check if a particular index matches one
+          // of these indicies; we can use the `<value name>` syntax in the match
+          // statement below.
           val partiallyBuildFns =
             bothPartIndices.foldLeft(BuildingFns.empty) {
               case (bFns, (value, index)) =>
