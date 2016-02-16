@@ -5,6 +5,7 @@
 //import mlbigbook.math.VectorOpsT
 //
 //import scala.language.higherKinds
+//import scala.reflect.ClassTag
 //
 //object CutPoint {
 //
@@ -12,7 +13,7 @@
 //   * Finds the value that, when used to partition the input data, maximizes
 //   * the information gain of the resulting partitions.
 //   */
-//  def apply[D[_]: Data, V[_], N: Numeric](data: D[(V[N], Boolean)])(
+//  def apply[D[_]: Data, V[_], N: Numeric: ClassTag](data: D[(V[N], Boolean)])(
 //    implicit
 //    fs:   FeatureSpace,
 //    vops: VectorOpsT[N, V]
@@ -29,7 +30,7 @@
 //        )
 //      }
 //
-//  def apply[D[_]: Data, N: Numeric](data: D[(N, Boolean)])(
+//  def apply[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)])(
 //    implicit
 //    fs: FeatureSpace
 //  ): N =
@@ -37,7 +38,6 @@
 //      implicitly[Numeric[N]].zero
 //
 //    else {
-//      import Data.ops._
 //
 //      // obtain all cut points:
 //      // each time the label sequence (ordered on increasing feature value)
@@ -58,7 +58,7 @@
 //                  }
 //                  .getOrElse(same)
 //            },
-//            {
+//            { 
 //              case ((cps1, _), (cps2, _)) =>
 //                (cps1 ++ cps2, None)
 //            }
@@ -69,7 +69,10 @@
 //      // calculate information gain increase from each cut point
 //      // select the one that achieves the maximium increase
 //
-//      val totalEntropy = Entropy(data)
+//      val totalEntropy = {
+//        import EqualityImplicits._
+//        Entropy(data)
+//      }
 //      val totalSize = data.size.toDouble
 //
 //      val cpWithInfoIncrease =

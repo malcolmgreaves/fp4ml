@@ -1,13 +1,6 @@
-/*
- * Collection of classes, traits, and objects for manipulating Map types.
- *
- * @author Malcolm Greaves
- */
 package mlbigbook.data
 
-import mlbigbook.ml.{EqualityMap, Equality}
-
-import scala.collection.Map
+import mlbigbook.ml.{ EqualityMap, Equality }
 
 object MapOps {
 
@@ -85,7 +78,7 @@ class OLD_AddMap[@specialized(Byte, Int, Long, Float, Double) N: Numeric] {
   }
 }
 
-class AddMap[K :Equality, @specialized(Byte, Int, Long, Float, Double) N: Numeric] {
+class AddMap[K: Equality, @specialized(Byte, Int, Long, Float, Double) N: Numeric] {
 
   import scala.Numeric.Implicits._
 
@@ -99,9 +92,9 @@ class AddMap[K :Equality, @specialized(Byte, Int, Long, Float, Double) N: Numeri
   }
 
   /**
-    * Combines two maps. If maps m1 and m2 both have key k, then the resulting
-    * map will have m1(k) + m2(k) for the value of k.
-    */
+   * Combines two maps. If maps m1 and m2 both have key k, then the resulting
+   * map will have m1(k) + m2(k) for the value of k.
+   */
   def combine(m1: Map[K, N], m2: Map[K, N]): Map[K, N] = {
     val (a, b) = MapOps.reoderSmallLarge(m1, m2)
     a.foldLeft(b)({
@@ -111,6 +104,10 @@ class AddMap[K :Equality, @specialized(Byte, Int, Long, Float, Double) N: Numeri
       }
     })
   }
+}
+
+object AddMap {
+  def apply[K: Equality, N: Numeric]: AddMap[K, N] = new AddMap[K, N]
 }
 
 /** Class that supports operations on maps that indicate the presense of keys. */

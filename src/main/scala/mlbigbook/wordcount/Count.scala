@@ -7,8 +7,6 @@ package mlbigbook.wordcount
 
 import mlbigbook.data.{ OLD_AddMap, TextData }
 
-import scala.collection.Map
-
 /**
  * The Count object contains methods for computing the word count on a corpus, document,
  * and sentence level.

@@ -5,8 +5,6 @@
  */
 package mlbigbook.data
 
-import scala.collection.Map
-
 object TextData {
 
   type Word = String

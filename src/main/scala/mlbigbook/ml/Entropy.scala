@@ -2,54 +2,32 @@ package mlbigbook.ml
 
 import breeze.linalg.{ DenseVector, Vector }
 import fif.Data
+import mlbigbook.data.AddMap
 import mlbigbook.math.{ NumericConversion, OnlineMeanVariance, VectorOpsT }
 
 import scala.language.{ higherKinds, postfixOps }
+import scala.reflect.ClassTag
 
 object Entropy {
 
   import Data.ops._
 
-  def binary[D[_]: Data](data: D[(_, Boolean)]): Double = {
+  def apply[D[_]: Data, Label: Equality: ClassTag](
+    data: D[(_, Label)]
+  ): Double =
+    apply(
+      data.map { case (_, label) => label }
+    )(implicitly[Data[D]], implicitly[Equality[Label]])
 
-    val (nPos, nNeg) =
-      data.aggregate((0l, 0l))(
-        {
-          case ((nP, nN), (_, label)) =>
-            if (label)
-              (nP + 1l, nN)
-            else
-              (nP, nN + 1l)
-        },
-        {
-          case ((nP1, nN1), (nP2, nN2)) =>
-            (nP1 + nP2, nN1 + nN2)
-        }
+  def apply[D[_]: Data, Label: Equality](data: D[Label]): Double = {
+
+    val am = AddMap[Label, Long]
+
+    val label2count =
+      data.aggregate(EqualityMap.empty[Label, Long])(
+        { case (map, label) => am.add(map, label, 1) },
+        { case (map1, map2) => am.combine(map1, map2) }
       )
-
-    val (probPos, probNeg) = {
-      val total = (nPos + nNeg).toDouble
-      (nPos / total, nNeg / total)
-    }
-
-    val infoPos = probPos * Information.log2(probPos)
-    val infoNeg = probNeg * Information.log2(probNeg)
-
-    -(infoPos + infoNeg)
-  }
-
-  def apply[D[_]: Data, Label: Equality](data: D[(_, Label)]): Double = {
-
-    val label2count = Map.empty[Label, Long]
-//      data.aggregate(EqualityMap.empty[Label, Long])(
-//        {
-//          case (map, (_, label)) =>
-//             ???
-//        },
-//        {
-//          case (map1, map2) =>
-//        }
-//      )
 
     val total = data.size.toDouble
 
