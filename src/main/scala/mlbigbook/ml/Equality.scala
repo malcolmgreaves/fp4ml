@@ -11,7 +11,7 @@ import scala.language.{ higherKinds, postfixOps }
 
 object EqualityT {
 
-  def apply[T : Equality]: Equality[T] = implicitly[Equality[T]]
+  def apply[T: Equality]: Equality[T] = implicitly[Equality[T]]
 
   object Implicits {
 
