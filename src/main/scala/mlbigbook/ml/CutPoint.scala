@@ -119,13 +119,11 @@ object CutPoint {
     cp:   N
   ): (D[(N, Boolean)], D[(N, Boolean)]) = {
 
-    val lessThan = implicitly[Numeric[N]].lt _
-
     val lessThanCp =
-      data.filter { case (value, _) => lessThan(value, cp) }
+      data.filter { case (value, _) => implicitly[Numeric[N]].lt(value, cp) }
 
     val greaterThanOrEqualToCp =
-      data.filter { case (value, _) => !lessThan(value, cp) }
+      data.filter { case (value, _) => implicitly[Numeric[N]].gteq(value, cp) }
 
     (lessThanCp, greaterThanOrEqualToCp)
   }
