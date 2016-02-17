@@ -26,7 +26,7 @@ object FnsDiscretization {
   ): Seq[Rule[N]] = {
 
     implicit val _ = NumericConversion[N].numeric
-    InterQuartileRange(data)
+    FiveNumSummary(data)
       .map { fns => iqrRule(fns) }
   }
 

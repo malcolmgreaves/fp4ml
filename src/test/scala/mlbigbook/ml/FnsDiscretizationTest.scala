@@ -12,8 +12,8 @@ class FnsDiscretizationTest extends FunSuite {
   import NumericConversion.Implicits._
   import MathOps.Implicits._
 
-  test("testing that IQR computation is correct") {
-    val newFiveNumSums = InterQuartileRange(dataForDiscretization)
+  test("testing that five number summary computation is correct") {
+    val newFiveNumSums = FiveNumSummary(dataForDiscretization)
     assert(newFiveNumSums.size === 3)
     assert(newFiveNumSums.head === dim0_expectedFiveNumSum)
     assert(newFiveNumSums(1) === dim1_expectedFiveNumSum)
@@ -59,7 +59,7 @@ class FnsDiscretizationTest extends FunSuite {
 
   }
 
-  test("Testing IQR based discretization") {
+  test("Testing five number summary based discretization") {
 
     val (newData, newFs) = {
       implicit val _ = oldFs
