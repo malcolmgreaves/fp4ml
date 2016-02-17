@@ -5,7 +5,7 @@ import scala.language.{ higherKinds, postfixOps }
 import Equality.ops._
 
 case class EqualityMap[K: Equality, V](
-    hashCode2value: Map[Int, V],
+    hashCode2value: Map[Long, V],
     keysE:          EqualitySet[K]
 ) extends Map[K, V] {
 
@@ -51,6 +51,6 @@ object EqualityMap {
   }
 
   def empty[K: Equality, V]: Map[K, V] =
-    EqualityMap(Map.empty[Int, V], EqualitySet(Map.empty[Int, K]))
+    EqualityMap(Map.empty[Long, V], EqualitySet(Map.empty[Long, K]))
 
 }

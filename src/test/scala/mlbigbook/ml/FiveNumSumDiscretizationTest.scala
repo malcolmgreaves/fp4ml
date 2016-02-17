@@ -4,9 +4,9 @@ import breeze.linalg.{ QuasiTensor, DenseVector }
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import org.scalatest.FunSuite
 
-class DiscretizationTest extends FunSuite {
+class FiveNumSumDiscretizationTest extends FunSuite {
 
-  import DiscretizationTest._
+  import FiveNumSumDiscretizationTest._
   import fif.ImplicitCollectionsData._
   import VectorOpsT.Implicits._
   import NumericConversion.Implicits._
@@ -82,11 +82,11 @@ class DiscretizationTest extends FunSuite {
     newData.foreach { values =>
       assert(values.size == newDiscretizedFeatureValues.size)
     }
-    verifyNewDiscretizedValue(newDiscretizedFeatureValues)
-    verifyData(newData)
+    verifyNewDiscretizedValueIqr(newDiscretizedFeatureValues)
+    verifyDataIqr(newData)
   }
 
-  def verifyNewDiscretizedValue(newValuesPerFeature: Seq[Seq[String]]) =
+  def verifyNewDiscretizedValueIqr(newValuesPerFeature: Seq[Seq[String]]) =
     newValuesPerFeature
       .zipWithIndex
       .foreach {
@@ -100,7 +100,7 @@ class DiscretizationTest extends FunSuite {
       }
 
   // check data
-  def verifyData(data: Seq[Seq[String]]) = {
+  def verifyDataIqr(data: Seq[Seq[String]]) = {
 
     val mult = data.head.size
     val expected = (data.size / 4) * mult
@@ -136,7 +136,7 @@ class DiscretizationTest extends FunSuite {
 
 }
 
-object DiscretizationTest {
+object FiveNumSumDiscretizationTest {
 
   val dim0_expectedFiveNumSum = FiveNumSummary(
     min = -50,

@@ -66,7 +66,7 @@ object CutPoint {
       // calculate information gain increase from each cut point
       // select the one that achieves the maximium increase
 
-      import EqualityImplicits._
+      import EqualityT.Implicits._
 
       val totalEntropy = Entropy(data)
 

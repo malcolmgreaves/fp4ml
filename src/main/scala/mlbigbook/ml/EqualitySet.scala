@@ -5,7 +5,7 @@ import scala.language.{ higherKinds, postfixOps }
 import Equality.ops._
 
 case class EqualitySet[T: Equality](
-    hashCode2value: Map[Int, T]
+    hashCode2value: Map[Long, T]
 ) extends Set[T] {
 
   override def contains(elem: T): Boolean =
@@ -20,7 +20,7 @@ case class EqualitySet[T: Equality](
   def add(elem: T): EqualitySet[T] = {
     val hash = elem.hashCodeE
 
-    if (!(hashCode2value contains elem.hashCodeE)) {
+    if (!(hashCode2value contains hash)) {
       val added = hashCode2value + (hash -> elem)
       EqualitySet(added)
 
@@ -34,7 +34,7 @@ case class EqualitySet[T: Equality](
   def remove(elem: T): EqualitySet[T] = {
     val hash = elem.hashCodeE
 
-    if (hashCode2value contains elem.hashCodeE) {
+    if (hashCode2value contains hash) {
       val removed = hashCode2value - hash
       EqualitySet(removed)
 
@@ -56,6 +56,6 @@ object EqualitySet {
     )
 
   def empty[T: Equality]: Set[T] =
-    EqualitySet(Map.empty[Int, T])
+    EqualitySet(Map.empty[Long, T])
 
 }
