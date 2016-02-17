@@ -30,7 +30,7 @@ case class EqualityMap[K: Equality, V](
     hashCode2value get (key hashCodeE)
 
   override def iterator: Iterator[(K, V)] =
-    keys
+    keysE
       .map { key =>
         val hash = key.hashCodeE
         (key, hashCode2value(hash))

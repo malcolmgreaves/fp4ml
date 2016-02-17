@@ -46,14 +46,16 @@ object CutPoint {
           .aggregate((Seq.empty[N], Option.empty[Boolean]))(
             {
               case (same @ (cps, maybeLastLabel), (value, label)) =>
-                maybeLastLabel
-                  .map { lastLabel =>
+                maybeLastLabel match {
+                  case Some(lastLabel) =>
                     if (lastLabel != label)
                       (cps :+ value, Some(label))
                     else
                       (cps, maybeLastLabel)
-                  }
-                  .getOrElse(same)
+
+                  case None =>
+                    (cps :+ value, Some(label))
+                }
             },
             {
               case ((cps1, _), (cps2, _)) =>

@@ -182,4 +182,3 @@ object FiveNumSumDiscretizationTest {
   )
 
 }
-
