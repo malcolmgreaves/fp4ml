@@ -6,7 +6,7 @@ import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-object IqrDiscretization {
+object FnsDiscretization {
 
   val below_min = "below_min"
   val min_q1 = "between_min_inclusive_and_q1_exclusive"
@@ -70,6 +70,6 @@ object IqrDiscretization {
         fs:   FeatureSpace,
         vops: VectorOpsT[N, V]
       ): Seq[Rule[N]] =
-        IqrDiscretization(data)
+        FnsDiscretization(data)
     }
 }

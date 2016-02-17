@@ -4,9 +4,9 @@ import breeze.linalg.{ QuasiTensor, DenseVector }
 import mlbigbook.math.{ NumericConversion, VectorOpsT }
 import org.scalatest.FunSuite
 
-class FiveNumSumDiscretizationTest extends FunSuite {
+class FnsDiscretizationTest extends FunSuite {
 
-  import FiveNumSumDiscretizationTest._
+  import FnsDiscretizationTest._
   import fif.ImplicitCollectionsData._
   import VectorOpsT.Implicits._
   import NumericConversion.Implicits._
@@ -63,7 +63,7 @@ class FiveNumSumDiscretizationTest extends FunSuite {
 
     val (newData, newFs) = {
       implicit val _ = oldFs
-      Discretization(dataForDiscretization, IqrDiscretization.ruleProducer[Int])
+      Discretization(dataForDiscretization, FnsDiscretization.ruleProducer[Int])
     }
 
     assert(newFs.isCategorical.forall(identity))
@@ -91,12 +91,12 @@ class FiveNumSumDiscretizationTest extends FunSuite {
       .zipWithIndex
       .foreach {
         case (grouped, index) =>
-          assert(grouped.head === s"${IqrDiscretization.below_min}--dimension_$index")
-          assert(grouped(1) === s"${IqrDiscretization.min_q1}--dimension_$index")
-          assert(grouped(2) === s"${IqrDiscretization.q1_median}--dimension_$index")
-          assert(grouped(3) === s"${IqrDiscretization.median_q3}--dimension_$index")
-          assert(grouped(4) === s"${IqrDiscretization.q3_max}--dimension_$index")
-          assert(grouped.last === s"${IqrDiscretization.above_or_equal_to_max}--dimension_$index")
+          assert(grouped.head === s"${FnsDiscretization.below_min}--dimension_$index")
+          assert(grouped(1) === s"${FnsDiscretization.min_q1}--dimension_$index")
+          assert(grouped(2) === s"${FnsDiscretization.q1_median}--dimension_$index")
+          assert(grouped(3) === s"${FnsDiscretization.median_q3}--dimension_$index")
+          assert(grouped(4) === s"${FnsDiscretization.q3_max}--dimension_$index")
+          assert(grouped.last === s"${FnsDiscretization.above_or_equal_to_max}--dimension_$index")
       }
 
   // check data
@@ -111,32 +111,32 @@ class FiveNumSumDiscretizationTest extends FunSuite {
           case (c, values) =>
             values.foldLeft(c) {
               case (counts @ (nBMin, nMinQ1, nQ1Median, nMedianQ2, nQ2Max, nAMax), value) =>
-                if (value.startsWith(IqrDiscretization.below_min))
+                if (value.startsWith(FnsDiscretization.below_min))
                   counts.copy(_1 = nBMin + 1)
-                else if (value.startsWith(IqrDiscretization.min_q1))
+                else if (value.startsWith(FnsDiscretization.min_q1))
                   counts.copy(_2 = nMinQ1 + 1)
-                else if (value.startsWith(IqrDiscretization.q1_median))
+                else if (value.startsWith(FnsDiscretization.q1_median))
                   counts.copy(_3 = nQ1Median + 1)
-                else if (value.startsWith(IqrDiscretization.median_q3))
+                else if (value.startsWith(FnsDiscretization.median_q3))
                   counts.copy(_4 = nMedianQ2 + 1)
-                else if (value.startsWith(IqrDiscretization.q3_max))
+                else if (value.startsWith(FnsDiscretization.q3_max))
                   counts.copy(_5 = nQ2Max + 1)
                 else
                   counts.copy(_6 = nAMax + 1)
             }
         }
 
-    assert(belowMin === 0, s": ${IqrDiscretization.below_min} wrong")
-    assert(minQ1 === expected, s": ${IqrDiscretization.min_q1}  wrong")
-    assert(q1Median === expected, s": ${IqrDiscretization.q1_median}  wrong")
-    assert(medianQ2 === expected, s": ${IqrDiscretization.median_q3}  wrong")
-    assert(q2Max === expected, s": ${IqrDiscretization.q3_max}  wrong")
-    assert(aboveMax === (data.size / 100) * mult, s": ${IqrDiscretization.above_or_equal_to_max}  wrong")
+    assert(belowMin === 0, s": ${FnsDiscretization.below_min} wrong")
+    assert(minQ1 === expected, s": ${FnsDiscretization.min_q1}  wrong")
+    assert(q1Median === expected, s": ${FnsDiscretization.q1_median}  wrong")
+    assert(medianQ2 === expected, s": ${FnsDiscretization.median_q3}  wrong")
+    assert(q2Max === expected, s": ${FnsDiscretization.q3_max}  wrong")
+    assert(aboveMax === (data.size / 100) * mult, s": ${FnsDiscretization.above_or_equal_to_max}  wrong")
   }
 
 }
 
-object FiveNumSumDiscretizationTest {
+object FnsDiscretizationTest {
 
   val dim0_expectedFiveNumSum = FiveNumSummary(
     min = -50,
