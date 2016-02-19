@@ -44,7 +44,7 @@ object Mdl {
       }
       .getOrElse(Seq.empty[N])
 
-  def calcNc[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)]): Int = {
+  def calcNumClass[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)]): Int = {
     val atLeastOnePos =
       if (!data.filter { case (_, label) => label }.isEmpty) 1
       else 0
@@ -68,15 +68,15 @@ object Mdl {
 
     val deltaATS = {
 
-      val nc = calcNc(data)
+      val nc = calcNumClass(data)
 
       val a = Information.log2(math.pow(3.0, nc.toDouble) - 2.0)
 
       import EqualityT.Implicits._
       val b =
         nc * cpInfo.totalEntropy
-      -(calcNc(cpInfo.s1) * cpInfo.s1Entropy)
-      -(calcNc(cpInfo.s2) * cpInfo.s2Entropy)
+      -(calcNumClass(cpInfo.s1) * cpInfo.s1Entropy)
+      -(calcNumClass(cpInfo.s2) * cpInfo.s2Entropy)
 
       (a - b) / nExamples
     }

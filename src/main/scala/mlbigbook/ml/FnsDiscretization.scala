@@ -15,7 +15,7 @@ object FnsDiscretization {
   val q3_max = "between_q3_inclusive_and_max_exclusive"
   val above_or_equal_to_max = "above_or_equal_to_max"
 
-  val iqrDiscretizedValueBases = Seq(
+  val fnsDiscretizedValueBases = Seq(
     below_min, min_q1, q1_median, median_q3, q3_max, above_or_equal_to_max
   )
 
@@ -27,10 +27,10 @@ object FnsDiscretization {
 
     implicit val _ = NumericConversion[N].numeric
     FiveNumSummary(data)
-      .map { fns => iqrRule(fns) }
+      .map { fns => fnsRule(fns) }
   }
 
-  def iqrRule[N: Numeric](fns: FiveNumSummary[N]): Rule[N] =
+  def fnsRule[N: Numeric](fns: FiveNumSummary[N]): Rule[N] =
     new Rule[N] {
 
       val lessThan = implicitly[Numeric[N]].lt _
@@ -47,7 +47,7 @@ object FnsDiscretization {
         else above_or_equal_to_max
 
       override val discretizedValueBases =
-        iqrDiscretizedValueBases
+        fnsDiscretizedValueBases
 
       /*
       Rule(
