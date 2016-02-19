@@ -42,19 +42,10 @@ object Mdl {
           cpInfo.cutPoint +: (thresholdsS1 ++ thresholdsS2)
         }
       }
+      .map { thresholds =>
+        thresholds.sortBy(identity)
+      }
       .getOrElse(Seq.empty[N])
-
-  def calcNumClass[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)]): Int = {
-    val atLeastOnePos =
-      if (!data.filter { case (_, label) => label }.isEmpty) 1
-      else 0
-
-    val atLeastOneNeg =
-      if (!data.filter { case (_, label) => !label }.isEmpty) 1
-      else 0
-
-    atLeastOnePos + atLeastOneNeg
-  }
 
   def stoppingCriterion[D[_]: Data, N: Numeric: ClassTag](
     data:   D[(N, Boolean)],
@@ -82,6 +73,18 @@ object Mdl {
     }
 
     cpInfo.infoGainOfCp > term1 + deltaATS
+  }
+
+  def calcNumClass[D[_]: Data, N: Numeric: ClassTag](data: D[(N, Boolean)]): Int = {
+    val atLeastOnePos =
+      if (!data.filter { case (_, label) => label }.isEmpty) 1
+      else 0
+
+    val atLeastOneNeg =
+      if (!data.filter { case (_, label) => !label }.isEmpty) 1
+      else 0
+
+    atLeastOnePos + atLeastOneNeg
   }
 
 }
