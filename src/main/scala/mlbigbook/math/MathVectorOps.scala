@@ -1,5 +1,6 @@
 package mlbigbook.math
 
+import breeze.math.Semiring
 import breeze.linalg.{ SparseVector, DenseVector }
 import breeze.linalg.operators._
 import breeze.storage.Zero
@@ -14,17 +15,8 @@ import scala.reflect.ClassTag
  * product of two vectors is also included. As well as methods to construct new
  * vector instances.
  */
-trait MathVectorOps[@specialized N, V[_]] extends VectorOps[V] {
-
-  /**
-   * Evidence that type N belongs to the Numeric type class.
-   */
-  implicit def num: Numeric[N]
-
-  /**
-   * Evidence that there's a zero value for type N.
-   */
-  implicit def zero: Zero[N]
+abstract class MathVectorOps[@specialized N: Numeric: Zero: Semiring, V[_]]
+    extends VectorOps[V] {
 
   /**
    * Creates a new vector of the input size where each element has value 0.
@@ -113,6 +105,13 @@ object MathVectorOps {
       s.toSeq
     }
 
+  import Zero._
+  //  import algebra.std.all._
+
+  lazy implicit val semiDouble: Semiring[Double] = null.asInstanceOf[Semiring[Double]]
+  lazy implicit val semiFloat: Semiring[Float] = null.asInstanceOf[Semiring[Float]]
+  lazy implicit val semiLong: Semiring[Long] = null.asInstanceOf[Semiring[Long]]
+  lazy implicit val semiInt: Semiring[Int] = null.asInstanceOf[Semiring[Int]]
   //
   //
   // Implementations for MathVectorOps for DenseVector instances.
@@ -124,7 +123,7 @@ object MathVectorOps {
    * methods for the DenseVector type. Also defines the zeros, ones methds
    * of MathVectorOps.
    */
-  protected abstract class Dense[N: ClassTag]
+  protected abstract class Dense[@specialized N: Numeric: Zero: Semiring: ClassTag]
       extends MathVectorOps[N, DenseVector]
       with VectorOps[DenseVector] {
 
@@ -132,7 +131,10 @@ object MathVectorOps {
       DenseVector.zeros[N](size)
 
     override def ones(size: Int): DenseVector[N] =
-      DenseVector.ones[N](size)
+      DenseVector.ones[N](size)(
+        implicitly[ClassTag[N]],
+        implicitly[Semiring[N]]
+      )
 
     override def fill[A: ClassTag: Zero](size: Int)(value: => A) =
       DenseVector.fill(size)(value)
@@ -154,8 +156,6 @@ object MathVectorOps {
    * Implementation for DenseVector[Double].
    */
   object DoubleDenseMathVector extends Dense[Double] {
-    override implicit val num = implicitly[Numeric[Double]]
-    override implicit val zero = Zero.DoubleZero
     override val addV = DenseVector.dv_dv_Op_Double_OpAdd
     override val addS = DenseVector.dv_s_Op_Double_OpAdd
     override val subV = DenseVector.dv_dv_Op_Double_OpSub
@@ -171,8 +171,6 @@ object MathVectorOps {
    * Implementation for DenseVector[Float].
    */
   object FloatDenseMathVector extends Dense[Float] {
-    override implicit val num = implicitly[Numeric[Float]]
-    override implicit val zero = Zero.FloatZero
     override val addV = DenseVector.dv_dv_Op_Float_OpAdd
     override val addS = DenseVector.dv_s_Op_Float_OpAdd
     override val subV = DenseVector.dv_dv_Op_Float_OpSub
@@ -188,8 +186,6 @@ object MathVectorOps {
    * Implementation for DenseVector[Long].
    */
   object LongDenseMathVector extends Dense[Long] {
-    override implicit val num = implicitly[Numeric[Long]]
-    override implicit val zero = Zero.LongZero
     override val addV = DenseVector.dv_dv_Op_Long_OpAdd
     override val addS = DenseVector.dv_s_Op_Long_OpAdd
     override val subV = DenseVector.dv_dv_Op_Long_OpSub
@@ -205,8 +201,6 @@ object MathVectorOps {
    * Implementation for DenseVector[Int].
    */
   object IntDenseMathVector extends Dense[Int] {
-    override implicit val num = implicitly[Numeric[Int]]
-    override implicit val zero = Zero.IntZero
     override val addV = DenseVector.dv_dv_Op_Int_OpAdd
     override val addS = DenseVector.dv_s_Op_Int_OpAdd
     override val subV = DenseVector.dv_dv_Op_Int_OpSub
@@ -229,7 +223,7 @@ object MathVectorOps {
    * methods for the DenseVector type. Also defines the zeros, ones methds
    * of MathVectorOps.
    */
-  protected abstract class Sparse[N: ClassTag]
+  protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTag]
       extends MathVectorOps[N, SparseVector]
       with VectorOps[SparseVector] {
 
@@ -237,7 +231,7 @@ object MathVectorOps {
       SparseVector.zeros[N](size)
 
     override def ones(size: Int) =
-      SparseVector.fill(size)(num.one)
+      SparseVector.fill(size)(implicitly[Numeric[N]].one)
 
     override def fill[A: ClassTag: Zero](size: Int)(value: => A) =
       SparseVector.fill(size)(value)
@@ -251,7 +245,9 @@ object MathVectorOps {
     override def valueAt[A](v: SparseVector[A])(index: Int) =
       v(index)
 
-    override def map[A, B: ClassTag](v: SparseVector[A])(f: A => B) =
+    import SparseVector._
+
+    override def map[A, B: ClassTag](v: SparseVector[A])(f: A => B): SparseVector[B] =
       v.map(f)
   }
 
@@ -259,9 +255,6 @@ object MathVectorOps {
    * Implementation for SparseVector[Double].
    */
   object DoubleSparseMathVector extends Sparse[Double] {
-    override implicit val num = implicitly[Numeric[Double]]
-    override implicit val zero = Zero.DoubleZero
-
     override val subS = new OpSub.Impl2[SparseVector[Double], Double, SparseVector[Double]] {
       override def apply(v: SparseVector[Double], v2: Double) = v.map { _ - v2 }
     }
@@ -291,9 +284,6 @@ object MathVectorOps {
    * Implementation for SparseVector[Float].
    */
   object FloatSparseMathVector extends Sparse[Float] {
-    override implicit val num = implicitly[Numeric[Float]]
-    override implicit val zero = Zero.FloatZero
-
     override val subS = new OpSub.Impl2[SparseVector[Float], Float, SparseVector[Float]] {
       override def apply(v: SparseVector[Float], v2: Float) = v.map { _ - v2 }
     }
@@ -323,9 +313,6 @@ object MathVectorOps {
    * Implementation for SparseVector[Long].
    */
   object LongSparseMathVector extends Sparse[Long] {
-    override implicit val num = implicitly[Numeric[Long]]
-    override implicit val zero = Zero.LongZero
-
     override val subS = new OpSub.Impl2[SparseVector[Long], Long, SparseVector[Long]] {
       override def apply(v: SparseVector[Long], v2: Long) = v.map { _ - v2 }
     }
@@ -355,9 +342,6 @@ object MathVectorOps {
    * Implementation for SparseVector[Int].
    */
   object IntSparseMathVector extends Sparse[Int] {
-    override implicit val num = implicitly[Numeric[Int]]
-    override implicit val zero = Zero.IntZero
-
     override val subS = new OpSub.Impl2[SparseVector[Int], Int, SparseVector[Int]] {
       override def apply(v: SparseVector[Int], v2: Int) = v.map { _ - v2 }
     }
