@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 import Data.ops._
-import mlbigbook.math.{ OnlineMeanVariance, NumericConversion, VectorOpsT }
+import mlbigbook.math.{ OnlineMeanVariance, NumericConversion, MathVectorOps }
 
 import scala.language.{ higherKinds, implicitConversions }
 
@@ -13,7 +13,7 @@ object Gaussian {
   def estimate[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[V[N]])(
     implicit
     fs:   FeatureSpace,
-    vops: VectorOpsT[N, V]
+    vops: MathVectorOps[N, V]
   ): Seq[Gaussian[N]] =
 
     if (data isEmpty)

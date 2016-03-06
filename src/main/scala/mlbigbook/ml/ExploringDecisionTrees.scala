@@ -4,7 +4,7 @@
 //import breeze.linalg.support.CanMapValues
 //import fif.Data
 //import mlbigbook.data.DataClass
-//import mlbigbook.math.{ VectorOpsT, NumericConversion, OnlineMeanVariance, NumericX }
+//import mlbigbook.math.{ MathVectorOps, NumericConversion, OnlineMeanVariance, NumericX }
 //import simulacrum.typeclass
 //
 //import scala.language.higherKinds
@@ -31,7 +31,7 @@
 //  trait FeatureSpace[N, V[_]] {
 //
 //    implicit def numConv: NumericConversion[N]
-//    implicit def vecOps: VectorOpsT[N, V]
+//    implicit def vecOps: MathVectorOps[N, V]
 //
 //    def size: Int
 //    def nameOf(index: Int): Option[String]

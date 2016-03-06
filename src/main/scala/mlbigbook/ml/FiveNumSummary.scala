@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 import fif.Data.ops._
-import mlbigbook.math.VectorOpsT
+import mlbigbook.math.MathVectorOps
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
@@ -118,7 +118,7 @@ object FiveNumSummary {
 
   def apply[D[_]: Data, V[_], N: Numeric: ClassTag](
     data: D[V[N]]
-  )(implicit vops: VectorOpsT[N, V]): Seq[FiveNumSummary[N]] =
+  )(implicit vops: MathVectorOps[N, V]): Seq[FiveNumSummary[N]] =
     data.headOption match {
 
       case Some(firstVector) =>

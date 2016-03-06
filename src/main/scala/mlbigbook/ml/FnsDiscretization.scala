@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
@@ -21,7 +21,7 @@ object FnsDiscretization {
 
   def apply[D[_]: Data, V[_], N: NumericConversion: ClassTag](data: D[V[N]])(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): Seq[Rule[N]] = {
 
@@ -68,7 +68,7 @@ object FnsDiscretization {
       override def apply[D[_]: Data, V[_]](data: D[V[N]])(
         implicit
         fs:   FeatureSpace,
-        vops: VectorOpsT[N, V]
+        vops: MathVectorOps[N, V]
       ): Seq[Rule[N]] =
         FnsDiscretization(data)
     }

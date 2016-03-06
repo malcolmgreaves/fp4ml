@@ -1,14 +1,14 @@
 package mlbigbook.ml
 
 import breeze.linalg.{ QuasiTensor, DenseVector }
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 import org.scalatest.FunSuite
 
 class FnsDiscretizationTest extends FunSuite {
 
   import FnsDiscretizationTest._
   import fif.ImplicitCollectionsData._
-  import VectorOpsT.Implicits._
+  import MathVectorOps.Implicits._
   import NumericConversion.Implicits._
   import MathOps.Implicits._
 

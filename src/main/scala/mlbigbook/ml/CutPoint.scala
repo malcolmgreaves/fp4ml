@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 import Data.ops._
-import mlbigbook.math.VectorOpsT
+import mlbigbook.math.MathVectorOps
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
@@ -16,7 +16,7 @@ object CutPoint {
   def apply[D[_]: Data, V[_], N: Numeric: ClassTag](data: D[(V[N], Boolean)])(
     implicit
     fs:   FeatureSpace,
-    vops: VectorOpsT[N, V]
+    vops: MathVectorOps[N, V]
   ): Seq[N] =
     if (data isEmpty)
       Seq.empty[N]

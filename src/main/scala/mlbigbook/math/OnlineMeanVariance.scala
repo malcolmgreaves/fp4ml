@@ -25,7 +25,7 @@ object OnlineMeanVariance {
       m2:    V[N]
   ) {
 
-    def toStats(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
+    def toStats(implicit ops: MathVectorOps[N, V]): Stats[V[N]] =
       Stats(
         count = count,
         mean = mean,
@@ -46,7 +46,7 @@ object OnlineMeanVariance {
   def update[N: NumericConversion, V[_]](
     existing: State[N, V],
     current:  V[N]
-  )(implicit ops: VectorOpsT[N, V]): State[N, V] = {
+  )(implicit ops: MathVectorOps[N, V]): State[N, V] = {
 
     val nc = NumericConversion[N]
 
@@ -76,7 +76,7 @@ object OnlineMeanVariance {
   def apply[D[_]: Data, N: NumericConversion, V[_]](
     existing: State[N, V],
     elems:    D[V[N]]
-  )(implicit ops: VectorOpsT[N, V]): State[N, V] =
+  )(implicit ops: MathVectorOps[N, V]): State[N, V] =
     elems.headOption match {
 
       case Some(v) =>
@@ -128,7 +128,7 @@ object OnlineMeanVariance {
 
   def batch[D[_]: Data, N: NumericConversion, V[_]](
     elems: D[V[N]]
-  )(implicit ops: VectorOpsT[N, V]): Stats[V[N]] =
+  )(implicit ops: MathVectorOps[N, V]): Stats[V[N]] =
     elems.headOption match {
 
       case Some(v) =>

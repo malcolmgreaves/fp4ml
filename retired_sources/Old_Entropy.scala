@@ -13,7 +13,7 @@
   //    realOnly: D[V[N]]
   //  )(
   //    implicit
-  //    ops: VectorOpsT[N, V],
+  //    ops: MathVectorOps[N, V],
   //    fs:  FeatureSpace
   //  ): Map[String, Double] = {
   //
@@ -126,7 +126,7 @@
   //        }
   //
   //      import NumericConversion.Implicits._
-  //      import VectorOpsT.Implicits._
+  //      import MathVectorOps.Implicits._
   //      entropyContinous(realOnly)
   //    }
   //

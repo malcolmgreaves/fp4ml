@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 import Data.ops._
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
@@ -18,7 +18,7 @@ object BinaryDiscretization {
     data: D[(V[N], Boolean)]
   )(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): Seq[Rule[N]] =
     if (data isEmpty)
@@ -40,7 +40,7 @@ object BinaryDiscretization {
       override def apply[D[_]: Data, V[_]](data: D[(V[N], Boolean)])(
         implicit
         fs:   FeatureSpace,
-        vops: VectorOpsT[N, V]
+        vops: MathVectorOps[N, V]
       ): Seq[Rule[N]] =
         BinaryDiscretization(data)
     }

@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 import fif.Data.ops._
-import mlbigbook.math.VectorOpsT
+import mlbigbook.math.MathVectorOps
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag

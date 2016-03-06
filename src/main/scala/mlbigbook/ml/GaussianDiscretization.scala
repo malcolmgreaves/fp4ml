@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 
 import scala.language.{ higherKinds, postfixOps }
 import scala.reflect.ClassTag
@@ -30,7 +30,7 @@ object GaussianDiscretization {
 
   def apply[D[_]: Data, V[_], N: NumericConversion: MathOps](data: D[V[N]])(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): Seq[Rule[N]] = {
     implicit val _0 = NumericConversion[N].numeric
@@ -98,7 +98,7 @@ object GaussianDiscretization {
       override def apply[D[_]: Data, V[_]](data: D[V[N]])(
         implicit
         fs:   FeatureSpace,
-        vops: VectorOpsT[N, V]
+        vops: MathVectorOps[N, V]
       ): Seq[Rule[N]] =
         GaussianDiscretization(data)
     }

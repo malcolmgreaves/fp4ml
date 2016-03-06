@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.math.{ NumericConversion, VectorOpsT }
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 import spire.syntax.cfor._
 
 import scala.language.{ higherKinds, postfixOps }
@@ -22,7 +22,7 @@ object Discretization {
     rp:   RuleProducer[N]
   )(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): (D[DiscretizedVector], CategoricalFeatureSpace) =
     if (data isEmpty)
@@ -35,7 +35,7 @@ object Discretization {
     readyRulings: Seq[Rule[N]]
   )(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): (D[DiscretizedVector], CategoricalFeatureSpace) =
 
@@ -63,7 +63,7 @@ object Discretization {
     rp:   SupervisedRuleProducer[N]
   )(
     implicit
-    vops:     VectorOpsT[N, V],
+    vops:     MathVectorOps[N, V],
     fs:       FeatureSpace,
     ctNumVec: ClassTag[V[N]]
   ): (D[(DiscretizedVector, Boolean)], CategoricalFeatureSpace) =
@@ -80,7 +80,7 @@ object Discretization {
     readyRulings: Seq[Rule[N]]
   )(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): (D[(DiscretizedVector, Boolean)], CategoricalFeatureSpace) =
 
@@ -108,7 +108,7 @@ object Discretization {
     readyRulings: Seq[Rule[N]]
   )(
     implicit
-    vops: VectorOpsT[N, V],
+    vops: MathVectorOps[N, V],
     fs:   FeatureSpace
   ): V[N] => DiscretizedVector =
     vector => {
@@ -127,7 +127,7 @@ object Discretization {
       }
       res.toSeq
       // equivalent to the following side-effect free code:
-      // VectorOpsT[N,V].toSeq(vector).zip(readyRulings)
+      // MathVectorOps[N,V].toSeq(vector).zip(readyRulings)
       //   .map { case (value, rule) => rule(value) }
     }
 

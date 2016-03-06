@@ -3,8 +3,8 @@ package mlbigbook.math
 import breeze.linalg.DenseVector
 import org.scalatest.{ FunSpec, Matchers }
 
-class VectorOpsTTest extends FunSpec with Matchers {
-  import VectorOpsTTest._
+class MathVectorOpsTest extends FunSpec with Matchers {
+  import MathVectorOpsTest._
 
   describe("DenseVector operations") {
 
@@ -117,10 +117,10 @@ class VectorOpsTTest extends FunSpec with Matchers {
 
 }
 
-object VectorOpsTTest {
+object MathVectorOpsTest {
 
-  import VectorOpsT.Implicits._
-  val dd = implicitly[VectorOpsT[Double, DenseVector]]
+  import MathVectorOps.Implicits._
+  val dd = implicitly[MathVectorOps[Double, DenseVector]]
 
   val tolerance = 1e-6
 
