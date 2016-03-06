@@ -14,15 +14,9 @@ import scala.reflect.ClassTag
  */
 trait VectorOps[V[_]] {
 
-  /**
-   * Creates a new vector of the given size where each element has the
-   * input value, named value.
-   */
-  def fill[A](size: Int)(value: => A): V[A]
-
   def valueAt[A](v: V[A])(index: Int): A
 
-  def toSeq[A](v: V[A]): Seq[A]
+  def toSeq[A: ClassTag](v: V[A]): Seq[A]
 
   def map[A, B: ClassTag](v: V[A])(f: A => B): V[B]
 

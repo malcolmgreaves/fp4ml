@@ -21,6 +21,9 @@ trait MathVectorOps[@specialized N, V[_]] extends VectorOps[V] {
    */
   implicit def num: Numeric[N]
 
+  /**
+   * Evidence that there's a zero value for type N.
+   */
   implicit def zero: Zero[N]
 
   /**
@@ -32,6 +35,11 @@ trait MathVectorOps[@specialized N, V[_]] extends VectorOps[V] {
    * Creates a new vector of the input size where each element has value 1.
    */
   def ones(size: Int): V[N]
+
+  /**
+   * Create a new vector of the input size where each element has the value v.
+   */
+  def fill[A: ClassTag: Zero](size: Int)(v: => A): V[A]
 
   /**
    * Performs element-wise addition of two vectors.
@@ -126,14 +134,14 @@ object MathVectorOps {
     override def ones(size: Int): DenseVector[N] =
       DenseVector.ones[N](size)
 
-    override def toSeq[A](v: DenseVector[A]): Seq[A] =
+    override def fill[A: ClassTag: Zero](size: Int)(value: => A) =
+      DenseVector.fill(size)(value)
+
+    override def toSeq[A: ClassTag](v: DenseVector[A]): Seq[A] =
       vecCopyToSeq(v.toArray)
 
     override def size(v: DenseVector[_]): Int =
       v.length
-
-    override def fill[A](size: Int)(value: => A): DenseVector[A] =
-      DenseVector.fill(size)(value)
 
     override def valueAt[A](v: DenseVector[A])(index: Int): A =
       v(index)
@@ -231,14 +239,14 @@ object MathVectorOps {
     override def ones(size: Int) =
       SparseVector.fill(size)(num.one)
 
-    override def toSeq[A](v: SparseVector[A]) =
+    override def fill[A: ClassTag: Zero](size: Int)(value: => A) =
+      SparseVector.fill(size)(value)
+
+    override def toSeq[A: ClassTag](v: SparseVector[A]) =
       vecCopyToSeq(v.toDenseVector.toArray)
 
     override def size(v: SparseVector[_]): Int =
       v.length
-
-    override def fill[A](size: Int)(value: => A) =
-      SparseVector.fill(size)(value)
 
     override def valueAt[A](v: SparseVector[A])(index: Int) =
       v(index)
