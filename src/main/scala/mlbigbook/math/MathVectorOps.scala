@@ -1,9 +1,12 @@
 package mlbigbook.math
 
 import breeze.math.Semiring
-import breeze.linalg.{ SparseVector, DenseVector }
+import breeze.linalg.{Vector, SparseVector, DenseVector}
 import breeze.linalg.operators._
 import breeze.storage.Zero
+import com.github.fommil.netlib.BLAS
+import com.github.fommil.netlib.BLAS._
+import spire.syntax.cfor._
 
 import scala.language.{ higherKinds, implicitConversions }
 import scala.reflect.ClassTag
@@ -37,7 +40,7 @@ abstract class MathVectorOps[@specialized N: Numeric: Zero: Semiring, V[_]]
   /**
     * Perform
     */
-  def aggregate[B : ClassTag : Numeric](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
+//  def aggregate[B : ClassTag : Numeric : Zero](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
 
   /**
    * Create a new vector of the input size where each element has the value v.
@@ -162,12 +165,11 @@ object MathVectorOps {
     override def map[B: ClassTag : Numeric : Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
       v.map(f)
 
-    override def aggregate[B : ClassTag : Numeric](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
-      v
-        .map[B, DenseVector] { n => combine(zero, n) }
-        .reduce[B] {
-          case (b1, b2) => reduce(b1, b2)
-        }
+//    override def aggregate[B : ClassTag : Numeric : Zero](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
+//      map(v) { n => combine(zero, n) }
+//        .reduceLeft[B] {
+//          case (b1, b2) => reduce(b1, b2)
+//        }
   }
 
   /**
@@ -178,7 +180,34 @@ object MathVectorOps {
     override val addS = DenseVector.dv_s_Op_Double_OpAdd
     override val subV = DenseVector.dv_dv_Op_Double_OpSub
     override val subS = DenseVector.dv_s_Op_Double_OpSub
-    override val dot = DenseVector.canDotD
+    override val dot = new OpMulInner.Impl2[DenseVector[Double], DenseVector[Double], Double] {
+
+      def apply(a: DenseVector[Double], b: DenseVector[Double]) = {
+        require(b.length == a.length, "Vectors must be the same length!")
+        val boff =
+          if (b.stride >= 0) b.offset
+          else b.offset + b.stride * (b.length - 1)
+        val aoff =
+          if (a.stride >= 0) a.offset
+          else a.offset + a.stride * (a.length - 1)
+//        BLAS.getInstance().sdot(
+//          a.length, b.data, boff, b.stride, a.data, aoff, a.stride
+//        )
+
+//        var agg = 0.0
+//        cfor(0)(_ < a.length, _ += 1) { i =>
+//          agg += a(i) * b(i)
+//        }
+//        agg
+
+        // TODO: Need to take offset into account !!!
+
+        ???
+      }
+
+      implicitly[BinaryRegistry[Vector[Double], Vector[Double], OpMulInner.type, Double]].register(this)
+    }
+
     override val divS = DenseVector.dv_s_Op_Double_OpDiv
     override val mulS = DenseVector.dv_s_Op_Double_OpMulScalar
     override val divV = DenseVector.dv_dv_Op_Double_OpDiv
@@ -193,7 +222,7 @@ object MathVectorOps {
     override val addS = DenseVector.dv_s_Op_Float_OpAdd
     override val subV = DenseVector.dv_dv_Op_Float_OpSub
     override val subS = DenseVector.dv_s_Op_Float_OpSub
-    override val dot = DenseVector.canDotD
+    override val dot = DenseVector.canDot_DV_DV_Float
     override val divS = DenseVector.dv_s_Op_Float_OpDiv
     override val mulS = DenseVector.dv_s_Op_Float_OpMulScalar
     override val divV = DenseVector.dv_dv_Op_Float_OpDiv
@@ -208,7 +237,7 @@ object MathVectorOps {
     override val addS = DenseVector.dv_s_Op_Long_OpAdd
     override val subV = DenseVector.dv_dv_Op_Long_OpSub
     override val subS = DenseVector.dv_s_Op_Long_OpSub
-    override val dot = DenseVector.canDotD
+    override val dot = DenseVector.canDot_DV_DV_Long
     override val divS = DenseVector.dv_s_Op_Long_OpDiv
     override val mulS = DenseVector.dv_s_Op_Long_OpMulScalar
     override val divV = DenseVector.dv_dv_Op_Long_OpDiv
@@ -223,7 +252,7 @@ object MathVectorOps {
     override val addS = DenseVector.dv_s_Op_Int_OpAdd
     override val subV = DenseVector.dv_dv_Op_Int_OpSub
     override val subS = DenseVector.dv_s_Op_Int_OpSub
-    override val dot = DenseVector.canDotD
+    override val dot = DenseVector.canDot_DV_DV_Int
     override val divS = DenseVector.dv_s_Op_Int_OpDiv
     override val mulS = DenseVector.dv_s_Op_Int_OpMulScalar
     override val divV = DenseVector.dv_dv_Op_Int_OpDiv
