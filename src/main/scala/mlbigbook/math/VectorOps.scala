@@ -18,8 +18,6 @@ trait VectorOps[V[_]] {
 
   def toSeq[A: ClassTag](v: V[A]): Seq[A]
 
-  def map[A, B: ClassTag](v: V[A])(f: A => B): V[B]
-
   def size(v: V[_]): Int
 
 }

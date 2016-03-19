@@ -29,6 +29,17 @@ abstract class MathVectorOps[@specialized N: Numeric: Zero: Semiring, V[_]]
   def ones(size: Int): V[N]
 
   /**
+    * Change every element of a vector V using the function f.
+    * No side effects.
+    */
+  def map[B: ClassTag : Numeric : Zero](v: V[N])(f: N => B): V[B]
+
+  /**
+    * Perform
+    */
+  def aggregate[B : ClassTag : Numeric](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
+
+  /**
    * Create a new vector of the input size where each element has the value v.
    */
   def fill[A: ClassTag: Zero](size: Int)(v: => A): V[A]
@@ -148,8 +159,15 @@ object MathVectorOps {
     override def valueAt[A](v: DenseVector[A])(index: Int): A =
       v(index)
 
-    override def map[A, B: ClassTag](v: DenseVector[A])(f: A => B): DenseVector[B] =
+    override def map[B: ClassTag : Numeric : Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
       v.map(f)
+
+    override def aggregate[B : ClassTag : Numeric](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
+      v
+        .map[B, DenseVector] { n => combine(zero, n) }
+        .reduce[B] {
+          case (b1, b2) => reduce(b1, b2)
+        }
   }
 
   /**
@@ -247,7 +265,7 @@ object MathVectorOps {
 
     import SparseVector._
 
-    override def map[A, B: ClassTag](v: SparseVector[A])(f: A => B): SparseVector[B] =
+    override def map[B: ClassTag : Numeric : Zero](v: SparseVector[N])(f: N => B): SparseVector[B] =
       v.map(f)
   }
 
