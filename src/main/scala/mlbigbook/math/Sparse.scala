@@ -1,6 +1,6 @@
 package mlbigbook.math
 
-import breeze.linalg.{ DenseVector, SparseVector }
+import breeze.linalg.SparseVector
 import breeze.linalg.operators._
 import breeze.math.Semiring
 import breeze.storage.Zero
@@ -41,6 +41,10 @@ protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTa
 
   override def reduce[A: ClassTag, A1 >: A: ClassTag](v: SparseVector[A])(r: (A1, A1) => A1) =
     v.reduceLeft(r)
+
+  override def fold[A: ClassTag, B: ClassTag](v: SparseVector[A])(zero: B)(combine: (B, A) => B) =
+    v.valuesIterator
+      .foldLeft(zero)(combine)
 }
 
 /**

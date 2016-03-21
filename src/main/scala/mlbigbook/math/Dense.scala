@@ -43,11 +43,9 @@ protected abstract class Dense[@specialized N: Numeric: Zero: Semiring: ClassTag
   override def reduce[A: ClassTag, Super >: A: ClassTag](v: DenseVector[A])(r: (Super, Super) => Super): Super =
     v.reduceLeft(r)
 
-  //    override def aggregate[B : ClassTag : Numeric : Zero](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
-  //      map(v) { n => combine(zero, n) }
-  //        .reduceLeft[B] {
-  //          case (b1, b2) => reduce(b1, b2)
-  //        }
+  override def fold[A: ClassTag, B: ClassTag](v: DenseVector[A])(zero: B)(combine: (B, A) => B) =
+    v.valuesIterator
+      .foldLeft(zero)(combine)
 }
 
 /**

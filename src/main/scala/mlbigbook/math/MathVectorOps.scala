@@ -1,12 +1,8 @@
 package mlbigbook.math
 
 import breeze.math.Semiring
-import breeze.linalg.{ Vector, SparseVector, DenseVector }
 import breeze.linalg.operators._
 import breeze.storage.Zero
-import com.github.fommil.netlib.BLAS
-import com.github.fommil.netlib.BLAS._
-import spire.syntax.cfor._
 
 import scala.language.{ higherKinds, implicitConversions }
 import scala.reflect.ClassTag
@@ -40,11 +36,22 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
   def map[B: ClassTag: Numeric: Zero](v: V[N])(f: N => B): V[B]
 
   /**
-   * Perform
+   * Apply a binary combination operator, r, to pairs of elements from the
+   * input vector, v. Note that the output of r shall be applied to both
+   * vector elements as well as other, previous outputs from r. The order of
+   * execution is not guaranteed. Therefore, it is important that r is
+   * associative and communiative.
    */
-  //  def aggregate[B : ClassTag : Numeric : Zero](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
-
   def reduce[A: ClassTag, A1 >: A: ClassTag](v: V[A])(r: (A1, A1) => A1): A1
+
+  /**
+   * From the starting value, zero, applies the function combine to elements
+   * of the input vector v. This method evaluates to the final accumulated
+   * value of this operation across all elements of the vector. Execution
+   * order is not guaranteed, so combine must be side-effect free,
+   * associative, and communicative.
+   */
+  def fold[A: ClassTag, B: ClassTag](v: V[A])(zero: B)(combine: (B, A) => B): B
 
   /**
    * Create a new vector of the input size where each element has the value v.
