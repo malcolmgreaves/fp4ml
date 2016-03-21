@@ -130,8 +130,4 @@ object MathVectorOps {
       s.toSeq
     }
 
-  lazy implicit val semiDouble: Semiring[Double] = Semiring.semiringD
-  lazy implicit val semiFloat: Semiring[Float] = Semiring.semiringFloat
-  lazy implicit val semiLong: Semiring[Long] = Semiring.semiringLong
-  lazy implicit val semiInt: Semiring[Int] = Semiring.semiringInt
 }
