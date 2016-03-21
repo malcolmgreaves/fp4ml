@@ -31,6 +31,8 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
    */
   def ones(size: Int): V[N]
 
+  protected lazy val one = implicitly[Numeric[N]].one
+
   /**
    * Change every element of a vector V using the function f.
    * No side effects.
@@ -42,7 +44,7 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
    */
   //  def aggregate[B : ClassTag : Numeric : Zero](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
 
-  //  def reduce[A : ClassTag, A1 >: A : ClassTag](v: V[A])(r: (A1, A1) => A1): A1
+  def reduce[A: ClassTag, A1 >: A: ClassTag](v: V[A])(r: (A1, A1) => A1): A1
 
   /**
    * Create a new vector of the input size where each element has the value v.
@@ -120,9 +122,6 @@ object MathVectorOps {
       System.arraycopy(src, 0, s, 0, src.length)
       s.toSeq
     }
-
-  import Zero._
-  //  import algebra.std.all._
 
   lazy implicit val semiDouble: Semiring[Double] = Semiring.semiringD
   lazy implicit val semiFloat: Semiring[Float] = Semiring.semiringFloat

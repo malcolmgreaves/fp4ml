@@ -1,6 +1,6 @@
 package mlbigbook.math
 
-import breeze.linalg.SparseVector
+import breeze.linalg.{ DenseVector, SparseVector }
 import breeze.linalg.operators._
 import breeze.math.Semiring
 import breeze.storage.Zero
@@ -20,7 +20,7 @@ protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTa
     SparseVector.zeros[N](size)
 
   override def ones(size: Int) =
-    SparseVector.fill(size)(implicitly[Numeric[N]].one)
+    SparseVector.fill(size)(one)
 
   override def fill[A: ClassTag: Zero](size: Int)(value: => A) =
     SparseVector.fill(size)(value)
@@ -36,8 +36,11 @@ protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTa
 
   import SparseVector._
 
-  override def map[B: ClassTag: Numeric: Zero](v: SparseVector[N])(f: N => B): SparseVector[B] =
+  override def map[B: ClassTag: Numeric: Zero](v: SparseVector[N])(f: N => B) =
     v.map(f)
+
+  override def reduce[A: ClassTag, A1 >: A: ClassTag](v: SparseVector[A])(r: (A1, A1) => A1) =
+    v.reduceLeft(r)
 }
 
 /**

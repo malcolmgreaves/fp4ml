@@ -40,8 +40,8 @@ protected abstract class Dense[@specialized N: Numeric: Zero: Semiring: ClassTag
   override def map[B: ClassTag: Numeric: Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
     v.map(f)
 
-  //  override def dense[A : ClassTag, Super >: A : ClassTag](v: DenseVector[A])(r: (Super, Super) => Super): Super =
-  //    v.reduceLeft(r)
+  override def reduce[A: ClassTag, Super >: A: ClassTag](v: DenseVector[A])(r: (Super, Super) => Super): Super =
+    v.reduceLeft(r)
 
   //    override def aggregate[B : ClassTag : Numeric : Zero](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
   //      map(v) { n => combine(zero, n) }
