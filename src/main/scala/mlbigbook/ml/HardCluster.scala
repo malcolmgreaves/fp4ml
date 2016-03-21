@@ -30,7 +30,6 @@ object HardCluster {
       (input: T) => {
 
         val distCenters = compDistanceFromCenters(input)
-
         val minCenter =
           distCenters.slice(1, nCenters)
             .foldLeft(distCenters.head)({

@@ -1,7 +1,7 @@
 package mlbigbook.math
 
 import breeze.math.Semiring
-import breeze.linalg.{Vector, SparseVector, DenseVector}
+import breeze.linalg.{ Vector, SparseVector, DenseVector }
 import breeze.linalg.operators._
 import breeze.storage.Zero
 import com.github.fommil.netlib.BLAS
@@ -18,7 +18,7 @@ import scala.reflect.ClassTag
  * product of two vectors is also included. As well as methods to construct new
  * vector instances.
  */
-abstract class MathVectorOps[@specialized N: Numeric: Zero: Semiring, V[_]]
+abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
     extends VectorOps[V] {
 
   /**
@@ -32,15 +32,15 @@ abstract class MathVectorOps[@specialized N: Numeric: Zero: Semiring, V[_]]
   def ones(size: Int): V[N]
 
   /**
-    * Change every element of a vector V using the function f.
-    * No side effects.
-    */
-  def map[B: ClassTag : Numeric : Zero](v: V[N])(f: N => B): V[B]
+   * Change every element of a vector V using the function f.
+   * No side effects.
+   */
+  def map[B: ClassTag: Numeric: Zero](v: V[N])(f: N => B): V[B]
 
   /**
-    * Perform
-    */
-//  def aggregate[B : ClassTag : Numeric : Zero](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
+   * Perform
+   */
+  //  def aggregate[B : ClassTag : Numeric : Zero](v : V[N])(zero: B)(combine: (B, N) => B, reduce: (B, B) => B): B
 
   /**
    * Create a new vector of the input size where each element has the value v.
@@ -110,7 +110,7 @@ object MathVectorOps {
     implicit val IntSparseVot = IntSparseMathVector
   }
 
-  @inline private[this] def vecCopyToSeq[A: ClassTag](src: Array[A]): Seq[A] =
+  @inline private[this] def vecCopyToSeq[@specialized A: ClassTag](src: Array[A]): Seq[A] =
     if (src == null || src.isEmpty)
       Seq.empty[A]
     else {
@@ -122,10 +122,10 @@ object MathVectorOps {
   import Zero._
   //  import algebra.std.all._
 
-  lazy implicit val semiDouble: Semiring[Double] = null.asInstanceOf[Semiring[Double]]
-  lazy implicit val semiFloat: Semiring[Float] = null.asInstanceOf[Semiring[Float]]
-  lazy implicit val semiLong: Semiring[Long] = null.asInstanceOf[Semiring[Long]]
-  lazy implicit val semiInt: Semiring[Int] = null.asInstanceOf[Semiring[Int]]
+  lazy implicit val semiDouble: Semiring[Double] = Semiring.semiringD
+  lazy implicit val semiFloat: Semiring[Float] = Semiring.semiringFloat
+  lazy implicit val semiLong: Semiring[Long] = Semiring.semiringLong
+  lazy implicit val semiInt: Semiring[Int] = Semiring.semiringInt
   //
   //
   // Implementations for MathVectorOps for DenseVector instances.
@@ -162,14 +162,14 @@ object MathVectorOps {
     override def valueAt[A](v: DenseVector[A])(index: Int): A =
       v(index)
 
-    override def map[B: ClassTag : Numeric : Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
+    override def map[B: ClassTag: Numeric: Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
       v.map(f)
 
-//    override def aggregate[B : ClassTag : Numeric : Zero](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
-//      map(v) { n => combine(zero, n) }
-//        .reduceLeft[B] {
-//          case (b1, b2) => reduce(b1, b2)
-//        }
+    //    override def aggregate[B : ClassTag : Numeric : Zero](v: DenseVector[N])(zero: B)(combine: (B, N) => B, reduce: (B,B) => B): B =
+    //      map(v) { n => combine(zero, n) }
+    //        .reduceLeft[B] {
+    //          case (b1, b2) => reduce(b1, b2)
+    //        }
   }
 
   /**
@@ -190,15 +190,15 @@ object MathVectorOps {
         val aoff =
           if (a.stride >= 0) a.offset
           else a.offset + a.stride * (a.length - 1)
-//        BLAS.getInstance().sdot(
-//          a.length, b.data, boff, b.stride, a.data, aoff, a.stride
-//        )
+        //        BLAS.getInstance().sdot(
+        //          a.length, b.data, boff, b.stride, a.data, aoff, a.stride
+        //        )
 
-//        var agg = 0.0
-//        cfor(0)(_ < a.length, _ += 1) { i =>
-//          agg += a(i) * b(i)
-//        }
-//        agg
+        //        var agg = 0.0
+        //        cfor(0)(_ < a.length, _ += 1) { i =>
+        //          agg += a(i) * b(i)
+        //        }
+        //        agg
 
         // TODO: Need to take offset into account !!!
 
@@ -294,7 +294,7 @@ object MathVectorOps {
 
     import SparseVector._
 
-    override def map[B: ClassTag : Numeric : Zero](v: SparseVector[N])(f: N => B): SparseVector[B] =
+    override def map[B: ClassTag: Numeric: Zero](v: SparseVector[N])(f: N => B): SparseVector[B] =
       v.map(f)
   }
 
