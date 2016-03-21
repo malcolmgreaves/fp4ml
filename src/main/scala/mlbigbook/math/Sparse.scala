@@ -39,12 +39,15 @@ protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTa
   override def map[B: ClassTag: Numeric: Zero](v: SparseVector[N])(f: N => B) =
     v.map(f)
 
-  override def reduce[A: ClassTag, A1 >: A: ClassTag](v: SparseVector[A])(r: (A1, A1) => A1) =
+  override def reduce[A1 >: N: ClassTag](v: SparseVector[N])(r: (A1, A1) => A1) =
     v.reduceLeft(r)
 
-  override def fold[A: ClassTag, B: ClassTag](v: SparseVector[A])(zero: B)(combine: (B, A) => B) =
+  override def fold[B: ClassTag](v: SparseVector[N])(zero: B)(combine: (B, N) => B) =
     v.valuesIterator
       .foldLeft(zero)(combine)
+
+  override final def copy(v: SparseVector[N]) =
+    v.copy
 }
 
 /**

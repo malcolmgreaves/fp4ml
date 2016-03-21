@@ -40,12 +40,20 @@ protected abstract class Dense[@specialized N: Numeric: Zero: Semiring: ClassTag
   override def map[B: ClassTag: Numeric: Zero](v: DenseVector[N])(f: N => B): DenseVector[B] =
     v.map(f)
 
-  override def reduce[A: ClassTag, Super >: A: ClassTag](v: DenseVector[A])(r: (Super, Super) => Super): Super =
+  override def reduce[B >: N: ClassTag](v: DenseVector[N])(r: (B, B) => B) =
     v.reduceLeft(r)
 
-  override def fold[A: ClassTag, B: ClassTag](v: DenseVector[A])(zero: B)(combine: (B, A) => B) =
+  override def fold[B: ClassTag](v: DenseVector[N])(zero: B)(combine: (B, N) => B) =
     v.valuesIterator
       .foldLeft(zero)(combine)
+
+  override final def copy(v: DenseVector[N]) = {
+    val src = v.toArray
+    val size = src.length
+    val cpy = new Array[N](size)
+    System.arraycopy(src, 0, cpy, 0, size)
+    DenseVector(cpy)
+  }
 }
 
 /**

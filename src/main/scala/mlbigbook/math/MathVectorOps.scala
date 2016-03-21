@@ -42,7 +42,7 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
    * execution is not guaranteed. Therefore, it is important that r is
    * associative and communiative.
    */
-  def reduce[A: ClassTag, A1 >: A: ClassTag](v: V[A])(r: (A1, A1) => A1): A1
+  def reduce[A1 >: N: ClassTag](v: V[N])(r: (A1, A1) => A1): A1
 
   /**
    * From the starting value, zero, applies the function combine to elements
@@ -51,12 +51,20 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
    * order is not guaranteed, so combine must be side-effect free,
    * associative, and communicative.
    */
-  def fold[A: ClassTag, B: ClassTag](v: V[A])(zero: B)(combine: (B, A) => B): B
+  def fold[B: ClassTag](v: V[N])(zero: B)(combine: (B, N) => B): B
 
   /**
    * Create a new vector of the input size where each element has the value v.
    */
   def fill[A: ClassTag: Zero](size: Int)(v: => A): V[A]
+
+  /**
+   * Performs a shallow copy of the vector's contents. Each element is copied
+   * to a newly allocated vector of type V[N]. If N is a primiative or other
+   * value type, then this will be a deep copy. Otherwise, the reference will
+   * be copied.
+   */
+  def copy(v: V[N]): V[N]
 
   /**
    * Performs element-wise addition of two vectors.
