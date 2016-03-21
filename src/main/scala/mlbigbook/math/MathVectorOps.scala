@@ -60,7 +60,7 @@ abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
 
   /**
    * Performs a shallow copy of the vector's contents. Each element is copied
-   * to a newly allocated vector of type V[N]. If N is a primiative or other
+   * to a newly allocated vector of type V[N]. If N is a primitive or other
    * value type, then this will be a deep copy. Otherwise, the reference will
    * be copied.
    */
