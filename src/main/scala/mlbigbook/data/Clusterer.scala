@@ -13,42 +13,42 @@ case class ClusteringConf(
   maxIterations: Int
 )
 
+trait MkVectorizerModule {
+
+  val vmod: VectorizerTypeModule
+  import vmod._
+
+  def apply[D[_]: Data](data: D[Item]): Vectorizer
+}
+
 trait ClusteringModule {
 
-  val vmod: VectorizerModule
+  val vmod: VectorizerTypeModule
   import vmod._
   import numVecMod._
 
-//  def mkVectorizer[D[_]: Data, T](data: D[T]): Vectorizer
-
-  val dmod: DistanceModule
+  val dmod: DistanceTypeModule
   import dmod._
 
   case class Center(id: String, mean: V[N])
 
-//  final def cluster[D[_]: Data, T](
-//    conf: ClusteringConf,
-//    dist: Distance
-//  )(data: D[T]): Seq[Center] =
-//    cluster(conf, dist, mkVectorizer(data))(data)
-
-  def cluster[D[_]: Data, T](
+  def cluster[D[_]: Data](
     conf:  ClusteringConf,
     dist:  Distance,
     toVec: Vectorizer
-  )(data: D[T]): Seq[Center]
+  )(data: D[Item]): Seq[Center]
 
 }
 
-trait DistanceModule {
+trait DistanceTypeModule {
 
-  val numVecMod: NumericalVectorModule
+  val numVecMod: NumericalVectorTypeModule
   import numVecMod._
 
   type Distance = (V[N], V[N]) => N
 }
 
-trait NumericalVectorModule {
+trait NumericalVectorTypeModule {
 
   type N
   implicit val num: Numeric[N]
@@ -60,29 +60,29 @@ trait NumericalVectorModule {
 
 }
 
-object NumericalVectorModule {
+object NumericalVectorTypeModule {
 
-  type Type[Num, Vec[_]] = NumericalVectorModule {
+  type Type[Num, Vec[_]] = NumericalVectorTypeModule {
     type N = Num
     type V[_] = Vec[_]
   }
 }
 
-trait VectorizerModule {
+trait VectorizerTypeModule {
 
   type Item
 
-  val numVecMod: NumericalVectorModule
+  val numVecMod: NumericalVectorTypeModule
   import numVecMod._
 
   type Vectorizer = Item => V[N]
 }
 
-object VectorizerModule {
+object VectorizerTypeModule {
 
-  type Type[T, Num, Vec[_]] = VectorizerModule {
+  type Type[T, Num, Vec[_]] = VectorizerTypeModule {
     type Item = T
-    val numVecMod: NumericalVectorModule.Type[Num, Vec]
+    val numVecMod: NumericalVectorTypeModule.Type[Num, Vec]
   }
 
 }
