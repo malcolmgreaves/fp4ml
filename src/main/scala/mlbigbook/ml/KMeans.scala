@@ -36,9 +36,9 @@
 // * vectorspace for all of the clusters. The centers value is this indexed
 // * sequence of cluster centers.
 // */
-//case class VectorizedCenters[T, N : Numeric, V[_] : MathVectorOps](
+//case class VectorizedCenters[T, N : Numeric, V[_]](
 //                                 cardinality: Int,
-//                                 v: Vectorizer[T],
+//                                 vectorizer: T => V[N],
 //                                 centers: IndexedSeq[Center[N,V]]
 //                               )
 //
