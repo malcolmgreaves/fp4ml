@@ -4,7 +4,7 @@ import fif.Data
 import Data.ops._
 import mlbigbook.math.{ OnlineMeanVariance, NumericConversion, MathVectorOps }
 
-import scala.language.{ higherKinds, implicitConversions }
+import scala.language.{ postfixOps, higherKinds, implicitConversions }
 
 case class Gaussian[N: Numeric](mean: N, variance: N, stddev: N)
 

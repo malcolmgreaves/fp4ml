@@ -2,7 +2,7 @@ package mlbigbook.data.mut
 
 import java.util.Random
 
-import mlbigbook.data.OldVector
+import mlbigbook.data.OLD_Vector
 
 /**
  * WARNING: DenseVectorBuilder is a highly mutable class!
@@ -41,7 +41,7 @@ class DenseVectorBuilder(val cardinality: Int) {
    * If the builder's and input vector's cardinality differs, then the
    * add call is a no-op.
    */
-  def add(v: OldVector): Unit =
+  def add(v: OLD_Vector): Unit =
     if (v.cardinality == cardinality) {
       v.nonZeros.foreach({
         case (index, value) =>
@@ -105,7 +105,7 @@ class DenseVectorBuilder(val cardinality: Int) {
    * This is the prefered invocation. Only call with copyValues=false if you can guarentee
    * that the builder will be discarded after calling create.
    */
-  def create(copyValues: Boolean = true): OldVector =
+  def create(copyValues: Boolean = true): OLD_Vector =
     DenseVector(denseValues, copyValues)
 
 }
@@ -124,9 +124,9 @@ object DenseVector {
    * every value of the vector. So frozenValues(i) == the value of the
    * vector's ith dimension. The first valid dimension value is 0.
    */
-  def apply(frozenValues: Array[Double], copyValues: Boolean = true): OldVector =
+  def apply(frozenValues: Array[Double], copyValues: Boolean = true): OLD_Vector =
 
-    new OldVector {
+    new OLD_Vector {
 
       override val cardinality =
         frozenValues.length
@@ -156,7 +156,7 @@ object DenseVector {
     }
 
   /** Creates a Vector of knownCardinality size; dimensions drawn uniformly from [0,1]. */
-  def mkRandom(knownCardinality: Int)(implicit rand: Random): OldVector = {
+  def mkRandom(knownCardinality: Int)(implicit rand: Random): OLD_Vector = {
     val uniformRandomValues = new Array[Double](knownCardinality)
 
     var i = 0

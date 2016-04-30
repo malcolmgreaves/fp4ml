@@ -3,7 +3,7 @@ package mlbigbook.ml
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 
-class KMeansTest extends FunSuite with LocalSparkContext {
+class OLDKMeansTest extends FunSuite with LocalSparkContext {
 
   ignore("classify simple addresses") {
     fail("unimplemented")
@@ -11,11 +11,11 @@ class KMeansTest extends FunSuite with LocalSparkContext {
 
 }
 
-object KMeansTest {
+object OLDKMeansTest {
 
   import NearestNeighborsLSHTest._
 
-  def softClusterTest[T](sc: SoftCluster[T], input: T, expected: IndexedSeq[(Center, Double)]): Err = {
+  def softClusterTest[T](sc: SoftCluster[T], input: T, expected: IndexedSeq[(OLD_Center, Double)]): Err = {
     val actual = sc(input)
 
     val errors =

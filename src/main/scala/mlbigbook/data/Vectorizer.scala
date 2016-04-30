@@ -6,22 +6,15 @@
  */
 package mlbigbook.data
 
-/** Type that represents something that can convert an arbitrary instance of T into a Vector. */
-trait Vectorizer[T] extends (T => OldVector)
+import breeze.math.Semiring
+import breeze.storage.Zero
+import fif.Data
+import mlbigbook.math.MathVectorOps
 
-object Vectorizer {
+import scala.language.higherKinds
 
-  implicit class Fn[T](val f: T => OldVector) extends Vectorizer[T] {
-    override def apply(x: T) = f(x)
-  }
-}
+trait Vectorizer {
 
-/** Type that can construct a vectorizer, if given a distributed data source. */
-trait VectorizerMaker[T] extends (DataClass[T] => Vectorizer[T])
+  def apply[D[_]: Data, N: Numeric: Semiring: Zero, V[_], T](data: D[T])(implicit vops: MathVectorOps[N, V]): T => V[N]
 
-object VectorizerMaker {
-
-  implicit class Fn[T](val f: DataClass[T] => Vectorizer[T]) extends VectorizerMaker[T] {
-    override def apply(x: DataClass[T]) = f(x)
-  }
 }

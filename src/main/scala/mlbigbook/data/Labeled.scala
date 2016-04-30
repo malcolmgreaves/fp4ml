@@ -50,9 +50,9 @@ object UnlabeledData {
   @inline def isA(ld: LabeledData[_]): Boolean =
     unlabeledStr == ld.label
 
-  import Vectorizer._
+  import OLD_Vectorizer._
 
-  @inline implicit def vectorizer[T](v: Vectorizer[T]): Vectorizer[LabeledData[T]] =
+  @inline implicit def vectorizer[T](v: OLD_Vectorizer[T]): OLD_Vectorizer[LabeledData[T]] =
     (ignoreLabelHere: LabeledData[T]) => v(ignoreLabelHere.example)
 
   val asLabled = Labeled(unlabeledStr)

@@ -24,9 +24,9 @@ object LshRanker {
     val hashTables = createHashTables(lshFuncs, vectorizedData)
 
     val perTableRankers = hashTables.map(ht =>
-      (vecInput: OldVector) =>
+      (vecInput: OLD_Vector) =>
         Ranker.takeTopK[T](
-          (v: OldVector) => n.dist(vecInput, v),
+          (v: OLD_Vector) => n.dist(vecInput, v),
           n.neighborhoodSize,
           ht
         )).toIndexedSeq
@@ -39,7 +39,7 @@ object LshRanker {
 
       val examplesFromAllBins = hashIndicies.flatMap(hIndex => perTableRankers(hIndex)(vecInput))
 
-      val f = (v: OldVector) => n.dist(vecInput, v)
+      val f = (v: OLD_Vector) => n.dist(vecInput, v)
 
       Ranker.takeTopK[T](
         f,
@@ -49,7 +49,7 @@ object LshRanker {
     }
   }
 
-  def createHashTables[T](lshFuncs: Seq[Lsh], vdata: DataClass[(T, OldVector)])(implicit ddContext: DataContext): Seq[DataClass[(T, OldVector)]] =
+  def createHashTables[T](lshFuncs: Seq[Lsh], vdata: DataClass[(T, OLD_Vector)])(implicit ddContext: DataContext): Seq[DataClass[(T, OLD_Vector)]] =
 
     vdata
       // use the LSH functions to compute the set of hash table indicies

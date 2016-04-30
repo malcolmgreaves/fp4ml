@@ -10,7 +10,7 @@ import scala.collection.Map
  */
 object DocVectorizer {
 
-  import VectorizerMaker._
+  import OLD_VectorizerMaker._
 
   /**
    * Constructs a document vectorizing funciton. The corpus and document counting functions are used
@@ -23,7 +23,7 @@ object DocVectorizer {
   )(
     implicit
     n: Numeric[N]
-  ): VectorizerMaker[TextData.Document] =
+  ): OLD_VectorizerMaker[TextData.Document] =
 
     (documents: DataClass[TextData.Document]) => {
 
@@ -42,12 +42,12 @@ object DocVectorizer {
 
       val docCounter = mkDocCount(documents)
 
-      Vectorizer.Fn(
+      OLD_Vectorizer.Fn(
         (d: TextData.Document) => {
 
           val countedD = docCounter(d)
 
-          new OldVector {
+          new OLD_Vector {
 
             override val cardinality =
               allCardinality

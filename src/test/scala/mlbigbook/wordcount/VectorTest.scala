@@ -1,6 +1,6 @@
 package mlbigbook.wordcount
 
-import mlbigbook.data.OldVector
+import mlbigbook.data.OLD_Vector
 
 import org.scalatest.FunSuite
 
@@ -66,7 +66,7 @@ object VectorTest {
   val wordcountVectorizer = DocVectorizer(Counters.WordCorpusCounter, Counters.WordDocumentCounter) _
   val tfidfVectorizer = DocVectorizer(Counters.NormCorpusCounter, Counters.NormDocumentCounter) _
 
-  def checkVec(nonZero: Set[Int], v: OldVector): Unit = {
+  def checkVec(nonZero: Set[Int], v: OLD_Vector): Unit = {
     (0 until v.cardinality).foreach(i => {
       v.valueAt(i) match {
         case 0.0 => assert(!nonZero(i), s"index $i was zero, should be non-zero")
@@ -75,6 +75,6 @@ object VectorTest {
     })
   }
 
-  def stringify(v: OldVector): String =
+  def stringify(v: OLD_Vector): String =
     (0 until v.cardinality).map(i => v.valueAt(i)).mkString(",")
 }

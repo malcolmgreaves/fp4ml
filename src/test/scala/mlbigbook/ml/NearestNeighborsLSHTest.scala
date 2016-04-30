@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data.mut.DenseVector
-import mlbigbook.data.{ VectorizerMaker, Vectorizer }
+import mlbigbook.data.{ OLD_VectorizerMaker$, OLD_Vectorizer$ }
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 
@@ -64,13 +64,13 @@ object NearestNeighborsLSHTest {
     Address(Location(5, 3), Some("apartment J"))
   )
 
-  import Vectorizer._
+  import OLD_Vectorizer._
 
-  def addressVectorizer[N: Numeric]: Vectorizer[Address[N]] =
+  def addressVectorizer[N: Numeric]: OLD_Vectorizer[Address[N]] =
     (a: Address[N]) =>
       DenseVector(Array(implicitly[Numeric[N]].toDouble(a.loc.x), implicitly[Numeric[N]].toDouble(a.loc.y)))
 
-  def mkAddressVectorizer[N](implicit n: Numeric[N]): VectorizerMaker[Address[N]] =
+  def mkAddressVectorizer[N](implicit n: Numeric[N]): OLD_VectorizerMaker[Address[N]] =
     ???
 
 }

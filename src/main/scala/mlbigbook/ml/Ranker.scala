@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 
 trait Ranker[T] extends (T => Traversable[(T, Double)])
 
-case class RankerIn(rankFn: (OldVector, OldVector) => Double, limit: Int)
+case class RankerIn(rankFn: (OLD_Vector, OLD_Vector) => Double, limit: Int)
 
 object Ranker {
 
@@ -41,7 +41,7 @@ object Ranker {
 
       val vecInput = vectorizer(input)
 
-      val f = (v: OldVector) => d(vecInput, v)
+      val f = (v: OLD_Vector) => d(vecInput, v)
 
       takeTopK(f, limit, data)
         .map(x => (x._1, f(x._2)))
@@ -53,11 +53,11 @@ object Ranker {
    * Evaluates to a Traversable containing the elements that have the largest associated values in the input. The
    * returned Traversable has at most limit items.
    */
-  def takeTopK[T](f: OldVector => Double, limit: Int, elements: DataClass[(T, OldVector)]): Traversable[(T, OldVector)] = {
+  def takeTopK[T](f: OLD_Vector => Double, limit: Int, elements: DataClass[(T, OLD_Vector)]): Traversable[(T, OLD_Vector)] = {
 
-    val BoundPq = BoundedPriorityQueue.create[(T, OldVector)](OldVector.rankFnOrdering[T](f))(limit)
+    val BoundPq = BoundedPriorityQueue.create[(T, OLD_Vector)](OLD_Vector.rankFnOrdering[T](f))(limit)
 
-      @tailrec @inline def toTraversable(pq: BoundPq.T, existing: Seq[(T, OldVector)]): Traversable[(T, OldVector)] =
+      @tailrec @inline def toTraversable(pq: BoundPq.T, existing: Seq[(T, OLD_Vector)]): Traversable[(T, OLD_Vector)] =
         BoundPq.takeMin(pq) match {
 
           case None =>
@@ -80,7 +80,7 @@ object Ranker {
           }
         )(ClassTag(BoundPq.empty.getClass))
 
-    toTraversable(resultingBpq, Seq.empty[(T, OldVector)])
+    toTraversable(resultingBpq, Seq.empty[(T, OLD_Vector)])
   }
 
   /**
