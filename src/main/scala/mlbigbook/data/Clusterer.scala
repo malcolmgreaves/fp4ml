@@ -7,33 +7,45 @@ import mlbigbook.math.MathVectorOps
 
 import scala.language.higherKinds
 
+case class ClusteringConf(
+  nClusters:     Int,
+  tolerance:     Double,
+  maxIterations: Int
+)
+
 trait ClusteringModule {
 
   val vmod: VectorizerModule
   import vmod._
   import numVecMod._
 
-  //  case class Center(id: String, mean: V[N])
+  def mkVectorizer[D[_]: Data, T](data: D[T]): Vectorizer
 
-  //  def mkVectorizer[D[_] : Data, T](data: D[T]): VectorizerModule.Type[Item, N, V]
-  //
-  //  def cluster[D[_] : Data, T](data: D[T]):
+  val dmod: DistanceModule
+  import dmod._
 
-  //  type Item
-  //
-  //  type N
-  //  implicit val num: Numeric[N]
-  //  implicit val sr: Semiring[N]
-  //  implicit val zero: Zero[N]
-  //
-  //  type V[_]
-  //  implicit val vops: MathVectorOps[N, V]
-  //
-  //  type Vectorizer = Item => V[N]
-  //  val vectorizer: Vectorizer
-  //
-  //  case class Center(id: String, mean: V[N])
+  case class Center(id: String, mean: V[N])
 
+  final def cluster[D[_]: Data, T](
+    conf: ClusteringConf,
+    dist: Distance
+  )(data: D[T]): Seq[Center] =
+    cluster(conf, dist, mkVectorizer(data))(data)
+
+  def cluster[D[_]: Data, T](
+    conf:  ClusteringConf,
+    dist:  Distance,
+    toVec: Vectorizer
+  )(data: D[T]): Seq[Center]
+
+}
+
+trait DistanceModule {
+
+  val numVecMod: NumericalVectorModule
+  import numVecMod._
+
+  type Distance = (V[N], V[N]) => N
 }
 
 trait NumericalVectorModule {
@@ -64,14 +76,13 @@ trait VectorizerModule {
   import numVecMod._
 
   type Vectorizer = Item => V[N]
-  val toVec: Vectorizer
 }
 
 object VectorizerModule {
-  //
-  //  type Type[T, Number, Vec[_]] = VectorizerModule {
-  //    type Item = T
-  //
-  //  }
+
+  type Type[T, Num, Vec[_]] = VectorizerModule {
+    type Item = T
+    val numVecMod: NumericalVectorModule.Type[Num, Vec]
+  }
 
 }
