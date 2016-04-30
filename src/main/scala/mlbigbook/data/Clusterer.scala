@@ -19,18 +19,18 @@ trait ClusteringModule {
   import vmod._
   import numVecMod._
 
-  def mkVectorizer[D[_]: Data, T](data: D[T]): Vectorizer
+//  def mkVectorizer[D[_]: Data, T](data: D[T]): Vectorizer
 
   val dmod: DistanceModule
   import dmod._
 
   case class Center(id: String, mean: V[N])
 
-  final def cluster[D[_]: Data, T](
-    conf: ClusteringConf,
-    dist: Distance
-  )(data: D[T]): Seq[Center] =
-    cluster(conf, dist, mkVectorizer(data))(data)
+//  final def cluster[D[_]: Data, T](
+//    conf: ClusteringConf,
+//    dist: Distance
+//  )(data: D[T]): Seq[Center] =
+//    cluster(conf, dist, mkVectorizer(data))(data)
 
   def cluster[D[_]: Data, T](
     conf:  ClusteringConf,
