@@ -1,7 +1,26 @@
 package mlbigbook.math
 
 import breeze.linalg.DenseVector
-import org.scalatest.{ FunSpec, Matchers }
+import mlbigbook.data.Clusterer
+import org.scalatest.{FunSuite, FunSpec, Matchers}
+
+import scala.language.higherKinds
+import scala.reflect.ClassTag
+
+abstract class MVOT extends FunSuite {
+
+  val c: Clusterer
+
+  implicit val ct: ClassTag[c.N]
+
+  test("generic"){
+    val k = 10
+    val zero10 = c.v.vops.zeros(k)
+    val one10 = c.v.vops.map[c.N](zero10)(z => c.v.vops.n.plus(z, c.v.vops.n.one))(ct,c.v.vops.n, c.v.vops.z)
+    assert(one10 === c.v.vops.ones(k))
+  }
+
+}
 
 class MathVectorOpsTest extends FunSpec with Matchers {
   import MathVectorOpsTest._
