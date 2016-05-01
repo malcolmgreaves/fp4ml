@@ -5,6 +5,7 @@ import breeze.linalg.operators._
 import breeze.math.Semiring
 import breeze.storage.Zero
 
+import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 /**
@@ -13,8 +14,7 @@ import scala.reflect.ClassTag
  * of MathVectorOps.
  */
 protected abstract class Sparse[@specialized N: Numeric: Zero: Semiring: ClassTag]
-    extends MathVectorOps[N, SparseVector]
-    with VectorOps[SparseVector] {
+    extends BaseMvo[N, SparseVector] {
 
   override def zeros(size: Int) =
     SparseVector.zeros[N](size)

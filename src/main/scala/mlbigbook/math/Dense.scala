@@ -13,8 +13,7 @@ import scala.reflect.ClassTag
  * of MathVectorOps.
  */
 protected abstract class Dense[@specialized N: Numeric: Zero: Semiring: ClassTag]
-    extends MathVectorOps[N, DenseVector]
-    with VectorOps[DenseVector] {
+    extends BaseMvo[N, DenseVector] {
 
   override def zeros(size: Int): DenseVector[N] =
     DenseVector.zeros[N](size)

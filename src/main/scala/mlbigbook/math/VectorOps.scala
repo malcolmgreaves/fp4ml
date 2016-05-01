@@ -21,4 +21,3 @@ trait VectorOps[V[_]] {
   def size(v: V[_]): Int
 
 }
-

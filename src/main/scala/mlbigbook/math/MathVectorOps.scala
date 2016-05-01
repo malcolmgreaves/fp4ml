@@ -14,8 +14,11 @@ import scala.reflect.ClassTag
  * product of two vectors is also included. As well as methods to construct new
  * vector instances.
  */
-abstract class MathVectorOps[N: Numeric: Zero: Semiring, V[_]]
-    extends VectorOps[V] {
+trait MathVectorOps[N, V[_]] extends VectorOps[V] {
+
+  implicit val n: Numeric[N]
+  implicit val z: Zero[N]
+  implicit val s: Semiring[N]
 
   /**
    * Creates a new vector of the input size where each element has value 0.

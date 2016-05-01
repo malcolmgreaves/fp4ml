@@ -7,7 +7,7 @@ import mlbigbook.math.MathVectorOps
 
 import scala.language.higherKinds
 
-trait MkVectorizer {
+trait OLD_MkVectorizer {
 
   def apply[D[_]: Data, N: Numeric: Semiring: Zero, V[_], T](
     data: D[T]
