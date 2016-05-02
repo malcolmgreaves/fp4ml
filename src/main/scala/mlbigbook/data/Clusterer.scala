@@ -14,51 +14,53 @@ abstract class RandoMut[N: Numeric] {
   def next(): N
 }
 
-trait Kmeans extends Clusterer {
+abstract class Kmeans extends Clusterer {
 
   implicit def ct: ClassTag[N]
 
-//  def foo(): V[N] = {
-//    v.vops.map[N](v.vops.ones(10))(identity[N])(
-//      ct,
-//      v.vops.n,
-//      v.vops.z
-//    )
-//  }
-//
-//  def initialize(
-//    nClusters:   Int,
-//    nDimensions: Int
-//  )(implicit r: RandoMut[N]): Seq[Center] =
-//    (0 until nClusters)
-//      .map { id =>
-//        implicit val _0: Numeric[N] = v.vops.n
-//        implicit val _1: Semiring[N] = v.vops.s
-//        implicit val _2: Zero[N] = v.vops.z
-//
-//
-//
-//
-////        val v1: V[N] = v.vops.ones(nDimensions)
-////        val v1: V[N] = null.asInstanceOf[V[N]]
-////        val v2: V[N] = v.vops.map[N](
-////          v1
-//////          null.asInstanceOf[V[N]]
-//////          v1.asInstanceOf[V[Kmeans.this.N]]
-////        )(_ => r.next())
-//        Center(
-//          id = id.toString,
-//          mean = foo()
-//        )
-//      }
-//      .toSeq
+  //  def foo(): V[N] = v.vops.asInstanceOf[MathVectorOps[N,V]].ones(10)
 
-  override def cluster[D[_]: Data](
-    conf:  ClusteringConf,
-    dist:  d.Distance,
-    toVec: v.Vectorizer
-  )(data: D[v.Item]): Seq[Center] = ???
+  def foo(): V[N] = {
+    val v1: V[N] = v.vops.asInstanceOf[MathVectorOps[N, V]].ones(10)
+    v.vops.asInstanceOf[MathVectorOps[N, V]].map[N](v1)(x => v.vops.n.plus(x, v.vops.n.one))(
+      ct,
+      v.vops.n,
+      v.vops.z
+    )
+  }
 
+  //  def initialize(
+  //    nClusters:   Int,
+  //    nDimensions: Int
+  //  )(implicit r: RandoMut[N]): Seq[Center] =
+  //    (0 until nClusters)
+  //      .map { id =>
+  //        implicit val _0: Numeric[N] = v.vops.n
+  //        implicit val _1: Semiring[N] = v.vops.s
+  //        implicit val _2: Zero[N] = v.vops.z
+  //
+  //
+  //
+  //
+  ////        val v1: V[N] = v.vops.ones(nDimensions)
+  ////        val v1: V[N] = null.asInstanceOf[V[N]]
+  ////        val v2: V[N] = v.vops.map[N](
+  ////          v1
+  //////          null.asInstanceOf[V[N]]
+  //////          v1.asInstanceOf[V[Kmeans.this.N]]
+  ////        )(_ => r.next())
+  //        Center(
+  //          id = id.toString,
+  //          mean = foo()
+  //        )
+  //      }
+  //      .toSeq
+
+  //  override def cluster[D[_]: Data](
+  //    conf:  ClusteringConf,
+  //    dist:  d.Distance,
+  //    toVec: v.Vectorizer
+  //  )(data: D[v.Item]): Seq[Center] = ???
 }
 
 case class ClusteringConf(
@@ -93,7 +95,6 @@ trait Clusterer extends ActionModule {
   type V[_]
   val v: VectorizerTM.Type[Item, N, V]
   val d: DistanceTM.Type[N, V]
-
 
   case class Center(id: String, mean: V[N])
 

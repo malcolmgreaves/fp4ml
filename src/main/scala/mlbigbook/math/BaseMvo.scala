@@ -6,10 +6,10 @@ import breeze.storage.Zero
 import scala.language.higherKinds
 
 protected[math] abstract class BaseMvo[N, V[_]](
-  implicit
-  no: Numeric[N],
-  zo: Zero[N],
-  so: Semiring[N]
+    implicit
+    no: Numeric[N],
+    zo: Zero[N],
+    so: Semiring[N]
 ) extends MathVectorOps[N, V] {
 
   override final implicit val n = no
