@@ -14,6 +14,31 @@ abstract class RandoMut[N: Numeric] {
   def next(): N
 }
 
+trait Clusterer extends ActionModule {
+
+  type Item
+  type N
+  type V[_]
+  val v: VectorizerTM.Type[Item, N, V]
+  val d: DistanceTM.Type[N, V]
+
+  case class Center(id: String, mean: V[N])
+
+  final def cluster[D[_]: Data](
+                                 conf:  ClusteringConf,
+                                 dist:  d.Distance,
+                                 mkVec: MkVectorizer.Type[Item, N, V]
+                               )(data: D[Item]): Seq[Center] =
+    cluster(conf, dist, mkVec(data))(data)
+
+  def cluster[D[_]: Data](
+                           conf:  ClusteringConf,
+                           dist:  d.Distance,
+                           toVec: v.Vectorizer
+                         )(data: D[Item]): Seq[Center]
+
+}
+
 abstract class Kmeans extends Clusterer {
 
   implicit def ct: ClassTag[N]
@@ -21,6 +46,11 @@ abstract class Kmeans extends Clusterer {
   //  def foo(): V[N] = v.vops.asInstanceOf[MathVectorOps[N,V]].ones(10)
 
   def foo(): V[N] = {
+
+
+    val vFirst: MathVectorOps[N,V] = v.vops.asInstanceOf[MathVectorOps[N, V]]
+    val vSeond: MathVectorOps[N,V] = v.vops
+
     val v1: V[N] = v.vops.asInstanceOf[MathVectorOps[N, V]].ones(10)
     v.vops.asInstanceOf[MathVectorOps[N, V]].map[N](v1)(x => v.vops.n.plus(x, v.vops.n.one))(
       ct,
@@ -88,30 +118,6 @@ object MkVectorizer {
 
 }
 
-trait Clusterer extends ActionModule {
-
-  type Item
-  type N
-  type V[_]
-  val v: VectorizerTM.Type[Item, N, V]
-  val d: DistanceTM.Type[N, V]
-
-  case class Center(id: String, mean: V[N])
-
-  final def cluster[D[_]: Data](
-    conf:  ClusteringConf,
-    dist:  d.Distance,
-    mkVec: MkVectorizer.Type[Item, N, V]
-  )(data: D[Item]): Seq[Center] =
-    cluster(conf, dist, mkVec(data))(data)
-
-  def cluster[D[_]: Data](
-    conf:  ClusteringConf,
-    dist:  d.Distance,
-    toVec: v.Vectorizer
-  )(data: D[Item]): Seq[Center]
-
-}
 
 trait DistanceTM extends TypeModule {
 
