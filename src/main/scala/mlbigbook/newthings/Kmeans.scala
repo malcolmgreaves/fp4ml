@@ -143,6 +143,15 @@ object Kmeans {
     ctForVn: ClassTag[Vec[Num]]
   ): Type[ItemToCluster, Num, Vec] = {
     val ctForN = implicitly[ClassTag[Num]]
+
+    val okVops: MathVectorOps[Type[ItemToCluster, Num, Vec]#N, Type[ItemToCluster, Num, Vec]#V] =
+//      mathVectorOps
+      mathVectorOps.asInstanceOf[MathVectorOps[Type[ItemToCluster, Num, Vec]#N, Type[ItemToCluster, Num, Vec]#V]]
+
+    val okCtVn: ClassTag[Type[ItemToCluster, Num, Vec]#V[Type[ItemToCluster, Num, Vec]#N]] =
+//      ctForVn
+      ctForVn.asInstanceOf[ClassTag[Type[ItemToCluster, Num, Vec]#V[Type[ItemToCluster, Num, Vec]#N]]]
+
     new Kmeans {
 
       override type N = Num
@@ -150,14 +159,10 @@ object Kmeans {
       override type Item = ItemToCluster
 
       override lazy val mkRandomNumGen = mkRando
-      override lazy val vops: MathVectorOps[N, V] =
-        mathVectorOps
-//        mathVectorOps.asInstanceOf[MathVectorOps[N,V]]
+      override lazy val vops = okVops
 
       override protected implicit lazy val ctN = ctForN
-      override protected implicit lazy val ctVn: ClassTag[V[N]] =
-        ctForVn
-//        ctForVn.asInstanceOf[ClassTag[V[N]]]
+      override protected implicit lazy val ctVn = okCtVn
     }
   }
 
