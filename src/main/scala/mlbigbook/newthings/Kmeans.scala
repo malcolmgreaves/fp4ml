@@ -1,7 +1,8 @@
 package mlbigbook.newthings
 
+import breeze.linalg.DenseVector
 import fif.Data
-import mlbigbook.math.MathVectorOps
+import mlbigbook.math.{NumericConversion, MathVectorOps}
 
 import scala.annotation.tailrec
 import scala.language.{ higherKinds, reflectiveCalls }
@@ -164,6 +165,15 @@ object Kmeans {
       override protected implicit lazy val ctN = ctForN
       override protected implicit lazy val ctVn = okCtVn
     }
+  }
+
+
+  val testCompilation: Type[String, Float, DenseVector] = {
+    import NumericConversion.Implicits._
+    apply[String, Float, DenseVector](
+      MathVectorOps.Implicits.FloatDenseVot,
+      RandoMut.newSeedPerCall[Float]
+    )
   }
 
 }
