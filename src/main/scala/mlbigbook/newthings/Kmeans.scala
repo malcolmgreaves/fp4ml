@@ -13,7 +13,6 @@ trait Kmeans extends Clustering {
 
   // ClassTag evidence necessary for MathVectorOps, Data abstractions
   protected[Kmeans] implicit val ctN: ClassTag[N]
-  protected[Kmeans] implicit val ctVn: ClassTag[V[N]]
 
   // Brings in the Data type class operations as methods "accessible" using
   // familiar object dot notation.
