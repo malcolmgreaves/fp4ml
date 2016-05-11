@@ -1,6 +1,7 @@
 package mlbigbook.newthings
 
 import fif.Data
+import mlbigbook.math.MathVectorOps
 
 import scala.annotation.tailrec
 import scala.language.{ higherKinds, reflectiveCalls }
@@ -12,7 +13,7 @@ trait Kmeans extends Clustering {
   val mkRandomNumGen: () => RandoMut[N]
 
   // ClassTag evidence necessary for MathVectorOps, Data abstractions
-  protected[Kmeans] implicit val ctN: ClassTag[N]
+  protected implicit val ctN: ClassTag[N]
 
   // Brings in the Data type class operations as methods "accessible" using
   // familiar object dot notation.
@@ -98,6 +99,66 @@ trait Kmeans extends Clustering {
     toVec:   Vectorizer,
     centers: Seq[Center],
     data:    D[V[N]]
-  ): Seq[Center] = Seq.empty
+  ): Seq[Center] =
+    data.zip(assign(centers, dist)(data))
+      .groupBy { case (_, assignment) => assignment }
+      .map {
+        case (label, bothDataAndLabel) =>
+
+          val summed =
+            bothDataAndLabel
+              .foldLeft(vops.zeros(toVec.nDimensions)) {
+                case (summing, (vector, _)) =>
+                  vops.addV(summing, vector)
+              }
+
+          val newMean =
+            vops.divS(
+              summed,
+              implicitly[Numeric[N]].fromInt(bothDataAndLabel.size)
+            )
+
+          Center(
+            id = label,
+            mean = newMean
+          )
+      }
+      .toSeq
+
+}
+
+object Kmeans {
+
+  type Type[ItemToCluster, Num, Vec[_]] = Kmeans {
+    type Item = ItemToCluster
+    type N = Num
+    type V[_] = Vec[_]
+  }
+
+  def apply[ItemToCluster, Num: Numeric: ClassTag, Vec[_]](
+    mathVectorOps: MathVectorOps[Num, Vec],
+    mkRando:       () => RandoMut[Num]
+  )(
+    implicit
+    ctForVn: ClassTag[Vec[Num]]
+  ): Type[ItemToCluster, Num, Vec] = {
+    val ctForN = implicitly[ClassTag[Num]]
+    new Kmeans {
+
+      override type N = Num
+      override type V[_] = Vec[_]
+      override type Item = ItemToCluster
+
+      override lazy val mkRandomNumGen = mkRando
+      override lazy val vops: MathVectorOps[N, V] =
+//        mathVectorOps
+        mathVectorOps.asInstanceOf[MathVectorOps[N,V]]
+
+      override protected implicit lazy val ctN = ctForN
+      override protected implicit lazy val ctVn: ClassTag[V[N]] =
+//        ctForVn
+        ctForVn.asInstanceOf[ClassTag[V[N]]]
+    }
+  }
 
 }

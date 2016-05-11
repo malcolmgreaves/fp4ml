@@ -19,9 +19,9 @@ trait Clustering {
   val vops: MathVectorOps[N, V]
 
   // we can get these type classes for N
-  protected[Clustering] implicit lazy val _0: Numeric[N] = vops.n
-  protected[Clustering] implicit lazy val _1: Semiring[N] = vops.s
-  protected[Clustering] implicit lazy val _2: Zero[N] = vops.z
+  protected implicit lazy val _0: Numeric[N] = vops.n
+  protected implicit lazy val _1: Semiring[N] = vops.s
+  protected implicit lazy val _2: Zero[N] = vops.z
 
   type Vectorizer = {
     val vectorize: Item => V[N]
@@ -46,7 +46,7 @@ trait Clustering {
   )(data: D[Item]): Seq[Center]
 
   // required for assign definition
-  protected[Clustering] implicit val ctVn: ClassTag[V[N]]
+  protected implicit val ctVn: ClassTag[V[N]]
 
   import Data.ops._
 
