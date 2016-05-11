@@ -1,0 +1,17 @@
+[info] Compiling 95 Scala sources to /Users/mgreaves/development/opensource/malcolmgreaves/bigmlbook/target/scala-2.11/classes...
+[error] /Users/mgreaves/development/opensource/malcolmgreaves/bigmlbook/src/main/scala/mlbigbook/data/Clusterer.scala:63: type mismatch;
+[error]  found   : mlbigbook.data.VectorizerTM{type Item = I; type N = Num; type V[_] = Vec[_]}
+[error]  required: mlbigbook.data.VectorizerTM.Type[this.Item,this.N,this.V]
+[error]     (which expands to)  mlbigbook.data.VectorizerTM{type Item = I; type N = Num; type V[_] = Vec[_]}
+[error]       override lazy val v:VectorizerTM.Type[Item, N, V]  = vecTypeMod
+[error]                                                            ^
+[error] /Users/mgreaves/development/opensource/malcolmgreaves/bigmlbook/src/main/scala/mlbigbook/data/Clusterer.scala:64: type mismatch;
+[error]  found   : mlbigbook.data.DistanceTM{type N = Num; type V[_] = Vec[_]}
+[error]  required: mlbigbook.data.DistanceTM.Type[this.N,this.V]
+[error]     (which expands to)  mlbigbook.data.DistanceTM{type N = Num; type V[_] = Vec[_]}
+[error]       override lazy val d: DistanceTM.Type[N, V] = distTypeMod
+[error]                                                    ^
+[error] two errors found
+[error] (compile:compileIncremental) Compilation failed
+[error] Total time: 3 s, completed May 10, 2016 5:09:59 PM
+12. Waiting for source changes... (press enter to interrupt)
