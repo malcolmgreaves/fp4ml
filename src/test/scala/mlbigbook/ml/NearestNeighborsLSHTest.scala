@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import mlbigbook.data.mut.DenseVector
-import mlbigbook.data.{ OLD_VectorizerMaker$, OLD_Vectorizer$ }
+import mlbigbook.data.{ OLD_VectorizerMaker, OLD_Vectorizer, OLD_VectorizerMaker$, OLD_Vectorizer$ }
 import mlbigbook.wordcount.LocalSparkContext
 import org.scalatest.FunSuite
 

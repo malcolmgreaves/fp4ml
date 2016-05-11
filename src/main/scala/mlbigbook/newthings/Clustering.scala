@@ -78,14 +78,12 @@ trait Clustering {
     } else {
 
       val lessThan = implicitly[Numeric[N]].lt _
-
-      val initialLabel = centers.head.id
-      val restCenters = centers.slice(1, centers.size)
+      val restCents = centers.slice(1, centers.size)
 
       data map { v =>
 
         val (nearestLabel, _) =
-          restCenters.foldLeft(initialLabel, distance(centers.head.mean, v)) {
+          restCents.foldLeft(centers.head.id, distance(centers.head.mean, v)) {
 
             case (currChampion @ (minLabel, minDistance), center) =>
 

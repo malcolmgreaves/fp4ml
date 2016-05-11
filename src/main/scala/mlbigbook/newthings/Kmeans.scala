@@ -2,7 +2,7 @@ package mlbigbook.newthings
 
 import breeze.linalg.DenseVector
 import fif.Data
-import mlbigbook.math.{NumericConversion, MathVectorOps}
+import mlbigbook.math.{ NumericConversion, MathVectorOps }
 
 import scala.annotation.tailrec
 import scala.language.{ higherKinds, reflectiveCalls }
@@ -67,7 +67,15 @@ trait Kmeans extends Clustering {
       currCenters
 
     else {
+
       val updatedCenters = updateCenters(dist, toVec, currCenters, data)
+
+      println(
+        s"""[center check: currIter=$currIter]
+            |[ORIGINAL] ${currCenters.mkString("\t")}
+            |[UPDATED]  ${updatedCenters.mkString("\t")}
+         """.stripMargin
+      )
 
       val sumSquaredChangeInMeansBetweenIters =
         currCenters.zip(updatedCenters)
@@ -146,11 +154,11 @@ object Kmeans {
     val ctForN = implicitly[ClassTag[Num]]
 
     val okVops: MathVectorOps[Type[ItemToCluster, Num, Vec]#N, Type[ItemToCluster, Num, Vec]#V] =
-//      mathVectorOps
+      //      mathVectorOps
       mathVectorOps.asInstanceOf[MathVectorOps[Type[ItemToCluster, Num, Vec]#N, Type[ItemToCluster, Num, Vec]#V]]
 
     val okCtVn: ClassTag[Type[ItemToCluster, Num, Vec]#V[Type[ItemToCluster, Num, Vec]#N]] =
-//      ctForVn
+      //      ctForVn
       ctForVn.asInstanceOf[ClassTag[Type[ItemToCluster, Num, Vec]#V[Type[ItemToCluster, Num, Vec]#N]]]
 
     new Kmeans {
@@ -165,15 +173,6 @@ object Kmeans {
       override protected implicit lazy val ctN = ctForN
       override protected implicit lazy val ctVn = okCtVn
     }
-  }
-
-
-  val testCompilation: Type[String, Float, DenseVector] = {
-    import NumericConversion.Implicits._
-    apply[String, Float, DenseVector](
-      MathVectorOps.Implicits.FloatDenseVot,
-      RandoMut.newSeedPerCall[Float]
-    )
   }
 
 }
