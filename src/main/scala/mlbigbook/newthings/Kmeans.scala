@@ -72,8 +72,8 @@ trait Kmeans extends Clustering {
 
       println(
         s"""[center check: currIter=$currIter]
-            |[ORIGINAL] ${currCenters.mkString("\t")}
-            |[UPDATED]  ${updatedCenters.mkString("\t")}
+            |[ORIGINAL # ${currCenters.size}] ${currCenters.mkString("\t")}
+            |[UPDATED  # ${updatedCenters.size}] ${updatedCenters.mkString("\t")}
          """.stripMargin
       )
 

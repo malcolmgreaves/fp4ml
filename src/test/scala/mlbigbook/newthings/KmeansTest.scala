@@ -4,12 +4,24 @@ import breeze.linalg.DenseVector
 import mlbigbook.math.{ MathVectorOps, NumericConversion }
 import org.scalatest.FunSuite
 
+import scala.language.reflectiveCalls
+
 class KmeansTest extends FunSuite {
 
   import KmeansTest._
   import fif.ImplicitCollectionsData._
 
   test("Simple run") {
+
+    val initial = kmeans.initialize(conf.nClusters, stringVectorizer.nDimensions)
+    println(
+      s"""INITIAL with nClusters= ${conf.nClusters} & nDimensions= ${stringVectorizer.nDimensions}
+         |# of clusters FROM INITIAL: ${initial.size}
+         |
+         |${initial.mkString("\n")}
+         |
+       """.stripMargin
+    )
 
     val centers = kmeans.cluster(conf, distance, stringVectorizer)(data)
 
@@ -49,21 +61,22 @@ object KmeansTest {
 
   val stringVectorizer: kmeans.Vectorizer = new {
 
-    val vectorize = (s: String) =>
-      DenseVector(
-        s
+    lazy val vectorize = (s: String) =>
+      DenseVector {
+        val bothIndexValue = s
           .split(" ")
           .foldLeft(initial) {
             case (accum, word) =>
               val index = word2index(word)
               (accum - index) + (index -> (accum(index) + 1.0f))
           }
-          .toSeq
-          .sortBy { case (index, _) => index }
-          .map { case (_, value) => value }
-      )
 
-    val nDimensions = words.size
+        (0 until nDimensions)
+          .map { index => bothIndexValue.getOrElse(index, 0.0f) }
+          .toArray
+      }
+
+    lazy val nDimensions = words.size
   }
 
   val distance: kmeans.Distance = (v1, v2) => {
