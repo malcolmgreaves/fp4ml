@@ -151,13 +151,13 @@ object Kmeans {
 
       override lazy val mkRandomNumGen = mkRando
       override lazy val vops: MathVectorOps[N, V] =
-//        mathVectorOps
-        mathVectorOps.asInstanceOf[MathVectorOps[N,V]]
+        mathVectorOps
+//        mathVectorOps.asInstanceOf[MathVectorOps[N,V]]
 
       override protected implicit lazy val ctN = ctForN
       override protected implicit lazy val ctVn: ClassTag[V[N]] =
-//        ctForVn
-        ctForVn.asInstanceOf[ClassTag[V[N]]]
+        ctForVn
+//        ctForVn.asInstanceOf[ClassTag[V[N]]]
     }
   }
 
