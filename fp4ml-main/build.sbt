@@ -7,7 +7,7 @@ ScalariformKeys.preferences := sharedCodeFmt
 
 addCompilerPlugin(scalaMacros)
 
-libraryDependencies :=
+libraryDependencies ++=
   fp4mlMainDeps ++
   testDeps
 

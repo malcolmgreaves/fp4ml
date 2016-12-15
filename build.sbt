@@ -1,8 +1,4 @@
 name := "fp4ml"
-
-com.typesafe.sbt.SbtScalariform.defaultScalariformSettings
-
-scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.malcolmgreaves"
 version in ThisBuild      := {
   val major: Int = 0
@@ -10,6 +6,10 @@ version in ThisBuild      := {
   val patch: Int = 0
   s"$major.$minor.$patch"
 }
+
+import SharedBuild._
+com.typesafe.sbt.SbtScalariform.defaultScalariformSettings
+ScalariformKeys.preferences := sharedCodeFmt
 
 lazy val root = project
   .in(file("."))
@@ -53,7 +53,8 @@ resolvers in ThisBuild := Seq(
   "Confluent" at "http://packages.confluent.io/maven/"
 )
 
-lazy val javaV = "1.8"
+lazy val javaV              = "1.8"
+scalaVersion  in ThisBuild := "2.11.8"
 scalacOptions in ThisBuild := Seq(
   "-optimize",
   "-deprecation",
@@ -70,6 +71,7 @@ scalacOptions in ThisBuild := Seq(
   "-language:reflectiveCalls",
   "-Yno-adapted-args",
   "-Ywarn-value-discard",
+  "-Yinline-warnings",
   "-Xlint",
   "-Xfuture",
   "-Ywarn-dead-code",
