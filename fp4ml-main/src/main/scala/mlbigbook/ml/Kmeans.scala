@@ -49,7 +49,6 @@ trait Kmeans extends ClusteringModule {
   }
 
   @tailrec
-  @inline
   private[this] final def cluster_h[D[_]: Data](
     conf:        ClusteringConf,
     dist:        Distance,
