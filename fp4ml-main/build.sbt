@@ -16,4 +16,3 @@ fork in Test := true
 parallelExecution in Test := true
 
 pomExtra := pomExtraInfo
-
