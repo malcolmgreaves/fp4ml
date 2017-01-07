@@ -1,4 +1,4 @@
-name := "fp4ml"
+name                      := "fp4ml"
 organization in ThisBuild := "io.malcolmgreaves"
 version in ThisBuild      := {
   val major: Int = 0
@@ -8,8 +8,6 @@ version in ThisBuild      := {
 }
 
 import SharedBuild._
-com.typesafe.sbt.SbtScalariform.defaultScalariformSettings
-ScalariformKeys.preferences := sharedCodeFmt
 
 lazy val root = project
   .in(file("."))

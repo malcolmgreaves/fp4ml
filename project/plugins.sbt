@@ -1,6 +1,6 @@
 logLevel := Level.Warn
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
+addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.4.10")
 
 addSbtPlugin("com.gonitro" % "avro-codegen-compiler" % "0.3.4")
 

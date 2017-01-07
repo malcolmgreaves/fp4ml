@@ -2,9 +2,6 @@ name := "fp4ml-main"
 
 import SharedBuild._
 
-com.typesafe.sbt.SbtScalariform.defaultScalariformSettings
-ScalariformKeys.preferences := sharedCodeFmt
-
 addCompilerPlugin(scalaMacros)
 
 libraryDependencies ++=
