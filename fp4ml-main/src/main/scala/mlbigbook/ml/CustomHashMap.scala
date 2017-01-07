@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 final class CustomHashMap[K: Hashable, V](
     private[this] val hashedKey2val: Map[Int, V],
-    private[this] val hashedKeys:    List[K]
+    private[this] val hashedKeys: List[K]
 ) extends Map[K, V] {
 
   override def +[B1 >: V](kv: (K, B1)): Map[K, B1] = {
@@ -29,12 +29,10 @@ final class CustomHashMap[K: Hashable, V](
   }
 
   override def iterator: Iterator[(K, V)] =
-    hashedKeys
-      .toIterator
-      .map { key =>
-        val id = implicitly[Hashable[K]].hash(key)
-        (key, hashedKey2val(id))
-      }
+    hashedKeys.toIterator.map { key =>
+      val id = implicitly[Hashable[K]].hash(key)
+      (key, hashedKey2val(id))
+    }
 
   override def -(key: K): Map[K, V] = {
     val id = implicitly[Hashable[K]].hash(key)
@@ -49,9 +47,9 @@ final class CustomHashMap[K: Hashable, V](
 
   @tailrec
   private[this] def remove(
-    idOfKeyToRemove: Int,
-    before:          List[K],
-    remaining:       List[K]
+      idOfKeyToRemove: Int,
+      before: List[K],
+      remaining: List[K]
   ): List[K] =
     remaining match {
 

@@ -4,7 +4,7 @@ import breeze.math.Semiring
 import breeze.storage.Zero
 import mlbigbook.math.MathVectorOps
 
-import scala.language.{ higherKinds, postfixOps, reflectiveCalls }
+import scala.language.{higherKinds, postfixOps, reflectiveCalls}
 import scala.reflect.ClassTag
 
 trait ItemNumVecModule {

@@ -3,9 +3,9 @@ package mlbigbook.math
 import scala.reflect.ClassTag
 
 /**
- * Typeclass supporting conversions between primitive types, with the
- * constraint that the primitive has Numeric evidence.
- */
+  * Typeclass supporting conversions between primitive types, with the
+  * constraint that the primitive has Numeric evidence.
+  */
 sealed abstract class NumericConversion[@specialized N] {
 
   def fromInt(i: Int): N
@@ -29,9 +29,9 @@ object NumericConversion {
     implicitly[NumericConversion[N]]
 
   /**
-   * Implicit NumericConversion instances for every primitive numeric type:
-   * float, long, double, int, short, byte
-   */
+    * Implicit NumericConversion instances for every primitive numeric type:
+    * float, long, double, int, short, byte
+    */
   object Implicits {
 
     implicit case object FloatC extends NumericConversion[Float] {

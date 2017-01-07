@@ -6,8 +6,7 @@ import breeze.storage.Zero
 import scala.language.higherKinds
 
 private[math] abstract class BaseMathVecOps[Num, V[_]](
-    implicit
-    no: Fractional[Num],
+    implicit no: Fractional[Num],
     zo: Zero[Num],
     so: Semiring[Num]
 ) extends MathVectorOps[V] {

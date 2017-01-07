@@ -3,7 +3,7 @@ package mlbigbook.ml
 import fif.Data
 
 import scala.annotation.tailrec
-import scala.language.{ higherKinds, postfixOps, reflectiveCalls }
+import scala.language.{higherKinds, postfixOps, reflectiveCalls}
 import scala.reflect.ClassTag
 
 trait ClassificationModule extends ItemNumVecModule {
@@ -23,8 +23,8 @@ trait ClassificationModule extends ItemNumVecModule {
   import Data.ops._
 
   final def train[D[_]: Data](
-    c:            Conf,
-    mkVectorizer: D[(Item, Label)] => Vectorizer
+      c: Conf,
+      mkVectorizer: D[(Item, Label)] => Vectorizer
   )(data: D[(Item, Label)]): Classifier =
     train(
       c,
@@ -32,8 +32,8 @@ trait ClassificationModule extends ItemNumVecModule {
     )(data)
 
   def train[D[_]: Data](
-    c:     Conf,
-    toVec: Vectorizer
+      c: Conf,
+      toVec: Vectorizer
   )(data: D[(Item, Label)]): Classifier
 
 }

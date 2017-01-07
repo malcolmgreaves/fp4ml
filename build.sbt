@@ -1,6 +1,6 @@
-name                      := "fp4ml"
+name := "fp4ml"
 organization in ThisBuild := "io.malcolmgreaves"
-version in ThisBuild      := {
+version in ThisBuild := {
   val major: Int = 0
   val minor: Int = 0
   val patch: Int = 0
@@ -17,20 +17,16 @@ lazy val root = project
   )
   .settings {
     publishArtifact := false
-    publishLocal    := {}
-    publish         := {}
+    publishLocal := {}
+    publish := {}
   }
 
-lazy val `fp4ml-main` = project
-  .in(file("fp4ml-main"))
-  .settings { 
-    publishArtifact := true
-  }
+lazy val `fp4ml-main` = project.in(file("fp4ml-main")).settings {
+  publishArtifact := true
+}
 
-lazy val `fp4ml-spark` = project
-  .in(file("fp4ml-spark"))
-  .dependsOn(`fp4ml-main`)
-  .settings {
+lazy val `fp4ml-spark` =
+  project.in(file("fp4ml-spark")).dependsOn(`fp4ml-main`).settings {
     publishArtifact := true
   }
 
@@ -39,20 +35,18 @@ lazy val publishTasks = subprojects.map { publish.in }
 
 resolvers in ThisBuild := Seq(
   // sonatype, maven central
-  "Sonatype Releases"  at "https://oss.sonatype.org/content/repositories/releases/",
+  "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
   "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
-
   // bintray
   "Scalaz Bintray" at "http://dl.bintray.com/scalaz/releases",
   Resolver.bintrayRepo("mfglabs", "maven"),
   Resolver.bintrayRepo("dwhjames", "maven"),
-
   // etc.
   "Confluent" at "http://packages.confluent.io/maven/"
 )
 
-lazy val javaV              = "1.8"
-scalaVersion  in ThisBuild := "2.11.8"
+lazy val javaV = "1.8"
+scalaVersion in ThisBuild := "2.11.8"
 scalacOptions in ThisBuild := Seq(
   "-optimize",
   "-deprecation",
@@ -76,9 +70,9 @@ scalacOptions in ThisBuild := Seq(
   "-Xfatal-warnings" // Every warning is esclated to an error.
 )
 javacOptions in ThisBuild := Seq("-source", javaV, "-target", javaV)
-javaOptions in ThisBuild  := Seq(
-  "-server", 
-  "-XX:+AggressiveOpts", 
+javaOptions in ThisBuild := Seq(
+  "-server",
+  "-XX:+AggressiveOpts",
   "-XX:+TieredCompilation",
   "-XX:CompileThreshold=100",
   "-Xmx3000M",

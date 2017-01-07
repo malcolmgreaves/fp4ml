@@ -1,12 +1,12 @@
 package mlbigbook.app
 
-import java.io.{ FileReader, BufferedReader, File }
+import java.io.{FileReader, BufferedReader, File}
 import java.nio.charset.Charset
 import java.nio.file.Files
 
-import breeze.linalg.{ SparseVector, DenseVector }
+import breeze.linalg.{SparseVector, DenseVector}
 import mlbigbook.math.MathVectorOps
-import mlbigbook.ml.{ ImplicitHashable, KnnClassifier }
+import mlbigbook.ml.{ImplicitHashable, KnnClassifier}
 
 import scala.io.Source
 import scala.util.Random
@@ -17,9 +17,10 @@ object Exp20NG extends App {
     s => s.trim.toLowerCase
 
   lazy val filterLine: String => Boolean =
-    s => s.nonEmpty &&
-      headerPrefixes.forall { !s.startsWith(_) } &&
-      headerSuffixes.forall { !s.endsWith(_) }
+    s =>
+      s.nonEmpty &&
+        headerPrefixes.forall { !s.startsWith(_) } &&
+        headerSuffixes.forall { !s.endsWith(_) }
 
   lazy val labelTransform: String => String =
     label => {
@@ -68,29 +69,22 @@ object Exp20NG extends App {
     | >
     |:
     |<
-  """.stripMargin
-      .trim
-      .toLowerCase
-      .split { "\n" }
-      .toSeq
+  """.stripMargin.trim.toLowerCase.split { "\n" }.toSeq
 
   lazy val headerSuffixes: Seq[String] =
     """
       |writes:
       |.com
-    """.stripMargin
-      .trim
-      .toLowerCase
-      .split { "\n" }
-      .toSeq
+    """.stripMargin.trim.toLowerCase.split { "\n" }.toSeq
 
   lazy val ngDirectory = new File("./20_newsgroups")
-  println(s"Loading 20 Newsgroup Data from:\n${ngDirectory.getCanonicalPath}\n")
+  println(
+    s"Loading 20 Newsgroup Data from:\n${ngDirectory.getCanonicalPath}\n")
 
   import scala.collection.JavaConverters._
   lazy val loadNgFi: File => Seq[String] =
-    fi => if (fi isFile)
-      {
+    fi =>
+      if (fi isFile) {
         val br = new BufferedReader(new FileReader(fi))
         val buf = new scala.collection.mutable.ArrayBuffer[String](420)
         var line: String = br.readLine()
@@ -99,23 +93,18 @@ object Exp20NG extends App {
           line = br.readLine()
         }
         buf.toSeq
-      }
-        .map { normalizeLine }
-        .filter { filterLine }
-    else
-      Seq.empty
+      }.map { normalizeLine }.filter { filterLine } else
+        Seq.empty
 
   lazy val loadNgData: File => Seq[(File, Seq[String])] =
     f => {
       if (f.isDirectory) {
-        Option(f.listFiles())
-          .map { _.toSeq }
-          .getOrElse { Seq.empty }
-          .flatMap { loadNgData }
+        Option(f.listFiles()).map { _.toSeq }.getOrElse { Seq.empty }.flatMap {
+          loadNgData
+        }
 
       } else if (f.isFile)
         Seq((f, loadNgFi(f)))
-
       else
         Seq.empty
     }
@@ -130,13 +119,11 @@ object Exp20NG extends App {
   println(s"There are ${ng20.size} newsgroup directories")
 
   val newsgroup2fileandcontent =
-    ng20
-      .map { ngDir =>
-        println(s"loading data from the ${ngDir.getName} newsgroup ... ")
-        val bothFiLines = loadNgData(ngDir)
-        (ngDir.getName, bothFiLines)
-      }
-      .toMap
+    ng20.map { ngDir =>
+      println(s"loading data from the ${ngDir.getName} newsgroup ... ")
+      val bothFiLines = loadNgData(ngDir)
+      (ngDir.getName, bothFiLines)
+    }.toMap
 
   type Document = String
 
@@ -166,25 +153,22 @@ object Exp20NG extends App {
 
     lazy val vectorize = (s: Document) =>
       SparseVector[Float](word2index.size)({
-        val bothIndexValue = s
-          .split(" ")
-          .foldLeft(Map.empty[Int, Float]) {
-            case (accum, word) =>
+        val bothIndexValue = s.split(" ").foldLeft(Map.empty[Int, Float]) {
+          case (accum, word) =>
+            if (word2index contains word) {
+              val index = word2index(word)
+              if (accum.contains(index))
+                (accum - index) + (index -> (accum(index) + 1.0f))
+              else
+                accum + (index -> 1.0f)
 
-              if (word2index contains word) {
-                val index = word2index(word)
-                if (accum.contains(index))
-                  (accum - index) + (index -> (accum(index) + 1.0f))
-                else
-                  accum + (index -> 1.0f)
+            } else
+              accum
+        }
 
-              } else
-                accum
-          }
-
-        bothIndexValue
-          .map { case (index, count) => (index, math.log(count).toFloat) }
-          .toSeq
+        bothIndexValue.map {
+          case (index, count) => (index, math.log(count).toFloat)
+        }.toSeq
       }: _*)
 
     lazy val nDimensions = word2index.size
@@ -204,10 +188,9 @@ object Exp20NG extends App {
 
   val (train, test): (Seq[(Document, String)], Seq[(Document, String)]) = {
 
-    val shuffled: Seq[(Document, String)] = allLabeledData
-      .map { x => (x, math.random) }
-      .sortBy { case (_, rando) => rando }
-      .map { case (x, _) => x }
+    val shuffled: Seq[(Document, String)] = allLabeledData.map { x =>
+      (x, math.random)
+    }.sortBy { case (_, rando) => rando }.map { case (x, _) => x }
 
     val si = (shuffled.size * .9).toInt
 
@@ -231,5 +214,6 @@ object Exp20NG extends App {
       if (predicted == testLabel)
         nCorrect += 1
   }
-  println(s"\n\nAccuracy:  $nCorrect / $nTake  = ${(nCorrect.toFloat / nTake.toFloat) * 100.0f} %")
+  println(
+    s"\n\nAccuracy:  $nCorrect / $nTake  = ${(nCorrect.toFloat / nTake.toFloat) * 100.0f} %")
 }

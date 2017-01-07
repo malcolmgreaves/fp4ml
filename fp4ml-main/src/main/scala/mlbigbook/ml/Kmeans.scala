@@ -1,10 +1,10 @@
 package mlbigbook.ml
 
 import fif.Data
-import mlbigbook.math.{ MathVectorOps, RandoMut }
+import mlbigbook.math.{MathVectorOps, RandoMut}
 
 import scala.annotation.tailrec
-import scala.language.{ higherKinds, reflectiveCalls }
+import scala.language.{higherKinds, reflectiveCalls}
 import scala.reflect.ClassTag
 
 trait Kmeans extends ClusteringModule {
@@ -18,9 +18,9 @@ trait Kmeans extends ClusteringModule {
   import Data.ops._
 
   override final def cluster[D[_]: Data](
-    conf:  ClusteringConf,
-    dist:  Distance,
-    toVec: Vectorizer
+      conf: ClusteringConf,
+      dist: Distance,
+      toVec: Vectorizer
   )(data: D[Item]): Seq[Center] =
     cluster_h(
       conf,
@@ -32,35 +32,31 @@ trait Kmeans extends ClusteringModule {
     )
 
   final def initialize(
-    nClusters:   Int,
-    nDimensions: Int
+      nClusters: Int,
+      nDimensions: Int
   ): Seq[Center] = {
     val r = mkRandomNumGen()
-    (0 until nClusters)
-      .map { id =>
-        Center(
-          id = id.toString,
-          mean = vops.map(vops.ones(nDimensions)) {
-            one => vops.n.times(one, r.next())
-          }
-        )
-      }
-      .toSeq
+    (0 until nClusters).map { id =>
+      Center(
+        id = id.toString,
+        mean = vops.map(vops.ones(nDimensions)) { one =>
+          vops.n.times(one, r.next())
+        }
+      )
+    }.toSeq
   }
 
   @tailrec
   private[this] final def cluster_h[D[_]: Data](
-    conf:        ClusteringConf,
-    dist:        Distance,
-    toVec:       Vectorizer,
-    currIter:    Int,
-    data:        D[V[N]],
-    currCenters: Seq[Center]
+      conf: ClusteringConf,
+      dist: Distance,
+      toVec: Vectorizer,
+      currIter: Int,
+      data: D[V[N]],
+      currCenters: Seq[Center]
   ): Seq[Center] =
-
     if (currIter >= conf.maxIterations)
       currCenters
-
     else {
 
       val updatedCenters = updateCenters(dist, toVec, currCenters, data)
@@ -68,25 +64,24 @@ trait Kmeans extends ClusteringModule {
       println(
         s"""[center check: currIter=$currIter]
             |[ORIGINAL # ${currCenters.size}] ${currCenters.mkString("\t")}
-            |[UPDATED  # ${updatedCenters.size}] ${updatedCenters.mkString("\t")}
+            |[UPDATED  # ${updatedCenters.size}] ${updatedCenters.mkString(
+             "\t")}
          """.stripMargin
       )
 
       val sumSquaredChangeInMeansBetweenIters =
-        currCenters.zip(updatedCenters)
-          .foldLeft(0.0) {
-            case (accum, (existing, updated)) =>
-              val d = math.abs(
-                implicitly[Numeric[N]].toDouble(
-                  dist(existing.mean, updated.mean)
-                )
+        currCenters.zip(updatedCenters).foldLeft(0.0) {
+          case (accum, (existing, updated)) =>
+            val d = math.abs(
+              implicitly[Numeric[N]].toDouble(
+                dist(existing.mean, updated.mean)
               )
-              accum + d
-          }
+            )
+            accum + d
+        }
 
       if (sumSquaredChangeInMeansBetweenIters < conf.tolerance)
         updatedCenters
-
       else
         cluster_h(
           conf,
@@ -99,22 +94,21 @@ trait Kmeans extends ClusteringModule {
     }
 
   def updateCenters[D[_]: Data](
-    dist:    Distance,
-    toVec:   Vectorizer,
-    centers: Seq[Center],
-    data:    D[V[N]]
+      dist: Distance,
+      toVec: Vectorizer,
+      centers: Seq[Center],
+      data: D[V[N]]
   ): Seq[Center] =
-    data.zip(assign(centers, dist)(data))
+    data
+      .zip(assign(centers, dist)(data))
       .groupBy { case (_, assignment) => assignment }
       .map {
         case (label, bothDataAndLabel) =>
-
           val summed =
-            bothDataAndLabel
-              .foldLeft(vops.zeros(toVec.nDimensions)) {
-                case (summing, (vector, _)) =>
-                  vops.addV(summing, vector)
-              }
+            bothDataAndLabel.foldLeft(vops.zeros(toVec.nDimensions)) {
+              case (summing, (vector, _)) =>
+                vops.addV(summing, vector)
+            }
 
           val newMean =
             vops.divS(
@@ -140,13 +134,12 @@ object Kmeans {
   }
 
   def apply[ItemToCluster, Num, Vec[_]](
-    mathVectorOps: MathVectorOps.Type[Num, Vec],
-    mkRando:       () => RandoMut[Num]
+      mathVectorOps: MathVectorOps.Type[Num, Vec],
+      mkRando: () => RandoMut[Num]
   )(
-    implicit
-    ctForI:  ClassTag[ItemToCluster],
-    ctForN:  ClassTag[Num],
-    ctForVn: ClassTag[Vec[Num]]
+      implicit ctForI: ClassTag[ItemToCluster],
+      ctForN: ClassTag[Num],
+      ctForVn: ClassTag[Vec[Num]]
   ): Type[ItemToCluster, Num, Vec] = {
 
     //    val okVops: MathVectorOps.Type[Type[ItemToCluster, Num, Vec]#N, Type[ItemToCluster, Num, Vec]#V] =
@@ -164,7 +157,8 @@ object Kmeans {
       override type V[_] = Vec[_]
 
       override lazy val mkRandomNumGen = mkRando
-      override lazy val vops = mathVectorOps.asInstanceOf[MathVectorOps.Type[N, V]]
+      override lazy val vops =
+        mathVectorOps.asInstanceOf[MathVectorOps.Type[N, V]]
 
       override implicit lazy val ctI = ctForI
       override implicit lazy val ctN = ctForN

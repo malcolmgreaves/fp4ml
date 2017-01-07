@@ -2,7 +2,8 @@ package mlbigbook.ml
 
 import simulacrum._
 
-@typeclass trait Hashable[T] {
+@typeclass
+trait Hashable[T] {
   def hash(t: T): Int
 }
 
@@ -26,7 +27,7 @@ object ImplicitHashable {
 
       @inline override def hash(maybeT: Option[T]) = maybeT match {
         case Some(t) => t.hash
-        case None    => 0
+        case None => 0
       }
     }
 

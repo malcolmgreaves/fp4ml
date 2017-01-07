@@ -6,6 +6,6 @@ addCompilerPlugin(scalaMacros)
 
 libraryDependencies ++=
   fp4mlSparkDeps ++
-  testDeps
+    testDeps
 
 fork in run := false

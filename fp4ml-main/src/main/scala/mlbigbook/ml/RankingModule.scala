@@ -2,7 +2,7 @@ package mlbigbook.ml
 
 import fif.Data
 
-import scala.language.{ higherKinds, postfixOps, reflectiveCalls }
+import scala.language.{higherKinds, postfixOps, reflectiveCalls}
 
 trait RankingModule extends ItemNumVecModule {
 
@@ -18,16 +18,16 @@ trait RankingModule extends ItemNumVecModule {
   type Conf
 
   final def mkRanker[D[_]: Data](
-    c:            Conf,
-    mkVectorizer: D[Item] => Vectorizer
+      c: Conf,
+      mkVectorizer: D[Item] => Vectorizer
   )(data: D[Item]): Ranker =
     mkRanker(c, mkVectorizer(data))(data)
 
   def mkRanker[D[_]: Data](
-    c:     Conf,
-    toVec: Vectorizer
+      c: Conf,
+      toVec: Vectorizer
   )(
-    data: D[Item]
+      data: D[Item]
   ): Ranker
 
 }
