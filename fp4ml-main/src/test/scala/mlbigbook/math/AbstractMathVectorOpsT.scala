@@ -7,7 +7,7 @@ import scala.language.higherKinds
 abstract class AbstractMathVectorOpsT[N, V[_]] extends FunSpec with Matchers {
 
   val vops: MathVectorOps.Type[N, V]
-  implicit lazy val nIsNumeric:Numeric[N] = vops.n
+  implicit lazy val nIsNumeric: Numeric[N] = vops.n
 
   def vals2vec(vs: N*): V[N]
 
@@ -24,13 +24,12 @@ abstract class AbstractMathVectorOpsT[N, V[_]] extends FunSpec with Matchers {
 
   val tolerance: N
 
-
   describe("vector operations") {
 
     it("zeros") {
       vops.foreach { vops.zeros(5) } { x =>
-          x should be(0.n +- tolerance)
-        }
+        x should be(0.n +- tolerance)
+      }
     }
 
     it("ones") {

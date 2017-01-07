@@ -78,3 +78,5 @@ javaOptions in ThisBuild := Seq(
   "-Xmx3000M",
   "-XX:+UseG1GC"
 )
+
+publishArtifact := false

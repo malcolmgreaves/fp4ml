@@ -2,7 +2,7 @@ package mlbigbook.math
 
 import scala.language.higherKinds
 
-trait AbstractMvoFractionalT[N, V[_]] extends AbstractMathVectorOpsT[N,V] {
+trait AbstractMvoFractionalT[N, V[_]] extends AbstractMathVectorOpsT[N, V] {
 
   it("divide vector") {
     val v1 = vals2vec(1.n, 2.n, 40.n)

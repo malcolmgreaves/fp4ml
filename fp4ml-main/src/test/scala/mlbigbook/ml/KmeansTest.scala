@@ -1,7 +1,7 @@
 package mlbigbook.ml
 
 import breeze.linalg.DenseVector
-import mlbigbook.math.{ MathVectorOps, NumericConversion, RandoMut }
+import mlbigbook.math.{MathVectorOps, NumericConversion, RandoMut}
 import org.scalatest.FunSuite
 
 import scala.language.reflectiveCalls
@@ -13,7 +13,8 @@ class KmeansTest extends FunSuite {
 
   test("Simple run") {
 
-    val initial = kmeans.initialize(conf.nClusters, stringVectorizer.nDimensions)
+    val initial =
+      kmeans.initialize(conf.nClusters, stringVectorizer.nDimensions)
     println(
       s"""INITIAL with nClusters= ${conf.nClusters} & nDimensions= ${stringVectorizer.nDimensions}
          |# of clusters FROM INITIAL: ${initial.size}
@@ -63,18 +64,16 @@ object KmeansTest {
 
     lazy val vectorize = (s: String) =>
       DenseVector {
-        val bothIndexValue = s
-          .split(" ")
-          .foldLeft(initial) {
-            case (accum, word) =>
-              val index = word2index(word)
-              (accum - index) + (index -> (accum(index) + 1.0f))
-          }
+        val bothIndexValue = s.split(" ").foldLeft(initial) {
+          case (accum, word) =>
+            val index = word2index(word)
+            (accum - index) + (index -> (accum(index) + 1.0f))
+        }
 
-        (0 until nDimensions)
-          .map { index => bothIndexValue.getOrElse(index, 0.0f) }
-          .toArray
-      }
+        (0 until nDimensions).map { index =>
+          bothIndexValue.getOrElse(index, 0.0f)
+        }.toArray
+    }
 
     lazy val nDimensions = words.size
   }
