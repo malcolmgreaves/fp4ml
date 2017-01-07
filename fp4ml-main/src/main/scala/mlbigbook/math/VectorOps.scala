@@ -6,13 +6,14 @@ import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 /**
- * An abstraction specifying operations one may perform using vectors and
- * scalar values. These operations include element-wise & scalar
- * multiplication, division, addition, and subtraction. Support for the dot
- * product of two vectors is also included. As well as methods to construct new
- * vector instances.
- */
-@typeclass trait VectorOps[V[_]] {
+  * An abstraction specifying operations one may perform using vectors and
+  * scalar values. These operations include element-wise & scalar
+  * multiplication, division, addition, and subtraction. Support for the dot
+  * product of two vectors is also included. As well as methods to construct new
+  * vector instances.
+  */
+@typeclass
+trait VectorOps[V[_]] {
 
   def apply[A](v: V[A])(index: Int): A
 
@@ -20,6 +21,6 @@ import scala.reflect.ClassTag
 
   def size(v: V[_]): Int
 
-  def foreach[A](v : V[A])(f: A => Any): Unit
+  def foreach[A](v: V[A])(f: A => Any): Unit
 
 }
