@@ -14,3 +14,6 @@ libraryDependencies ++=
 fork in run := true
 fork in Test := true
 parallelExecution in Test := true
+
+pomExtra := pomExtraInfo
+

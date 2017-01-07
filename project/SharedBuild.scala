@@ -47,4 +47,27 @@ object SharedBuild {
     "org.scalatest" %% "scalatest" % "2.2.6" % Test
   )
 
+  lazy val pomExtraInfo = {
+    <url>https://github.com/malcolmgreaves/fp4ml</url>
+    <licenses>
+      <license>
+        <name>Apache 2.0</name>
+        <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+    <scm>
+      <url>git@github.com:malcolmgreaves/fp4ml.git</url>
+      <connection>scm:git@github.com:malcolmgreaves/fp4ml.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>malcolmgreaves</id>
+        <name>Malcolm Greaves</name>
+        <email>greaves.malcolm@gmail.com</email>
+        <url>https://malcolmgreaves.io/</url>
+      </developer>
+    </developers>
+ }
+
 }

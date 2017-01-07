@@ -9,3 +9,5 @@ libraryDependencies ++=
     testDeps
 
 fork in run := false
+
+pomExtra := pomExtraInfo
